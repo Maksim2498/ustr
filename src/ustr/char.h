@@ -13,6 +13,23 @@ enum {
 #define uc16(literal) u##literal
 #define uc8(literal)  u8##literal
 
+// Convert
+
+// - To uc32_t
+
+uc32_t uc32_from_uc16(const uc16_t *chars);
+uc32_t uc32_from_uc8(const uc8_t *chars);
+
+// - To uc16_t
+
+void uc16_from_uc32(uc32_t from, uc16_t *to);
+void uc16_from_uc8(const uc8_t *from, uc16_t *to);
+
+// - To uc8_t
+
+void uc8_from_uc32(uc32_t from, uc8_t *to);
+void uc8_from_uc16(const uc16_t *from, uc8_t *to);
+
 // Digit vals
 
 int uc32_dec_val(uc32_t c);

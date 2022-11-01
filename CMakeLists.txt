@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.12)
 
 project(ustr
-        VERSION 0.1.0
-        LANGUAGES C
+        VERSION     0.1.0
+        LANGUAGES   C
         DESCRIPTION "Small C library for unicode strings handling"
         HOMEPAGE_URL https://github.com/Maksim2498/ustr)
 
@@ -14,6 +14,7 @@ add_library(${PROJECT_NAME}
             src/ustr/cview.h      src/ustr/cview.c
             src/ustr/encoding_t.h
             src/ustr/encoding.h   src/ustr/encoding.c
+            src/ustr/io.h         src/ustr/io.c
             src/ustr/mem.h        src/ustr/mem.c
             src/ustr/str_t.h
             src/ustr/str.h        src/ustr/str.c

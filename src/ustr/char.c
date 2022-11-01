@@ -13,6 +13,44 @@
 
 // Human-readable:
 
+uc32_t uc32_from_uc16(const uc16_t *chars) {
+	// TODO
+	return 0;
+}
+
+// Human-readable:
+
+uc32_t uc32_from_uc8(const uc8_t *chars) {
+	// TODO
+	return 0;
+}
+
+// Human-readable:
+
+void uc16_from_uc32(uc32_t from, uc16_t *to) {
+	// TODO
+}
+
+// Human-readable:
+
+void uc16_from_uc8(const uc8_t *from, uc16_t *to) {
+	// TODO
+}
+
+// Human-readable:
+
+void uc8_from_uc32(uc32_t from, uc8_t *to) {
+	// TODO
+}
+
+// Human-readable:
+
+void uc8_from_uc16(const uc16_t *from, uc8_t *to) {
+	// TODO
+}
+
+// Human-readable:
+
 int uc32_dec_val(uc32_t c) {
     return uc32_dec(c) ? c - U'0' : -1;
 }
