@@ -1,0 +1,3 @@
+# UStr - Unicode Strings C Library
+
+Something will be written here soon...
