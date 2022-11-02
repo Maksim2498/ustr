@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "char_t.h"
 #include "cview_t.h"
 #include "str_t.h"
 #include "view_t.h"
@@ -19,8 +20,8 @@
 uv32_t uv32_from_us32(us32_t *str);
 uv32_t uv32_from_us32_range(us32_t *str, size_t from, size_t len);
 uv32_t uv32_from_uv32_range(uv32_t view, size_t from, size_t len);
-uv32_t uv32_from_chars(uc32_t *chars);
-uv32_t uv32_from_charsn(uc32_t *str, size_t n);
+uv32_t uv32_from_cstr(uc32_t *cstr);
+uv32_t uv32_from_cstrn(uc32_t *cstr, size_t n);
 
 // Char
 
@@ -29,10 +30,14 @@ void uv32_set_char(uv32_t view, uc32_t c, size_t index);
 
 // Cmp
 
-int uv32_cmp_pr(const uv32_t *lhs, const uv32_t *rhs);
-int uv32_cmp_p(const uv32_t *lhs, const uv32_t *rhs);
-int uv32_cmp_r(uv32_t lhs, uv32_t rhs);
 int uv32_cmp(uv32_t lhs, uv32_t rhs);
+int uv32_cmp_n(uv32_t lhs, uv32_t rhs, size_t n);
+int uv32_cmp_ucv32(uv32_t lhs, ucv32_t rhs);
+int uv32_cmp_ucv32_n(uv32_t lhs, ucv32_t rhs, size_t n);
+int uv32_cmp_us32(uv32_t lhs, const us32_t *rhs);
+int uv32_cmp_us32_n(uv32_t lhs, const us32_t *rhs, size_t n);
+int uv32_cmp_cstr(uv32_t lhs, const uc32_t *cstr);
+int uv32_cmp_cstrn(uv32_t lhs, const uc32_t *cstr, size_t n);
 
 // Search
 
@@ -40,10 +45,10 @@ int uv32_cmp(uv32_t lhs, uv32_t rhs);
 
 ptrdiff_t uv32_char_pos(uv32_t view, uc32_t c);
 ptrdiff_t uv32_char_pos_from(uv32_t view, uc32_t c, size_t from);
-ptrdiff_t uv32_chars_pos(uv32_t view, const uc32_t *chars);
-ptrdiff_t uv32_chars_pos_from(uv32_t view, const uc32_t *chars, size_t from);
-ptrdiff_t uv32_charsn_pos(uv32_t view, const uc32_t *chars, size_t n);
-ptrdiff_t uv32_charsn_pos_from(uv32_t view, const uc32_t *chars, size_t n, size_t from);
+ptrdiff_t uv32_cstr_pos(uv32_t view, const uc32_t *cstr);
+ptrdiff_t uv32_cstr_pos_from(uv32_t view, const uc32_t *cstr, size_t from);
+ptrdiff_t uv32_cstrn_pos(uv32_t view, const uc32_t *cstr, size_t n);
+ptrdiff_t uv32_cstrn_pos_from(uv32_t view, const uc32_t *cstr, size_t n, size_t from);
 ptrdiff_t uv32_uv32_pos(uv32_t view, uv32_t another);
 ptrdiff_t uv32_uv32_pos_from(uv32_t view, uv32_t another, size_t from);
 ptrdiff_t uv32_ucv32_pos(uv32_t view, ucv32_t another);
@@ -54,10 +59,10 @@ ptrdiff_t uv32_us32_pos(uv32_t view, const us32_t *str);
 
 ptrdiff_t uv32_char_pos_r(uv32_t view, uc32_t c);
 ptrdiff_t uv32_char_pos_from_r(uv32_t view, uc32_t c, size_t from);
-ptrdiff_t uv32_chars_pos_r(uv32_t view, const uc32_t *chars);
-ptrdiff_t uv32_chars_pos_from_r(uv32_t view, const uc32_t *chars, size_t from);
-ptrdiff_t uv32_charsn_pos_r(uv32_t view, const uc32_t *chars, size_t n);
-ptrdiff_t uv32_chars32n_pos_from_r(uv32_t view, const uc32_t *chars, size_t n, size_t from);
+ptrdiff_t uv32_cstr_pos_r(uv32_t view, const uc32_t *cstr);
+ptrdiff_t uv32_cstr_pos_from_r(uv32_t view, const uc32_t *cstr, size_t from);
+ptrdiff_t uv32_cstrn_pos_r(uv32_t view, const uc32_t *cstr, size_t n);
+ptrdiff_t uv32_cstrn_pos_from_r(uv32_t view, const uc32_t *cstr, size_t n, size_t from);
 ptrdiff_t uv32_uv32_pos_r(uv32_t view, uv32_t another);
 ptrdiff_t uv32_uv32_pos_from_r(uv32_t view, uv32_t another, size_t from);
 ptrdiff_t uv32_ucv32_pos_r(uv32_t view, ucv32_t another);
@@ -70,10 +75,10 @@ ptrdiff_t uv32_us32_pos_from_r(uv32_t view, const us32_t *str, size_t from);
 
 void uv32_fill(uv32_t view, uc32_t c);
 void uv32_fill_range(uv32_t view, uc32_t c, size_t from, size_t len);
-void uv32_fill_chars(uv32_t view, const uc32_t *chars);
-void uv32_fill_chars_range(uv32_t view, const uc32_t *chars, size_t from, size_t len);
-void uv32_fill_charsn(uv32_t view, const uc32_t *chars, size_t n);
-void uv32_fill_charsn_range(uv32_t view, const uc32_t *chars, size_t n, size_t from, size_t len);
+void uv32_fill_cstr(uv32_t view, const uc32_t *cstr);
+void uv32_fill_cstr_range(uv32_t view, const uc32_t *cstr, size_t from, size_t len);
+void uv32_fill_cstrn(uv32_t view, const uc32_t *cstr, size_t n);
+void uv32_fill_cstrn_range(uv32_t view, const uc32_t *cstr, size_t n, size_t from, size_t len);
 void uv32_fill_uv32(uv32_t view, uv32_t another);
 void uv32_fill_uv32_from(uv32_t view, uv32_t another, size_t from);
 void uv32_fill_uv32_range(uv32_t view, uv32_t another, size_t from, size_t to);
