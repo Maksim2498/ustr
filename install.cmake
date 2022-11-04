@@ -1,0 +1,5 @@
+install(CODE      "message(\"Installing ${PROJECT_NAME} library\")")
+install(TARGETS   ${PROJECT_NAME}         DESTINATION lib     COMPONENT Runtime     EXPORT  ${PROJECT_NAME}-targets)
+install(EXPORT    ${PROJECT_NAME}-targets DESTINATION lib)
+install(DIRECTORY src/ustr                DESTINATION include COMPONENT Development PATTERN *.c EXCLUDE)
+install(CODE      "message(\"Done installing ${PROJECT_NAME} library\")")
