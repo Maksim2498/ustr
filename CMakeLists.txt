@@ -29,4 +29,5 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 target_include_directories(${PROJECT_NAME} PUBLIC /str/ustr)
 
-install(TARGETS ${PROJECT_NAME} DESTINATION lib)
+install(TARGETS   ${PROJECT_NAME} DESTINATION lib     COMPONENT Runtime)
+install(DIRECTORY src/ustr        DESTINATION include COMPONENT Development)
