@@ -3,6 +3,7 @@
 
 #include "char_t.h"
 #include "char.h"
+#include "config.h"
 #include "cview_t.h"
 #include "cview.h"
 #include "encoding_t.h"

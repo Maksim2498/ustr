@@ -6,5 +6,6 @@ project(ustr
         DESCRIPTION "Small C library for unicode strings handling"
         HOMEPAGE_URL https://github.com/Maksim2498/ustr)
 
-include(add_target.cmake)
+include(config.cmake)
+include(add-target.cmake)
 include(install.cmake)

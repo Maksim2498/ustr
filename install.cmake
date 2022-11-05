@@ -1,5 +1,8 @@
-install(CODE      "message(\"Installing ${PROJECT_NAME} library\")")
-install(TARGETS   ${PROJECT_NAME}         DESTINATION lib     COMPONENT Runtime     EXPORT  ${PROJECT_NAME}-targets)
-install(EXPORT    ${PROJECT_NAME}-targets DESTINATION lib)
-install(DIRECTORY src/ustr                DESTINATION include COMPONENT Development PATTERN *.c EXCLUDE)
-install(CODE      "message(\"Done installing ${PROJECT_NAME} library\")")
+install(CODE "message(\"Installing ustr library\")")
+
+install(TARGETS   ustr                         DESTINATION lib          COMPONENT Runtime     EXPORT  ustr-targets)
+install(EXPORT    ustr-targets                 DESTINATION lib)
+install(DIRECTORY src/ustr                     DESTINATION include      COMPONENT Development PATTERN *.c EXCLUDE)
+install(FILES     ${CMAKE_BINARY_DIR}/config.h DESTINATION include/ustr COMPONENT Development)
+
+install(CODE "message(\"Done installing ustr library\")")

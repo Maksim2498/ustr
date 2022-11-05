@@ -1,4 +1,5 @@
-add_library(${PROJECT_NAME}
+add_library(ustr
+            src/ustr/config.h.in
             src/ustr/all.h
             src/ustr/char_t.h
             src/ustr/char.h       src/ustr/char.c
@@ -14,9 +15,11 @@ add_library(${PROJECT_NAME}
             src/ustr/view_t.h
             src/ustr/view.h       src/ustr/view.c)
 
-set_target_properties(${PROJECT_NAME} PROPERTIES
+set_target_properties(ustr PROPERTIES
                       C_STANDARD 17
                       C_STANDARD_REQUIRED YES
                       C_EXTENSIONS NO)
 
-target_include_directories(${PROJECT_NAME} PUBLIC /str/ustr)
+target_include_directories(ustr
+                           PUBLIC /str/ustr
+                           PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
