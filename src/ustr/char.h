@@ -57,6 +57,44 @@ int uc8_from_uc16be(const uc16_t *from, uc8_t *to);
 
 // uc8_t Traits
 
+// - Digit vals
+
+int uc8_dec_val(uc8_t c);
+int uc8_hex_val(uc8_t c);
+int uc8_oct_val(uc8_t c);
+int uc8_bin_val(uc8_t c);
+int uc8_rad_val(uc8_t c, unsigned radix);
+
+// - Digit
+
+bool uc8_dec(uc8_t c);
+bool uc8_hex(uc8_t c);
+bool uc8_oct(uc8_t c);
+bool uc8_bin(uc8_t c);
+bool uc8_rad(uc8_t c, unsigned radix);
+
+// - Case chage
+
+int uc8_to_upper(uc8_t *c);
+int uc8_to_lower(uc8_t *c);
+
+// - Letter categories
+
+bool uc8_letter(const uc8_t *c);
+bool uc8_upper(const uc8_t *c);
+bool uc8_lower(const uc8_t *c);
+bool uc8_title(const uc8_t *c);
+bool uc8_mod(const uc8_t *c);
+bool uc8_oletter(const uc8_t *c);
+
+// - Other
+
+bool uc8_number(const uc8_t *c);
+bool uc8_cntrl(const uc8_t *c);
+bool uc8_space(const uc8_t *c);
+bool uc8_punct(const uc8_t *c);
+bool uc8_priv(const uc8_t *c);
+
 // uc16_t Traits
 
 // - Digit vals
