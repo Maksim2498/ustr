@@ -1,6 +1,7 @@
 #include "char.h"
 
 #include <assert.h>
+#include <string.h>
 
 #include "config.h"
 #include "endian.h"
@@ -65,22 +66,72 @@ bool uc32_from_uc8_e(const uc8_t *from, uc32_t *to, uendian_t to_endian) {
 // Human-readable:
 
 bool uc32_from_uc16(const uc16_t *from, uc32_t *to) {
-	// TODO
-	return 0;
+	assert(from);
+
+	uc16_t low = from[0];
+	
+	if (!uc16_srgt(low)) {
+		if (to)
+			*to = low;
+
+		return false;
+	}
+
+	if (uc16_srgt_high(low))
+		return true;
+
+	uc16_t high = from[1];
+
+	if (!uc16_srgt_high(high))
+		return false;
+
+	if (to) {
+		*to  = (low  & 0x3FF) << 10;
+		*to |= (high & 0x3FF);
+		*to += 0x10000;
+	}
+
+	return false;
 }
 
 // Human-readable:
 
 bool uc32_from_uc16be(const uc16_t *from, uc32_t *to) {
-	// TODO
-	return 0;
+	#ifndef USTR_BIG_ENDIAN
+		int from_len = uc16_len(from);
+
+		if (from_len < 0)
+			return true;
+
+		uc16_t from_le[from_len];
+
+		memcpy(from_le, from, from_len * sizeof(uc16_t));
+		uendian_toggle_arr(from_le, from_len, sizeof(uc16_t));
+
+		return uc32_from_uc16(from_le, to);
+	#else
+		return uc32_from_uc16(from, to);
+	#endif
 }
 
 // Human-readable:
 
 bool uc32_from_uc16le(const uc16_t *from, uc32_t *to) {
-	// TODO
-	return 0;
+	#ifdef USTR_BIG_ENDIAN
+		int from_len = uc16_len(from);
+
+		if (from_len < 0)
+			return true;
+
+		uc16_t from_le[from_len];
+
+		memcpy(from_le, from, from_len * sizeof(uc16_t));
+		uendian_toggle_arr(from_le, from_len, sizeof(uc16_t));
+
+		return uc32_from_uc16(from_le, to);
+	#else
+		return uc32_from_uc16(from, to);
+	#endif
 }
 
 // Human-readable:
@@ -93,22 +144,64 @@ bool uc32_from_uc8(const uc8_t *from, uc32_t *to) {
 // Human-readable:
 
 bool uc32le_from_uc16(const uc16_t *from, uc32_t *to) {
-	// TODO
-	return 0;
+	bool res = uc32_from_uc16(from, to);
+	
+	#ifdef USTR_BIG_ENDIAN
+		if (!res && to)
+			uendian_toggle(to, sizeof(uc32_t));
+	#endif
+
+	return res;
 }
 
 // Human-readable:
 
 bool uc32le_from_uc16be(const uc16_t *from, uc32_t *to) {
-	// TODO
-	return 0;
+	#ifndef USTR_BIG_ENDIAN
+		int from_len = uc16_len(from);
+
+		if (from_len < 0)
+			return true;
+
+		uc16_t from_le[from_len];
+
+		memcpy(from_le, from, from_len * sizeof(uc16_t));
+		uendian_toggle_arr(from_le, from_len, sizeof(uc16_t));
+
+		return uc32_from_uc16(from_le, to);
+	#else
+		bool res = uc32_from_uc16(from, to);
+
+		if (!res && to)
+			uendian_toggle(to, sizeof(uc32_t));
+
+		return res;
+	#endif
 }
 
 // Human-readable:
 
 bool uc32le_from_uc16le(const uc16_t *from, uc32_t *to) {
-	// TODO
-	return 0;
+	#ifdef USTR_BIG_ENDIAN
+		int from_len = uc16_len(from);
+
+		if (from_len < 0)
+			return true;
+
+		uc16_t from_le[from_len];
+
+		memcpy(from_le, from, from_len * sizeof(uc16_t));
+		uendian_toggle_arr(from_le, from_len, sizeof(uc16_t));
+
+		bool res = uc32_from_uc16(from_le, to);
+
+		if (!res && to)
+			uendian_toggle(to, sizeof(uc32_t));
+
+		return res;
+	#else
+		return uc32_from_uc16(from, to);
+	#endif
 }
 
 // Human-readable:
@@ -121,22 +214,64 @@ bool uc32le_from_uc8(const uc8_t *from, uc32_t *to) {
 // Human-readable:
 
 bool uc32be_from_uc16(const uc16_t *from, uc32_t *to) {
-	// TODO
-	return 0;
+	bool res = uc32_from_uc16(from, to);
+	
+	#ifndef USTR_BIG_ENDIAN
+		if (!res && to)
+			uendian_toggle(to, sizeof(uc32_t));
+	#endif
+
+	return res;
 }
 
 // Human-readable:
 
 bool uc32be_from_uc16be(const uc16_t *from, uc32_t *to) {
-	// TODO
-	return 0;
+	#ifndef USTR_BIG_ENDIAN
+		int from_len = uc16_len(from);
+
+		if (from_len < 0)
+			return true;
+
+		uc16_t from_le[from_len];
+
+		memcpy(from_le, from, from_len * sizeof(uc16_t));
+		uendian_toggle_arr(from_le, from_len, sizeof(uc16_t));
+
+		bool res = uc32_from_uc16(from_le, to);
+
+		if (!res && to)
+			uendian_toggle(to, sizeof(uc32_t));
+
+		return res;
+	#else
+		return uc32_from_uc16(from, to);
+	#endif
 }
 
 // Human-readable:
 
 bool uc32be_from_uc16le(const uc16_t *from, uc32_t *to) {
-	// TODO
-	return 0;
+	#ifdef USTR_BIG_ENDIAN
+		int from_len = uc16_len(from);
+
+		if (from_len < 0)
+			return true;
+
+		uc16_t from_le[from_len];
+
+		memcpy(from_le, from, from_len * sizeof(uc16_t));
+		uendian_toggle_arr(from_le, from_len, sizeof(uc16_t));
+
+		return uc32_from_uc16(from_le, to);
+	#else
+		bool res = uc32_from_uc16(from, to);
+
+		if (!res && to)
+			uendian_toggle(to, sizeof(uc32_t));
+
+		return res;
+	#endif
 }
 
 // Human-readable:
@@ -206,7 +341,7 @@ int uc16_from_uc32(uc32_t from, uc16_t *to) {
 		from -= 0x10000;
 
 		if (to) {
-			uc16_t top10 = from & 0xFFC00;
+			uc16_t top10 = from >> 10;
 			top10       += 0xD800;
 			to[0]        = top10;
 
@@ -495,6 +630,8 @@ bool uc8_rad(uc8_t c, unsigned radix) {
 // Human-readable:
 
 int uc8_to_upper(uc8_t *c) {
+	assert(c);
+
 	uc32_t c32;
 
 	if (uc32_from_uc8(c, &c32))
@@ -508,6 +645,8 @@ int uc8_to_upper(uc8_t *c) {
 // Human-readable:
 
 int uc8_to_lower(uc8_t *c) {
+	assert(c);
+
 	uc32_t c32;
 
 	if (uc32_from_uc8(c, &c32))
@@ -521,6 +660,7 @@ int uc8_to_lower(uc8_t *c) {
 // Human-readable:
 
 bool uc8_letter(const uc8_t *c) {
+	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(c, &c32) && uc32_letter(c32);
 }
@@ -528,6 +668,7 @@ bool uc8_letter(const uc8_t *c) {
 // Human-readable:
 
 bool uc8_upper(const uc8_t *c) {
+	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(c, &c32) && uc32_upper(c32);
 }
@@ -535,6 +676,7 @@ bool uc8_upper(const uc8_t *c) {
 // Human-readable:
 
 bool uc8_lower(const uc8_t *c) {
+	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(c, &c32) && uc32_lower(c32);
 }
@@ -542,6 +684,7 @@ bool uc8_lower(const uc8_t *c) {
 // Human-readable:
 
 bool uc8_title(const uc8_t *c) {
+	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(c, &c32) && uc32_title(c32);
 }
@@ -549,6 +692,7 @@ bool uc8_title(const uc8_t *c) {
 // Human-readable:
 
 bool uc8_mod(const uc8_t *c) {
+	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(c, &c32) && uc32_mod(c32);
 }
@@ -556,6 +700,7 @@ bool uc8_mod(const uc8_t *c) {
 // Human-readable:
 
 bool uc8_oletter(const uc8_t *c) {
+	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(c, &c32) && uc32_oletter(c32);
 }
@@ -563,6 +708,7 @@ bool uc8_oletter(const uc8_t *c) {
 // Human-readable:
 
 bool uc8_number(const uc8_t *c) {
+	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(c, &c32) && uc32_number(c32);
 }
@@ -570,6 +716,7 @@ bool uc8_number(const uc8_t *c) {
 // Human-readable:
 
 bool uc8_cntrl(const uc8_t *c) {
+	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(c, &c32) && uc32_cntrl(c32);
 }
@@ -577,6 +724,7 @@ bool uc8_cntrl(const uc8_t *c) {
 // Human-readable:
 
 bool uc8_space(const uc8_t *c) {
+	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(c, &c32) && uc32_space(c32);
 }
@@ -584,6 +732,7 @@ bool uc8_space(const uc8_t *c) {
 // Human-readable:
 
 bool uc8_punct(const uc8_t *c) {
+	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(c, &c32) && uc32_punct(c32);
 }
@@ -591,6 +740,7 @@ bool uc8_punct(const uc8_t *c) {
 // Human-readable:
 
 bool uc8_priv(const uc8_t *c) {
+	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(c, &c32) && uc32_priv(c32);
 }
@@ -658,6 +808,8 @@ bool uc16_rad(uc16_t c, unsigned radix) {
 // Human-readable:
 
 int uc16_to_upper(uc16_t *c) {
+	assert(c);
+
 	uc32_t c32;
 
 	if (uc32_from_uc16(c, &c32))
@@ -671,6 +823,8 @@ int uc16_to_upper(uc16_t *c) {
 // Human-readable:
 
 int uc16_to_lower(uc16_t *c) {
+	assert(c);
+
 	uc32_t c32;
 
 	if (uc32_from_uc16(c, &c32))
@@ -684,6 +838,7 @@ int uc16_to_lower(uc16_t *c) {
 // Human-readable:
 
 bool uc16_letter(const uc16_t *c) {
+	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(c, &c32) && uc32_letter(c32);
 }
@@ -691,6 +846,7 @@ bool uc16_letter(const uc16_t *c) {
 // Human-readable:
 
 bool uc16_upper(const uc16_t *c) {
+	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(c, &c32) && uc32_upper(c32);
 }
@@ -698,6 +854,7 @@ bool uc16_upper(const uc16_t *c) {
 // Human-readable:
 
 bool uc16_lower(const uc16_t *c) {
+	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(c, &c32) && uc32_lower(c32);
 }
@@ -705,6 +862,7 @@ bool uc16_lower(const uc16_t *c) {
 // Human-readable:
 
 bool uc16_title(const uc16_t *c) {
+	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(c, &c32) && uc32_title(c32);
 }
@@ -712,6 +870,7 @@ bool uc16_title(const uc16_t *c) {
 // Human-readable:
 
 bool uc16_mod(const uc16_t *c) {
+	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(c, &c32) && uc32_mod(c32);
 }
@@ -719,6 +878,7 @@ bool uc16_mod(const uc16_t *c) {
 // Human-readable:
 
 bool uc16_oletter(const uc16_t *c) {
+	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(c, &c32) && uc32_oletter(c32);
 }
@@ -726,6 +886,7 @@ bool uc16_oletter(const uc16_t *c) {
 // Human-readable:
 
 bool uc16_number(const uc16_t *c) {
+	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(c, &c32) && uc32_number(c32);
 }
@@ -733,6 +894,7 @@ bool uc16_number(const uc16_t *c) {
 // Human-readable:
 
 bool uc16_cntrl(const uc16_t *c) {
+	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(c, &c32) && uc32_cntrl(c32);
 }
@@ -740,6 +902,7 @@ bool uc16_cntrl(const uc16_t *c) {
 // Human-readable:
 
 bool uc16_space(const uc16_t *c) {
+	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(c, &c32) && uc32_space(c32);
 }
@@ -747,6 +910,7 @@ bool uc16_space(const uc16_t *c) {
 // Human-readable:
 
 bool uc16_punct(const uc16_t *c) {
+	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(c, &c32) && uc32_punct(c32);
 }
@@ -754,6 +918,7 @@ bool uc16_punct(const uc16_t *c) {
 // Human-readable:
 
 bool uc16_priv(const uc16_t *c) {
+	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(c, &c32) && uc32_priv(c32);
 }
@@ -774,6 +939,42 @@ bool uc16_srgt_low(uc16_t c) {
 
 bool uc16_srgt_high(uc16_t c) {
 	return uc32_srgt_high(c);
+}
+
+// Human-readable:
+
+int uc16_len(const uc16_t *c) {
+	assert(c);
+
+	uc16_t low = c[0];
+
+	if (!uc16_srgt(low))
+		return 1;
+
+	if (uc16_srgt_high(low))
+		return -1;
+
+	uc16_t high = c[1];
+
+	return uc16_srgt_high(high) ? 2 : -1;
+}
+
+// Human-readable:
+
+bool uc16_valid(const uc16_t *c) {
+	assert(c);
+
+	uc16_t low = c[0];
+
+	if (!uc16_srgt(low))
+		return true;
+
+	if (uc16_srgt_high(low))
+		return false;
+
+	uc16_t high = c[1];
+
+	return uc16_srgt_high(high);
 }
 
 // Human-readable:
@@ -33791,4 +33992,10 @@ int uc32_uc8_len(uc32_t c) {
 		return 4;
 
 	return -1;
+}
+
+// Human-readable:
+
+bool uc32_valid(uc32_t c) {
+	return c <= UMAX_CP;
 }

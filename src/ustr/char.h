@@ -147,6 +147,14 @@ bool uc16_srgt(uc16_t c);
 bool uc16_srgt_low(uc16_t c);
 bool uc16_srgt_high(uc16_t c);
 
+// - Len
+
+int uc16_len(const uc16_t *c);
+
+// - Valid
+
+bool uc16_valid(const uc16_t *c);
+
 // uc32_t Traits
 
 // - Digit vals
@@ -190,9 +198,13 @@ bool uc32_srgt(uc32_t c);
 bool uc32_srgt_low(uc32_t c);
 bool uc32_srgt_high(uc32_t c);
 
-// Len
+// - Len
 
 int uc32_uc16_len(uc32_t c);
 int uc32_uc8_len(uc32_t c);
+
+// - Valid
+
+bool uc32_valid(uc32_t c);
 
 #endif
