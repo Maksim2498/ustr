@@ -6,6 +6,7 @@
 #include "char_t.h"
 
 enum {
+    UMAX_CP    = 0x10FFFF,
     URADIX_MAX = 36
 };
 
