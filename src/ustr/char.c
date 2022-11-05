@@ -100,8 +100,8 @@ bool uc32_from_uc16be(const uc16_t *from, uc32_t *to) {
 	#ifndef USTR_BIG_ENDIAN
 		int from_len = uc16_len(from);
 
-		if (from_len < 0)
-			return true;
+		if (!from_len)
+			return false;
 
 		uc16_t from_le[from_len];
 
@@ -120,8 +120,8 @@ bool uc32_from_uc16le(const uc16_t *from, uc32_t *to) {
 	#ifdef USTR_BIG_ENDIAN
 		int from_len = uc16_len(from);
 
-		if (from_len < 0)
-			return true;
+		if (!from_len)
+			return false;
 
 		uc16_t from_le[from_len];
 
@@ -193,15 +193,15 @@ bool uc32le_from_uc16be(const uc16_t *from, uc32_t *to) {
 	#ifndef USTR_BIG_ENDIAN
 		int from_len = uc16_len(from);
 
-		if (from_len < 0)
-			return true;
+		if (!from_len)
+			return false;
 
-		uc16_t from_le[from_len];
+		uc16_t from_be[from_len];
 
-		memcpy(from_le, from, from_len * sizeof(uc16_t));
-		uendian_toggle_arr(from_le, from_len, sizeof(uc16_t));
+		memcpy(from_be, from, from_len * sizeof(uc16_t));
+		uendian_toggle_arr(from_be, from_len, sizeof(uc16_t));
 
-		return uc32_from_uc16(from_le, to);
+		return uc32_from_uc16(from_be, to);
 	#else
 		bool res = uc32_from_uc16(from, to);
 
@@ -218,8 +218,8 @@ bool uc32le_from_uc16le(const uc16_t *from, uc32_t *to) {
 	#ifdef USTR_BIG_ENDIAN
 		int from_len = uc16_len(from);
 
-		if (from_len < 0)
-			return true;
+		if (!from_len)
+			return false;
 
 		uc16_t from_le[from_len];
 
@@ -271,15 +271,15 @@ bool uc32be_from_uc16be(const uc16_t *from, uc32_t *to) {
 	#ifndef USTR_BIG_ENDIAN
 		int from_len = uc16_len(from);
 
-		if (from_len < 0)
-			return true;
+		if (!from_len)
+			return false;
 
-		uc16_t from_le[from_len];
+		uc16_t from_be[from_len];
 
-		memcpy(from_le, from, from_len * sizeof(uc16_t));
-		uendian_toggle_arr(from_le, from_len, sizeof(uc16_t));
+		memcpy(from_be, from, from_len * sizeof(uc16_t));
+		uendian_toggle_arr(from_be, from_len, sizeof(uc16_t));
 
-		bool res = uc32_from_uc16(from_le, to);
+		bool res = uc32_from_uc16(from_be, to);
 
 		if (res && to)
 			uendian_toggle(to, sizeof(uc32_t));
@@ -296,8 +296,8 @@ bool uc32be_from_uc16le(const uc16_t *from, uc32_t *to) {
 	#ifdef USTR_BIG_ENDIAN
 		int from_len = uc16_len(from);
 
-		if (from_len < 0)
-			return true;
+		if (!from_len)
+			return false;
 
 		uc16_t from_le[from_len];
 
@@ -430,8 +430,9 @@ int uc16_from_uc32be(uc32_t from, uc16_t *to) {
 // Human-readable:
 
 int uc16_from_uc8(const uc8_t *from, uc16_t *to) {
-	// TODO
-	return 0;
+	uc32_t from32;
+	uc32_from_uc8(from, &from32);
+	return uc16_from_uc32(from32, to);
 }
 
 // Human-readable:
@@ -486,8 +487,14 @@ int uc16le_from_uc32be(uc32_t from, uc16_t *to) {
 // Human-readable:
 
 int uc16le_from_uc8(const uc8_t *from, uc16_t *to) {
-	// TODO
-	return 0;
+	int res = uc16_from_uc8(from, to);
+
+	#ifdef USTR_BIG_ENDIAN
+		if (to && res)
+			uendian_toggle_arr(to, res, sizeof(uc16_t));
+	#endif
+
+	return res;
 }
 
 // Human-readable:
@@ -542,8 +549,14 @@ int uc16be_from_uc32be(uc32_t from, uc16_t *to) {
 // Human-readable:
 
 int uc16be_from_uc8(const uc8_t *from, uc16_t *to) {
-	// TODO
-	return 0;
+	int res = uc16_from_uc8(from, to);
+
+	#ifndef USTR_BIG_ENDIAN
+		if (to && res)
+			uendian_toggle_arr(to, res, sizeof(uc16_t));
+	#endif
+
+	return res;
 }
 
 // Human-readable:
@@ -634,22 +647,49 @@ int uc8_from_uc32be(uc32_t from, uc8_t *to) {
 // Human-readable:
 
 int uc8_from_uc16(const uc16_t *from, uc8_t *to) {
-	// TODO
-	return 0;
+	uc32_t from32;
+	uc32_from_uc16(from, &from32);
+	return uc8_from_uc32(from32, to);
 }
 
 // Human-readable:
 
 int uc8_from_uc16le(const uc16_t *from, uc8_t *to) {
-	// TODO
-	return 0;
+	#ifdef USTR_BIG_ENDIAN
+		int from_len = uc16_len(from);
+		
+		if (!from_len)
+			return 0;
+
+		uc16_t from_be[from_len];
+
+		memcpy(from_be, from, from_len * sizeof(uc16_t));
+		uendian_toggle_arr(from_be, from_len, sizeof(uc16_t));
+
+		return uc8_from_uc16(from_be, to);
+	#else
+		return uc8_from_uc16(from, to);
+	#endif
 }
 
 // Human-readable:
 
 int uc8_from_uc16be(const uc16_t *from, uc8_t *to) {
-	// TODO
-	return 0;
+	#ifndef USTR_BIG_ENDIAN
+		int from_len = uc16_len(from);
+		
+		if (!from_len)
+			return 0;
+
+		uc16_t from_le[from_len];
+
+		memcpy(from_le, from, from_len * sizeof(uc16_t));
+		uendian_toggle_arr(from_le, from_len, sizeof(uc16_t));
+
+		return uc8_from_uc16(from_le, to);
+	#else
+		return uc8_from_uc16(from, to);
+	#endif
 }
 
 int uc8_dec_val(uc8_t c) {
@@ -1111,11 +1151,11 @@ int uc16_len(const uc16_t *c) {
 		return 1;
 
 	if (uc16_srgt_high(low))
-		return -1;
+		return 0;
 
 	uc16_t high = c[1];
 
-	return uc16_srgt_high(high) ? 2 : -1;
+	return uc16_srgt_high(high) ? 2 : 0;
 }
 
 // Human-readable:
