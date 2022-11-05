@@ -9,7 +9,10 @@
 enum {
     UBOM_LITTLE_ENDIAN = 0xFFFE,
     UBOM_BIG_ENDIAN    = 0xFEFF,
+    UBOM_UTF_8         = 0xEFBBBF,
+
     UMAX_CP            = 0x10FFFF,
+
     URADIX_MAX         = 36
 };
 
