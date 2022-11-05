@@ -16,51 +16,36 @@
 // Human-readable:
 
 bool uc32_from_uc16(const uc16_t *from, uc32_t *to) {
-	#ifndef USTR_BIG_ENDIAN
-		return uc32le_from_uc16le(from, to);
-	#else
-		return uc32be_from_uc16be(from, to);
-	#endif
+	// TODO
+	return 0;
 }
 
 // Human-readable:
 
 bool uc32_from_uc16be(const uc16_t *from, uc32_t *to) {
-	#ifndef USTR_BIG_ENDIAN
-		return uc32le_from_uc16be(from, to);
-	#else
-		return uc32be_from_uc16be(from, to);
-	#endif
+	// TODO
+	return 0;
 }
 
 // Human-readable:
 
 bool uc32_from_uc16le(const uc16_t *from, uc32_t *to) {
-	#ifndef USTR_BIG_ENDIAN
-		return uc32le_from_uc16le(from, to);
-	#else
-		return uc32be_from_uc16le(from, to);
-	#endif
+	// TODO
+	return 0;
 }
 
 // Human-readable:
 
 bool uc32_from_uc8(const uc8_t *from, uc32_t *to) {
-	#ifndef USTR_BIG_ENDIAN
-		return uc32le_from_uc8(from, to);
-	#else
-		return uc32be_from_uc8(from, to);
-	#endif
+	// TODO
+	return 0;
 }
 
 // Human-readable:
 
 bool uc32le_from_uc16(const uc16_t *from, uc32_t *to) {
-	#ifndef USTR_BIG_ENDIAN
-		return uc32le_from_uc16le(from, to);
-	#else
-		return uc32le_from_uc16be(from, to);
-	#endif
+	// TODO
+	return 0;
 }
 
 // Human-readable:
@@ -87,11 +72,8 @@ bool uc32le_from_uc8(const uc8_t *from, uc32_t *to) {
 // Human-readable:
 
 bool uc32be_from_uc16(const uc16_t *from, uc32_t *to) {
-	#ifndef USTR_BIG_ENDIAN
-		return uc32be_from_uc16le(from, to);
-	#else
-		return uc32be_from_uc16be(from, to);
-	#endif
+	// TODO
+	return 0;
 }
 
 // Human-readable:
@@ -117,152 +99,353 @@ bool uc32be_from_uc8(const uc8_t *from, uc32_t *to) {
 
 // Human-readable:
 
-bool uc16_from_uc32(uc32_t from, uc16_t *to) {
-	#ifndef USTR_BIG_ENDIAN
-		return uc16le_from_uc32le(from, to);
-	#else
-		return uc16le_from_uc32be(from, to);
-	#endif
-}
-
-// Human-readable:
-
-bool uc16_from_uc32le(uc32_t from, uc16_t *to) {
-	#ifndef USTR_BIG_ENDIAN
-		return uc16le_from_uc32le(from, to);
-	#else
-		return uc16be_from_uc32le(from, to);
-	#endif
-}
-
-// Human-readable:
-
-bool uc16_from_uc32be(uc32_t from, uc16_t *to) {
-	#ifndef USTR_BIG_ENDIAN
-		return uc16le_from_uc32be(from, to);
-	#else
-		return uc16be_from_uc32be(from, to);
-	#endif
-}
-
-// Human-readable:
-
-bool uc16_from_uc8(const uc8_t *from, uc16_t *to) {
-	#ifndef USTR_BIG_ENDIAN
-		return uc16le_from_uc8(from, to);
-	#else
-		return uc16be_from_uc8(from, to);
-	#endif
-}
-
-// Human-readable:
-
-bool uc16le_from_uc32(uc32_t from, uc16_t *to) {
-	#ifndef USTR_BIG_ENDIAN
-		return uc16le_from_uc32le(from, to);
-	#else
-		return uc16le_from_uc32be(from, to);
-	#endif
-}
-
-// Human-readable:
-
-bool uc16le_from_uc32le(uc32_t from, uc16_t *to) {
+int uc16_from_uc32(uc32_t from, uc16_t *to) {
 	// TODO
 	return 0;
 }
 
 // Human-readable:
 
-bool uc16le_from_uc32be(uc32_t from, uc16_t *to) {
+int uc16_from_uc32le(uc32_t from, uc16_t *to) {
 	// TODO
 	return 0;
 }
 
 // Human-readable:
 
-bool uc16le_from_uc8(const uc8_t *from, uc16_t *to) {
+int uc16_from_uc32be(uc32_t from, uc16_t *to) {
 	// TODO
 	return 0;
 }
 
 // Human-readable:
 
-bool uc16be_from_uc32(uc32_t from, uc16_t *to) {
-	#ifndef USTR_BIG_ENDIAN
-		return uc16be_from_uc32le(from, to);
-	#else
-		return uc16be_from_uc32be(from, to);
-	#endif
-}
-
-// Human-readable:
-
-bool uc16be_from_uc32le(uc32_t from, uc16_t *to) {
+int uc16_from_uc8(const uc8_t *from, uc16_t *to) {
 	// TODO
 	return 0;
 }
 
 // Human-readable:
 
-bool uc16be_from_uc32be(uc32_t from, uc16_t *to) {
+int uc16le_from_uc32(uc32_t from, uc16_t *to) {
 	// TODO
 	return 0;
 }
 
 // Human-readable:
 
-bool uc16be_from_uc8(const uc8_t *from, uc16_t *to) {
+int uc16le_from_uc32le(uc32_t from, uc16_t *to) {
 	// TODO
 	return 0;
 }
 
 // Human-readable:
 
-bool uc8_from_uc32(uc32_t from, uc8_t *to) {
-	#ifndef USTR_BIG_ENDIAN
-		return uc8_from_uc32le(from, to);
-	#else
-		return uc8_from_uc32be(from, to);
-	#endif
-}
-
-// Human-readable:
-
-bool uc8_from_uc32le(uc32_t from, uc8_t *to) {
+int uc16le_from_uc32be(uc32_t from, uc16_t *to) {
 	// TODO
 	return 0;
 }
 
 // Human-readable:
 
-bool uc8_from_uc32be(uc32_t from, uc8_t *to) {
+int uc16le_from_uc8(const uc8_t *from, uc16_t *to) {
 	// TODO
 	return 0;
 }
 
 // Human-readable:
 
-bool uc8_from_uc16(const uc16_t *from, uc8_t *to) {
-	#ifndef USTR_BIG_ENDIAN
-		return uc8_from_uc16le(from, to);
-	#else
-		return uc8_from_uc16be(from, to);
-	#endif
-}
-
-// Human-readable:
-
-bool uc8_from_uc16le(const uc16_t *from, uc8_t *to) {
+int uc16be_from_uc32(uc32_t from, uc16_t *to) {
 	// TODO
 	return 0;
 }
 
 // Human-readable:
 
-bool uc8_from_uc16be(const uc16_t *from, uc8_t *to) {
+int uc16be_from_uc32le(uc32_t from, uc16_t *to) {
 	// TODO
 	return 0;
+}
+
+// Human-readable:
+
+int uc16be_from_uc32be(uc32_t from, uc16_t *to) {
+	// TODO
+	return 0;
+}
+
+// Human-readable:
+
+int uc16be_from_uc8(const uc8_t *from, uc16_t *to) {
+	// TODO
+	return 0;
+}
+
+// Human-readable:
+
+int uc8_from_uc32(uc32_t from, uc8_t *to) {
+	// TODO
+	return 0;
+}
+
+// Human-readable:
+
+int uc8_from_uc32le(uc32_t from, uc8_t *to) {
+	// TODO
+	return 0;
+}
+
+// Human-readable:
+
+int uc8_from_uc32be(uc32_t from, uc8_t *to) {
+	// TODO
+	return 0;
+}
+
+// Human-readable:
+
+int uc8_from_uc16(const uc16_t *from, uc8_t *to) {
+	// TODO
+	return 0;
+}
+
+// Human-readable:
+
+int uc8_from_uc16le(const uc16_t *from, uc8_t *to) {
+	// TODO
+	return 0;
+}
+
+// Human-readable:
+
+int uc8_from_uc16be(const uc16_t *from, uc8_t *to) {
+	// TODO
+	return 0;
+}
+
+// Human-readable:
+
+int uc16_dec_val(uc16_t c) {
+	return uc32_dec_val(c);
+}
+
+// Human-readable:
+
+int uc16_hex_val(uc16_t c) {
+	return uc32_hex_val(c);
+}
+
+// Human-readable:
+
+int uc16_oct_val(uc16_t c) {
+	return uc32_oct_val(c);
+}
+
+// Human-readable:
+
+int uc16_bin_val(uc16_t c) {
+	return uc32_bin_val(c);
+}
+
+// Human-readable:
+
+int uc16_rad_val(uc16_t c, unsigned radix) {
+	return uc32_rad_val(c, radix);
+}
+
+// Human-readable:
+
+bool uc16_dec(uc16_t c) {
+	return uc32_dec(c);
+}
+
+// Human-readable:
+
+bool uc16_hex(uc16_t c) {
+	return uc32_hex(c);
+}
+
+// Human-readable:
+
+bool uc16_oct(uc16_t c) {
+	return uc32_oct(c);
+}
+
+// Human-readable:
+
+bool uc16_bin(uc16_t c) {
+	return uc32_bin(c);
+}
+
+// Human-readable:
+
+bool uc16_rad(uc16_t c, unsigned radix) {
+	return uc32_rad(c, radix);
+}
+
+// Human-readable:
+
+int uc16_to_upper(uc16_t *c) {
+	uc32_t c32;
+
+	if (uc32_from_uc16(c, &c32))
+		return false;
+
+	c32 = uc32_to_upper(c32);
+
+	return uc16_from_uc32(c32, c);
+}
+
+// Human-readable:
+
+int uc16_to_lower(uc16_t *c) {
+	uc32_t c32;
+
+	if (uc32_from_uc16(c, &c32))
+		return false;
+
+	c32 = uc32_to_lower(c32);
+
+	return uc16_from_uc32(c32, c);
+}
+
+// Human-readable:
+
+bool uc16_letter(const uc16_t *c) {
+	uc32_t c32;
+
+	if (uc32_from_uc16(c, &c32))
+		return false;
+
+	return uc32_letter(c32);
+}
+
+// Human-readable:
+
+bool uc16_upper(const uc16_t *c) {
+	uc32_t c32;
+
+	if (uc32_from_uc16(c, &c32))
+		return false;
+
+	return uc32_upper(c32);
+}
+
+// Human-readable:
+
+bool uc16_lower(const uc16_t *c) {
+	uc32_t c32;
+
+	if (uc32_from_uc16(c, &c32))
+		return false;
+
+	return uc32_lower(c32);
+}
+
+// Human-readable:
+
+bool uc16_title(const uc16_t *c) {
+	uc32_t c32;
+
+	if (uc32_from_uc16(c, &c32))
+		return false;
+
+	return uc32_title(c32);
+}
+
+// Human-readable:
+
+bool uc16_mod(const uc16_t *c) {
+	uc32_t c32;
+
+	if (uc32_from_uc16(c, &c32))
+		return false;
+
+	return uc32_mod(c32);
+}
+
+// Human-readable:
+
+bool uc16_oletter(const uc16_t *c) {
+	uc32_t c32;
+
+	if (uc32_from_uc16(c, &c32))
+		return false;
+
+	return uc32_oletter(c32);
+}
+
+// Human-readable:
+
+bool uc16_number(const uc16_t *c) {
+	uc32_t c32;
+
+	if (uc32_from_uc16(c, &c32))
+		return false;
+
+	return uc32_number(c32);
+}
+
+// Human-readable:
+
+bool uc16_cntrl(const uc16_t *c) {
+	uc32_t c32;
+
+	if (uc32_from_uc16(c, &c32))
+		return false;
+
+	return uc32_cntrl(c32);
+}
+
+// Human-readable:
+
+bool uc16_space(const uc16_t *c) {
+	uc32_t c32;
+
+	if (uc32_from_uc16(c, &c32))
+		return false;
+
+	return uc32_space(c32);
+}
+
+// Human-readable:
+
+bool uc16_punct(const uc16_t *c) {
+	uc32_t c32;
+	
+	if (uc32_from_uc16(c, &c32))
+		return false;
+
+	return uc32_punct(c32);
+}
+
+// Human-readable:
+
+bool uc16_priv(const uc16_t *c) {
+	uc32_t c32;
+	
+	if (uc32_from_uc16(c, &c32))
+		return false;
+
+	return uc32_priv(c32);
+}
+
+// Human-readable:
+
+bool uc16_srgt(uc16_t c) {
+	return 0xD800 <= c && c <= 0xDFFF;
+}
+
+// Human-readable:
+
+bool uc16_srgt_low(uc16_t c) {
+	return 0xD800 <= c && c <= 0xDBFF;
+}
+
+// Human-readable:
+
+bool uc16_srgt_high(uc16_t c) {
+	return 0xDC00 <= c && c <= 0xDFFF;
 }
 
 // Human-readable:
@@ -33235,4 +33418,31 @@ bool uc32_punct(uc32_t c) {
 bool uc32_priv(uc32_t c) {
     return 0x00E000 <= c && c <= 0x00F8FF  // From BMP
         || 0xF00000 <= c && c <= 0x10FFFF; // Two last pages merged
+}
+
+// Human-readable:
+
+int uc32_uc16_len(uc32_t c) {
+	if (c > UMAX_CP)
+		return -1;
+
+	return c >= 0x10000 ? 2 : 1;
+}
+
+// Human-readable:
+
+int uc32_uc8_len(uc32_t c) {
+	if (c <= 0x7F)
+		return 1;
+
+	if (c <= 0x7FF)
+		return 2;
+
+	if (c <= 0xFFFF)
+		return 3;
+
+	if (c <= 0x10FFFF)
+		return 4;
+
+	return -1;
 }
