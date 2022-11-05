@@ -1,4 +1,5 @@
 .vscode
+/install
 /build
 /test/manual
 .DS_Store

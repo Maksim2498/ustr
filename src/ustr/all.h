@@ -8,6 +8,8 @@
 #include "cview.h"
 #include "encoding_t.h"
 #include "encoding.h"
+#include "endian_t.h"
+#include "endian.h"
 #include "mem.h"
 #include "str_t.h"
 #include "str.h"

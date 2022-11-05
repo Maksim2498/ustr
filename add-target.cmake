@@ -7,6 +7,8 @@ add_library(ustr
             src/ustr/cview.h      src/ustr/cview.c
             src/ustr/encoding_t.h
             src/ustr/encoding.h   src/ustr/encoding.c
+            src/ustr/endian_t.h
+            src/ustr/endian.h     src/ustr/endian.c
             src/ustr/io.h         src/ustr/io.c
             src/ustr/mem.h        src/ustr/mem.c
             src/ustr/str_t.h
