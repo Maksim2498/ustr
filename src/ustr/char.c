@@ -13,194 +13,212 @@
 
 // Human-readable:
 
-uc32_t uc32_from_uc16(const uc16_t *chars) {
+bool uc32_from_uc16(const uc16_t *from, uc32_t *to) {
 	// TODO
 	return 0;
 }
 
 // Human-readable:
 
-uc32_t uc32_from_uc16be(const uc16_t *chars) {
+bool uc32_from_uc16be(const uc16_t *from, uc32_t *to) {
 	// TODO
 	return 0;
 }
 
 // Human-readable:
 
-uc32_t uc32_from_uc16le(const uc16_t *chars) {
+bool uc32_from_uc16le(const uc16_t *from, uc32_t *to) {
 	// TODO
 	return 0;
 }
 
 // Human-readable:
 
-uc32_t uc32_from_uc8(const uc8_t *chars) {
+bool uc32_from_uc8(const uc8_t *from, uc32_t *to) {
 	// TODO
 	return 0;
 }
 
 // Human-readable:
 
-uc32_t uc32le_from_uc16(const uc16_t *chars) {
+bool uc32le_from_uc16(const uc16_t *from, uc32_t *to) {
 	// TODO
 	return 0;
 }
 
 // Human-readable:
 
-uc32_t uc32le_from_uc16be(const uc16_t *chars) {
+bool uc32le_from_uc16be(const uc16_t *from, uc32_t *to) {
 	// TODO
 	return 0;
 }
 
 // Human-readable:
 
-uc32_t uc32le_from_uc16le(const uc16_t *chars) {
+bool uc32le_from_uc16le(const uc16_t *from, uc32_t *to) {
 	// TODO
 	return 0;
 }
 
 // Human-readable:
 
-uc32_t uc32le_from_uc8(const uc8_t *chars) {
+bool uc32le_from_uc8(const uc8_t *from, uc32_t *to) {
 	// TODO
 	return 0;
 }
 
 // Human-readable:
 
-uc32_t uc32be_from_uc16(const uc16_t *chars) {
+bool uc32be_from_uc16(const uc16_t *from, uc32_t *to) {
 	// TODO
 	return 0;
 }
 
 // Human-readable:
 
-uc32_t uc32be_from_uc16be(const uc16_t *chars) {
+bool uc32be_from_uc16be(const uc16_t *from, uc32_t *to) {
 	// TODO
 	return 0;
 }
 
 // Human-readable:
 
-uc32_t uc32be_from_uc16le(const uc16_t *chars) {
+bool uc32be_from_uc16le(const uc16_t *from, uc32_t *to) {
 	// TODO
 	return 0;
 }
 
 // Human-readable:
 
-uc32_t uc32be_from_uc8(const uc8_t *chars) {
+bool uc32be_from_uc8(const uc8_t *from, uc32_t *to) {
 	// TODO
 	return 0;
 }
 
 // Human-readable:
 
-void uc16_from_uc32(uc32_t from, uc16_t *to) {
+bool uc16_from_uc32(uc32_t from, uc16_t *to) {
 	// TODO
+	return 0;
 }
 
 // Human-readable:
 
-void uc16_from_uc32le(uc32_t from, uc16_t *to) {
+bool uc16_from_uc32le(uc32_t from, uc16_t *to) {
 	// TODO
+	return 0;
 }
 
 // Human-readable:
 
-void uc16_from_uc32be(uc32_t from, uc16_t *to) {
+bool uc16_from_uc32be(uc32_t from, uc16_t *to) {
 	// TODO
+	return 0;
 }
 
 // Human-readable:
 
-void uc16_from_uc8(const uc8_t *from, uc16_t *to) {
+bool uc16_from_uc8(const uc8_t *from, uc16_t *to) {
 	// TODO
+	return 0;
 }
 
 // Human-readable:
 
-void uc16le_from_uc32(uc32_t from, uc16_t *to) {
+bool uc16le_from_uc32(uc32_t from, uc16_t *to) {
 	// TODO
+	return 0;
 }
 
 // Human-readable:
 
-void uc16le_from_uc32le(uc32_t from, uc16_t *to) {
+bool uc16le_from_uc32le(uc32_t from, uc16_t *to) {
 	// TODO
+	return 0;
 }
 
 // Human-readable:
 
-void uc16le_from_uc32be(uc32_t from, uc16_t *to) {
+bool uc16le_from_uc32be(uc32_t from, uc16_t *to) {
 	// TODO
+	return 0;
 }
 
 // Human-readable:
 
-void uc16le_from_uc8(const uc8_t *from, uc16_t *to) {
+bool uc16le_from_uc8(const uc8_t *from, uc16_t *to) {
 	// TODO
+	return 0;
 }
 
 // Human-readable:
 
-void uc16be_from_uc32(uc32_t from, uc16_t *to) {
+bool uc16be_from_uc32(uc32_t from, uc16_t *to) {
 	// TODO
+	return 0;
 }
 
 // Human-readable:
 
-void uc16be_from_uc32le(uc32_t from, uc16_t *to) {
+bool uc16be_from_uc32le(uc32_t from, uc16_t *to) {
 	// TODO
+	return 0;
 }
 
 // Human-readable:
 
-void uc16be_from_uc32be(uc32_t from, uc16_t *to) {
+bool uc16be_from_uc32be(uc32_t from, uc16_t *to) {
 	// TODO
+	return 0;
 }
 
 // Human-readable:
 
-void uc16be_from_uc8(const uc8_t *from, uc16_t *to) {
+bool uc16be_from_uc8(const uc8_t *from, uc16_t *to) {
 	// TODO
+	return 0;
 }
 
 // Human-readable:
 
-void uc8_from_uc32(uc32_t from, uc8_t *to) {
+bool uc8_from_uc32(uc32_t from, uc8_t *to) {
 	// TODO
+	return 0;
 }
 
 // Human-readable:
 
-void uc8_from_uc32le(uc32_t from, uc8_t *to) {
+bool uc8_from_uc32le(uc32_t from, uc8_t *to) {
 	// TODO
+	return 0;
 }
 
 // Human-readable:
 
-void uc8_from_uc32be(uc32_t from, uc8_t *to) {
+bool uc8_from_uc32be(uc32_t from, uc8_t *to) {
 	// TODO
+	return 0;
 }
 
 // Human-readable:
 
-void uc8_from_uc16(const uc16_t *from, uc8_t *to) {
+bool uc8_from_uc16(const uc16_t *from, uc8_t *to) {
 	// TODO
+	return 0;
 }
 
 // Human-readable:
 
-void uc8_from_uc16le(const uc16_t *from, uc8_t *to) {
+bool uc8_from_uc16le(const uc16_t *from, uc8_t *to) {
 	// TODO
+	return 0;
 }
 
 // Human-readable:
 
-void uc8_from_uc16be(const uc16_t *from, uc8_t *to) {
+bool uc8_from_uc16be(const uc16_t *from, uc8_t *to) {
 	// TODO
+	return 0;
 }
 
 // Human-readable:
