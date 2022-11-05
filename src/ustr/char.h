@@ -103,6 +103,22 @@ bool uc8_cntrl(const uc8_t *c);
 bool uc8_space(const uc8_t *c);
 bool uc8_punct(const uc8_t *c);
 bool uc8_priv(const uc8_t *c);
+bool uc8_srgt(const uc8_t *c);
+bool uc8_srgt_low(const uc8_t *c);
+bool uc8_srgt_high(const uc8_t *c);
+
+// - Order
+
+bool uc8_lead(uc8_t c);
+bool uc8_trail(uc8_t c);
+
+// - Len
+
+int uc8_len(uc8_t c);
+
+// - Valid
+
+int uc8_valid(const uc8_t *c);
 
 // uc16_t Traits
 

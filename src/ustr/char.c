@@ -74,11 +74,11 @@ bool uc32_from_uc16(const uc16_t *from, uc32_t *to) {
 		if (to)
 			*to = low;
 
-		return false;
+		return true;
 	}
 
 	if (uc16_srgt_high(low))
-		return true;
+		return false;
 
 	uc16_t high = from[1];
 
@@ -91,7 +91,7 @@ bool uc32_from_uc16(const uc16_t *from, uc32_t *to) {
 		*to += 0x10000;
 	}
 
-	return false;
+	return true;
 }
 
 // Human-readable:
@@ -147,7 +147,7 @@ bool uc32le_from_uc16(const uc16_t *from, uc32_t *to) {
 	bool res = uc32_from_uc16(from, to);
 	
 	#ifdef USTR_BIG_ENDIAN
-		if (!res && to)
+		if (res && to)
 			uendian_toggle(to, sizeof(uc32_t));
 	#endif
 
@@ -172,7 +172,7 @@ bool uc32le_from_uc16be(const uc16_t *from, uc32_t *to) {
 	#else
 		bool res = uc32_from_uc16(from, to);
 
-		if (!res && to)
+		if (res && to)
 			uendian_toggle(to, sizeof(uc32_t));
 
 		return res;
@@ -195,7 +195,7 @@ bool uc32le_from_uc16le(const uc16_t *from, uc32_t *to) {
 
 		bool res = uc32_from_uc16(from_le, to);
 
-		if (!res && to)
+		if (res && to)
 			uendian_toggle(to, sizeof(uc32_t));
 
 		return res;
@@ -217,7 +217,7 @@ bool uc32be_from_uc16(const uc16_t *from, uc32_t *to) {
 	bool res = uc32_from_uc16(from, to);
 	
 	#ifndef USTR_BIG_ENDIAN
-		if (!res && to)
+		if (res && to)
 			uendian_toggle(to, sizeof(uc32_t));
 	#endif
 
@@ -240,7 +240,7 @@ bool uc32be_from_uc16be(const uc16_t *from, uc32_t *to) {
 
 		bool res = uc32_from_uc16(from_le, to);
 
-		if (!res && to)
+		if (res && to)
 			uendian_toggle(to, sizeof(uc32_t));
 
 		return res;
@@ -267,7 +267,7 @@ bool uc32be_from_uc16le(const uc16_t *from, uc32_t *to) {
 	#else
 		bool res = uc32_from_uc16(from, to);
 
-		if (!res && to)
+		if (res && to)
 			uendian_toggle(to, sizeof(uc32_t));
 
 		return res;
@@ -743,6 +743,82 @@ bool uc8_priv(const uc8_t *c) {
 	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(c, &c32) && uc32_priv(c32);
+}
+
+// Human-readable:
+
+bool uc8_srgt(const uc8_t *c) {
+	assert(c);
+	uc32_t c32;
+	return uc32_from_uc8(c, &c32) && uc32_srgt(c32);
+}
+
+// Human-readable:
+
+bool uc8_srgt_low(const uc8_t *c) {
+	assert(c);
+	uc32_t c32;
+	return uc32_from_uc8(c, &c32) && uc32_srgt_low(c32);
+}
+
+// Human-readable:
+
+bool uc8_srgt_high(const uc8_t *c) {
+	assert(c);
+	uc32_t c32;
+	return uc32_from_uc8(c, &c32) && uc32_srgt_high(c32);
+}
+
+// Human-readable:
+
+bool uc8_lead(uc8_t c) {
+	return (c & 0x80) == 0     // 0xxx xxxx
+		|| (c & 0xE0) == 0xC0  // 110x xxxx
+		|| (c & 0xF0) == 0xE0  // 1110 xxxx
+		|| (c & 0xF7) == 0xF0; // 1111 0xxx
+}
+
+// Human-readable:
+
+bool uc8_trail(uc8_t c) {
+	return (c & 0xC0) == 0x80; // 10xx xxxx
+}
+
+// Human-readable:
+
+int uc8_len(uc8_t c) {
+	// 0xxx xxxx
+	if ((c & 0x80) == 0)
+		return 1;
+
+	// 110x xxxx
+	if ((c & 0xE0) == 0xC0)
+		return 2;
+
+	// 1110 xxxx
+	if ((c & 0xF0) == 0xE0)
+		return 3;
+
+	// 1111 0xxx
+	if ((c & 0xF7) == 0xF0)
+		return 4;
+
+	return 0;
+}
+
+// Human-readable:
+
+int uc8_valid(const uc8_t *c) {
+	assert(c);
+
+	uc8_t lead = c[0];
+	int   len  = uc8_len(lead);
+
+	for (int i = 1; i <= len; ++i) 
+		if (!uc8_trail(c[i]))
+			return 0;
+
+	return len;
 }
 
 // Human-readable:
