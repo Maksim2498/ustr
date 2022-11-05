@@ -9,7 +9,29 @@
 #include "str_t.h"
 #include "view_t.h"
 
-// Creation
+// uv8_t
+
+// - Creation
+
+#define uv8(literal)                                 \
+    (uv8_t) {                                        \
+        .chars = (u8##literal),                      \
+        .len   = sizeof(u8##literal) / sizeof(uc8_t) \
+    }
+
+// uv16_t
+
+// - Creation
+
+#define uv16(literal)                                \
+    (uv16_t) {                                       \
+        .chars = (u##literal),                       \
+        .len   = sizeof(u##literal) / sizeof(uc16_t) \
+    }
+
+// uv32_t
+
+// - Creation
 
 #define uv32(literal)                                \
     (uv32_t) {                                       \
@@ -23,12 +45,12 @@ uv32_t uv32_from_uv32_range(uv32_t view, size_t from, size_t len);
 uv32_t uv32_from_cstr(uc32_t *cstr);
 uv32_t uv32_from_cstrn(uc32_t *cstr, size_t n);
 
-// Char
+// - Char
 
 uc32_t uv32_char(uv32_t view, size_t index);
 void uv32_set_char(uv32_t view, uc32_t c, size_t index);
 
-// Cmp
+// - Cmp
 
 int uv32_cmp(uv32_t lhs, uv32_t rhs);
 int uv32_cmp_n(uv32_t lhs, uv32_t rhs, size_t n);
@@ -39,9 +61,9 @@ int uv32_cmp_us32_n(uv32_t lhs, const us32_t *rhs, size_t n);
 int uv32_cmp_cstr(uv32_t lhs, const uc32_t *cstr);
 int uv32_cmp_cstrn(uv32_t lhs, const uc32_t *cstr, size_t n);
 
-// Search
+// - Search
 
-// - Forward
+// -- Forward
 
 ptrdiff_t uv32_char_pos(uv32_t view, uc32_t c);
 ptrdiff_t uv32_char_pos_from(uv32_t view, uc32_t c, size_t from);
@@ -55,7 +77,7 @@ ptrdiff_t uv32_ucv32_pos(uv32_t view, ucv32_t another);
 ptrdiff_t uv32_ucv32_pos_from(uv32_t view, ucv32_t another, size_t from);
 ptrdiff_t uv32_us32_pos(uv32_t view, const us32_t *str);
 
-// - Backward
+// -- Backward
 
 ptrdiff_t uv32_char_pos_r(uv32_t view, uc32_t c);
 ptrdiff_t uv32_char_pos_from_r(uv32_t view, uc32_t c, size_t from);
@@ -71,7 +93,7 @@ ptrdiff_t uv32_us32_pos_r(uv32_t view, const us32_t *str);
 ptrdiff_t uv32_us32_pos_from_r(uv32_t view, const us32_t *str, size_t from);
 ptrdiff_t uv32_us32_pos_from_r(uv32_t view, const us32_t *str, size_t from);
 
-// Fill
+// - Fill
 
 void uv32_fill(uv32_t view, uc32_t c);
 void uv32_fill_range(uv32_t view, uc32_t c, size_t from, size_t len);
@@ -89,12 +111,12 @@ void uv32_fill_us32(uv32_t view, const us32_t *str);
 void uv32_fill_us32_from(uv32_t view, const us32_t *str, size_t from);
 void uv32_fill_us32_range(uv32_t view, const us32_t *str, size_t from, size_t to);
 
-// Case change
+// - Case Change
 
 void uv32_to_upper(uv32_t view);
 void uv32_to_lower(uv32_t view);
 
-// Iteration
+// - Iteration
 
 uc32_t *uv32_begin(uv32_t view);
 const uc32_t *uv32_cbegin(uv32_t view);
@@ -103,13 +125,13 @@ const uc32_t *uv32_cend(uv32_t view);
 uc32_t *uv32_at(uv32_t view);
 const uc32_t *uv32_cat(uv32_t view);
 
-// Len
+// - Len
 
 bool uv32_bounds(uv32_t view);
 size_t uv32_len(uv32_t view);
 bool uv32_empty(uv32_t view);
 
-// Valid
+// - Valid
 
 bool uv32_valid(uv32_t view);
 

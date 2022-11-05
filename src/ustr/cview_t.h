@@ -10,4 +10,14 @@ typedef struct {
     size_t len;
 } ucv32_t;
 
+typedef struct {
+    const uc16_t *chars;
+    size_t len;
+} ucv16_t;
+
+typedef struct {
+    const uc8_t *chars;
+    size_t len;
+} ucv8_t;
+
 #endif
