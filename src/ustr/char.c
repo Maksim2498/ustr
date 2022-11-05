@@ -319,13 +319,15 @@ bool uc32be_from_uc16le(const uc16_t *from, uc32_t *to) {
 
 bool uc32be_from_uc8(const uc8_t *from, uc32_t *to) {
 	#ifndef USTR_BIG_ENDIAN
-		bool res = uc32_form_uc8(from, to);
+		bool res = uc32_from_uc8(from, to);
 
 		if (res && to)
 			uendian_toggle(to, sizeof(uc32_t));
 
 		return res;
 	#else
+		return uc32_from_uc8(from, to);
+	#endif
 }
 
 // Human-readable:
@@ -400,7 +402,7 @@ int uc16_from_uc32(uc32_t from, uc16_t *to) {
 		return 2;
 	}
 
-	return -1;
+	return 0;
 }
 
 // Human-readable:
@@ -438,7 +440,7 @@ int uc16le_from_uc32(uc32_t from, uc16_t *to) {
 	int res = uc16_from_uc32(from, to);
 	
 	#ifdef USTR_BIG_ENDIAN
-		if (to && res > 0)
+		if (to && res)
 			uendian_toggle_arr(to, res, sizeof(uc16_t));
 	#endif
 
@@ -456,7 +458,7 @@ int uc16le_from_uc32le(uc32_t from, uc16_t *to) {
 	int res = uc16_from_uc32(from, to);
 	
 	#ifdef USTR_BIG_ENDIAN
-		if (to && res > 0)
+		if (to && res)
 			uendian_toggle_arr(to, res, sizeof(uc16_t));
 	#endif
 
@@ -474,7 +476,7 @@ int uc16le_from_uc32be(uc32_t from, uc16_t *to) {
 	int res = uc16_from_uc32(from, to);
 	
 	#ifdef USTR_BIG_ENDIAN
-		if (to && res > 0)
+		if (to && res)
 			uendian_toggle_arr(to, res, sizeof(uc16_t));
 	#endif
 
@@ -494,7 +496,7 @@ int uc16be_from_uc32(uc32_t from, uc16_t *to) {
 	int res = uc16_from_uc32(from, to);
 	
 	#ifndef USTR_BIG_ENDIAN
-		if (to && res > 0)
+		if (to && res)
 			uendian_toggle_arr(to, res, sizeof(uc16_t));
 	#endif
 
@@ -512,7 +514,7 @@ int uc16be_from_uc32le(uc32_t from, uc16_t *to) {
 	int res = uc16_from_uc32(from, to);
 	
 	#ifndef USTR_BIG_ENDIAN
-		if (to && res > 0)
+		if (to && res)
 			uendian_toggle_arr(to, res, sizeof(uc16_t));
 	#endif
 
@@ -530,7 +532,7 @@ int uc16be_from_uc32be(uc32_t from, uc16_t *to) {
 	int res = uc16_from_uc32(from, to);
 	
 	#ifndef USTR_BIG_ENDIAN
-		if (to && res > 0)
+		if (to && res)
 			uendian_toggle_arr(to, res, sizeof(uc16_t));
 	#endif
 
@@ -577,22 +579,56 @@ int uc8_from_uc16_e(const uc16_t *from, uendian_t from_endian, uc8_t *to) {
 // Human-readable:
 
 int uc8_from_uc32(uc32_t from, uc8_t *to) {
-	// TODO
-	return 0;
+	int len = uc32_uc8_len(from);
+
+	if (!len)
+		return 0;
+
+	if (to)
+		switch (len) {
+			case 1:
+				to[0] = from;
+				break;
+
+			case 2:
+				to[0] = (from & 0x7C0) >> 6 | 0xC0;
+				to[1] =  from & 0x03F       | 0x80;
+				break;
+
+			case 3:
+				to[0] = (from & 0xF000) >> 12 | 0xE0;
+				to[1] = (from & 0x0FC0) >> 6  | 0x80;
+				to[2] =  from & 0x003F        | 0x80;
+				break;
+
+			case 4:
+				to[0] = (from & 0x1C0000) >> 18 | 0xF0;
+				to[1] = (from & 0x03F000) >> 12 | 0x80;
+				to[2] = (from & 0x000FC0) >> 6  | 0x80;
+				to[3] =  from & 0x00003F        | 0x80;
+		}
+	
+	return len;
 }
 
 // Human-readable:
 
 int uc8_from_uc32le(uc32_t from, uc8_t *to) {
-	// TODO
-	return 0;
+	#ifdef USTR_BIG_ENDIAN
+		uendian_toggle(&from, sizeof from);
+	#endif
+
+	return uc8_from_uc32(from, to);
 }
 
 // Human-readable:
 
 int uc8_from_uc32be(uc32_t from, uc8_t *to) {
-	// TODO
-	return 0;
+	#ifndef USTR_BIG_ENDIAN
+		uendian_toggle(&from, sizeof from);
+	#endif
+
+	return uc8_from_uc32(from, to);
 }
 
 // Human-readable:
@@ -34094,7 +34130,7 @@ bool uc32_srgt_high(uc32_t c) {
 
 int uc32_uc16_len(uc32_t c) {
 	if (c > UMAX_CP)
-		return -1;
+		return 0;
 
 	return c >= 0x10000 ? 2 : 1;
 }
@@ -34114,7 +34150,7 @@ int uc32_uc8_len(uc32_t c) {
 	if (c <= 0x10FFFF)
 		return 4;
 
-	return -1;
+	return 0;
 }
 
 // Human-readable:
