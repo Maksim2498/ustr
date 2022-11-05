@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include "config.h"
+#include "endian.h"
 
 /*
     Most in this file isn't human readable
@@ -12,6 +13,54 @@
     Human-readable funtions are annotated
     with "// Human-readable:" commment.
 */
+
+// Human-readable:
+
+bool uc32_from_uc16_e(const uc16_t *from, uendian_t from_endian, uc32_t *to, uendian_t to_endian) {
+	switch (to_endian) {
+		case UENDIAN_BIG:
+			switch (from_endian) {
+				case UENDIAN_BIG:
+					return uc32be_from_uc16be(from, to);
+				
+				case UENDIAN_LITTLE:
+					return uc32be_from_uc16le(from, to);
+
+				default:
+					return -1;
+			}
+		
+		case UENDIAN_LITTLE:
+			switch (from_endian) {
+				case UENDIAN_BIG:
+					return uc32le_from_uc16be(from, to);
+				
+				case UENDIAN_LITTLE:
+					return uc32le_from_uc16le(from, to);
+
+				default:
+					return -1;
+			}
+
+		default:
+			return -1;
+	}
+}
+
+// Human-readable:
+
+bool uc32_from_uc8_e(const uc8_t *from, uc32_t *to, uendian_t to_endian) {
+	switch (to_endian) {
+		case UENDIAN_BIG:
+			return uc32be_from_uc8(from, to);
+
+		case UENDIAN_LITTLE:
+			return uc32le_from_uc8(from, to);
+
+		default:
+			return -1;
+	}
+}
 
 // Human-readable:
 
@@ -99,23 +148,99 @@ bool uc32be_from_uc8(const uc8_t *from, uc32_t *to) {
 
 // Human-readable:
 
+int uc16_from_uc32_e(uc32_t from, uendian_t from_endian, uc16_t *to, uendian_t to_endian) {
+	switch (to_endian) {
+		case UENDIAN_BIG:
+			switch (from_endian) {
+				case UENDIAN_BIG:
+					return uc16be_from_uc32be(from, to);
+
+				case UENDIAN_LITTLE:
+					return uc16be_from_uc32le(from, to);
+
+				default:
+					return -1;
+			}
+
+		case UENDIAN_LITTLE:
+			switch (from_endian) {
+				case UENDIAN_BIG:
+					return uc16le_from_uc32be(from, to);
+
+				case UENDIAN_LITTLE:
+					return uc16le_from_uc32le(from, to);
+
+				default:
+					return -1;
+			}
+
+		default:
+			return -1;
+	}
+}
+
+// Human-readable:
+
+int uc16_from_uc8_e(const uc8_t *from, uc16_t *to, uendian_t to_endian) {
+	switch (to_endian) {
+		case UENDIAN_BIG:
+			return uc16be_from_uc8(from, to);
+
+		case UENDIAN_LITTLE:
+			return uc16le_from_uc8(from, to);
+
+		default:
+			return -1;
+	}
+}
+
+// Human-readable:
+
 int uc16_from_uc32(uc32_t from, uc16_t *to) {
-	// TODO
-	return 0;
+	if (from < 0x10000) {
+		*to = from;
+		return 1;
+	}
+
+	if (from <= UMAX_CP) {
+		from -= 0x10000;
+
+		if (to) {
+			uc16_t top10 = from & 0xFFC00;
+			top10       += 0xD800;
+			to[0]        = top10;
+
+			uc16_t low10 = from & 0x003FF;
+			low10       += 0xDC00;
+			to[1]        = low10; 
+		}
+
+		return 2;
+	}
+
+	return -1;
 }
 
 // Human-readable:
 
 int uc16_from_uc32le(uc32_t from, uc16_t *to) {
-	// TODO
-	return 0;
+	#ifdef USTR_BIG_ENDIAN
+		if (to)
+			uendian_toggle(&from, sizeof from);
+	#endif
+
+	return uc16_from_uc32(from, to);
 }
 
 // Human-readable:
 
 int uc16_from_uc32be(uc32_t from, uc16_t *to) {
-	// TODO
-	return 0;
+	#ifndef USTR_BIG_ENDIAN
+		if (to)
+			uendian_toggle(&from, sizeof from);
+	#endif
+
+	return uc16_from_uc32(from, to);
 }
 
 // Human-readable:
@@ -128,22 +253,50 @@ int uc16_from_uc8(const uc8_t *from, uc16_t *to) {
 // Human-readable:
 
 int uc16le_from_uc32(uc32_t from, uc16_t *to) {
-	// TODO
-	return 0;
+	int res = uc16_from_uc32(from, to);
+	
+	#ifdef USTR_BIG_ENDIAN
+		if (to && res > 0)
+			uendian_toggle_arr(to, res, sizeof(uc16_t));
+	#endif
+
+	return res;
 }
 
 // Human-readable:
 
 int uc16le_from_uc32le(uc32_t from, uc16_t *to) {
-	// TODO
-	return 0;
+	#ifdef USTR_BIG_ENDIAN
+		if (to)
+			uendian_toggle(&from, sizeof from);
+	#endif
+
+	int res = uc16_from_uc32(from, to);
+	
+	#ifdef USTR_BIG_ENDIAN
+		if (to && res > 0)
+			uendian_toggle_arr(to, res, sizeof(uc16_t));
+	#endif
+
+	return res;
 }
 
 // Human-readable:
 
 int uc16le_from_uc32be(uc32_t from, uc16_t *to) {
-	// TODO
-	return 0;
+	#ifndef USTR_BIG_ENDIAN
+		if (to)
+			uendian_toggle(&from, sizeof from);
+	#endif
+
+	int res = uc16_from_uc32(from, to);
+	
+	#ifdef USTR_BIG_ENDIAN
+		if (to && res > 0)
+			uendian_toggle_arr(to, res, sizeof(uc16_t));
+	#endif
+
+	return res;
 }
 
 // Human-readable:
@@ -156,22 +309,50 @@ int uc16le_from_uc8(const uc8_t *from, uc16_t *to) {
 // Human-readable:
 
 int uc16be_from_uc32(uc32_t from, uc16_t *to) {
-	// TODO
-	return 0;
+	int res = uc16_from_uc32(from, to);
+	
+	#ifndef USTR_BIG_ENDIAN
+		if (to && res > 0)
+			uendian_toggle_arr(to, res, sizeof(uc16_t));
+	#endif
+
+	return res;
 }
 
 // Human-readable:
 
 int uc16be_from_uc32le(uc32_t from, uc16_t *to) {
-	// TODO
-	return 0;
+	#ifdef USTR_BIG_ENDIAN
+		if (to)
+			uendian_toggle(&from, sizeof from);
+	#endif
+
+	int res = uc16_from_uc32(from, to);
+	
+	#ifndef USTR_BIG_ENDIAN
+		if (to && res > 0)
+			uendian_toggle_arr(to, res, sizeof(uc16_t));
+	#endif
+
+	return res;
 }
 
 // Human-readable:
 
 int uc16be_from_uc32be(uc32_t from, uc16_t *to) {
-	// TODO
-	return 0;
+	#ifndef USTR_BIG_ENDIAN
+		if (to)
+			uendian_toggle(&from, sizeof from);
+	#endif
+
+	int res = uc16_from_uc32(from, to);
+	
+	#ifndef USTR_BIG_ENDIAN
+		if (to && res > 0)
+			uendian_toggle_arr(to, res, sizeof(uc16_t));
+	#endif
+
+	return res;
 }
 
 // Human-readable:
@@ -179,6 +360,36 @@ int uc16be_from_uc32be(uc32_t from, uc16_t *to) {
 int uc16be_from_uc8(const uc8_t *from, uc16_t *to) {
 	// TODO
 	return 0;
+}
+
+// Human-readable:
+
+int uc8_from_uc32_e(uc32_t from, uendian_t from_endian, uc8_t *to) {
+	switch (from_endian) {
+		case UENDIAN_BIG:
+			return uc8_from_uc32be(from, to);
+
+		case UENDIAN_LITTLE:
+			return uc8_from_uc32le(from, to);
+
+		default:
+			return -1;
+	}
+}
+
+// Human-readable:
+
+int uc8_from_uc16_e(const uc16_t *from, uendian_t from_endian, uc8_t *to) {
+	switch (from_endian) {
+		case UENDIAN_BIG:
+			return uc8_from_uc16be(from, to);
+
+		case UENDIAN_LITTLE:
+			return uc8_from_uc16le(from, to);
+
+		default:
+			return -1;
+	}
 }
 
 // Human-readable:
@@ -550,19 +761,19 @@ bool uc16_priv(const uc16_t *c) {
 // Human-readable:
 
 bool uc16_srgt(uc16_t c) {
-	return 0xD800 <= c && c <= 0xDFFF;
+	return uc32_srgt(c);
 }
 
 // Human-readable:
 
 bool uc16_srgt_low(uc16_t c) {
-	return 0xD800 <= c && c <= 0xDBFF;
+	return uc32_srgt_low(c);
 }
 
 // Human-readable:
 
 bool uc16_srgt_high(uc16_t c) {
-	return 0xDC00 <= c && c <= 0xDFFF;
+	return uc32_srgt_high(c);
 }
 
 // Human-readable:
@@ -33535,6 +33746,24 @@ bool uc32_punct(uc32_t c) {
 bool uc32_priv(uc32_t c) {
     return 0x00E000 <= c && c <= 0x00F8FF  // From BMP
         || 0xF00000 <= c && c <= 0x10FFFF; // Two last pages merged
+}
+
+// Human-readable:
+
+bool uc32_srgt(uc32_t c) {
+	return 0xD800 <= c && c <= 0xDFFF;
+}
+
+// Human-readable:
+
+bool uc32_srgt_low(uc32_t c) {
+	return 0xD800 <= c && c <= 0xDBFF;
+}
+
+// Human-readable:
+
+bool uc32_srgt_high(uc32_t c) {
+	return 0xDC00 <= c && c <= 0xDFFF;
 }
 
 // Human-readable:

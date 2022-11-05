@@ -4,10 +4,13 @@
 #include <stdbool.h>
 
 #include "char_t.h"
+#include "endian_t.h"
 
 enum {
-    UMAX_CP    = 0x10FFFF,
-    URADIX_MAX = 36
+    UBOM_LITTLE_ENDIAN = 0xFFFE,
+    UBOM_BIG_ENDIAN    = 0xFEFF,
+    UMAX_CP            = 0x10FFFF,
+    URADIX_MAX         = 36
 };
 
 #define uc32(literal) U##literal
@@ -18,6 +21,8 @@ enum {
 
 // - To uc32_t
 
+bool uc32_from_uc16_e(const uc16_t *from, uendian_t from_endian, uc32_t *to, uendian_t to_endian);
+bool uc32_from_uc8_e(const uc8_t *from, uc32_t *to, uendian_t to_endian);
 bool uc32_from_uc16(const uc16_t *from, uc32_t *to);
 bool uc32_from_uc16be(const uc16_t *from, uc32_t *to);
 bool uc32_from_uc16le(const uc16_t *from, uc32_t *to);
@@ -33,6 +38,8 @@ bool uc32be_from_uc8(const uc8_t *from, uc32_t *to);
 
 // - To uc16_t
 
+int uc16_from_uc32_e(uc32_t from, uendian_t from_endian, uc16_t *to, uendian_t to_endian);
+int uc16_from_uc8_e(const uc8_t *from, uc16_t *to, uendian_t to_endian);
 int uc16_from_uc32(uc32_t from, uc16_t *to);
 int uc16_from_uc32le(uc32_t from, uc16_t *to);
 int uc16_from_uc32be(uc32_t from, uc16_t *to);
@@ -48,6 +55,8 @@ int uc16be_from_uc8(const uc8_t *from, uc16_t *to);
 
 // - To uc8_t
 
+int uc8_from_uc32_e(uc32_t from, uendian_t from_endian, uc8_t *to);
+int uc8_from_uc16_e(const uc16_t *from, uendian_t from_endian, uc8_t *to);
 int uc8_from_uc32(uc32_t from, uc8_t *to);
 int uc8_from_uc32le(uc32_t from, uc8_t *to);
 int uc8_from_uc32be(uc32_t from, uc8_t *to);
@@ -177,6 +186,9 @@ bool uc32_cntrl(uc32_t c);
 bool uc32_space(uc32_t c);
 bool uc32_punct(uc32_t c);
 bool uc32_priv(uc32_t c);
+bool uc32_srgt(uc32_t c);
+bool uc32_srgt_low(uc32_t c);
+bool uc32_srgt_high(uc32_t c);
 
 // Len
 
