@@ -24,48 +24,48 @@ enum {
 
 // - To uc32_t
 
-bool uc32_from_uc16_e(const uc16_t *from, uendian_t from_endian, uc32_t *to, uendian_t to_endian);
-bool uc32_from_uc8_e(const uc8_t *from, uc32_t *to, uendian_t to_endian);
-bool uc32_from_uc16(const uc16_t *from, uc32_t *to);
-bool uc32_from_uc16be(const uc16_t *from, uc32_t *to);
-bool uc32_from_uc16le(const uc16_t *from, uc32_t *to);
-bool uc32_from_uc8(const uc8_t *from, uc32_t *to);
-bool uc32le_from_uc16(const uc16_t *from, uc32_t *to);
-bool uc32le_from_uc16le(const uc16_t *from, uc32_t *to);
-bool uc32le_from_uc16be(const uc16_t *from, uc32_t *to);
-bool uc32le_from_uc8(const uc8_t *from, uc32_t *to);
-bool uc32be_from_uc16(const uc16_t *from, uc32_t *to);
-bool uc32be_from_uc16le(const uc16_t *from, uc32_t *to);
-bool uc32be_from_uc16be(const uc16_t *from, uc32_t *to);
-bool uc32be_from_uc8(const uc8_t *from, uc32_t *to);
+bool uc32_from_uc16_e(uc32_t *to, uendian_t to_endian, const uc16_t *from, uendian_t from_endian);
+bool uc32_from_uc8_e(uc32_t *to, uendian_t to_endian, const uc8_t *from);
+bool uc32_from_uc16(uc32_t *to, const uc16_t *from);
+bool uc32_from_uc16be(uc32_t *to, const uc16_t *from);
+bool uc32_from_uc16le(uc32_t *to, const uc16_t *from);
+bool uc32_from_uc8(uc32_t *to, const uc8_t *from);
+bool uc32le_from_uc16(uc32_t *to, const uc16_t *from);
+bool uc32le_from_uc16le(uc32_t *to, const uc16_t *from);
+bool uc32le_from_uc16be(uc32_t *to, const uc16_t *from);
+bool uc32le_from_uc8(uc32_t *to, const uc8_t *from);
+bool uc32be_from_uc16(uc32_t *to, const uc16_t *from);
+bool uc32be_from_uc16le(uc32_t *to, const uc16_t *from);
+bool uc32be_from_uc16be(uc32_t *to, const uc16_t *from);
+bool uc32be_from_uc8(uc32_t *to, const uc8_t *from);
 
 // - To uc16_t
 
-int uc16_from_uc32_e(uc32_t from, uendian_t from_endian, uc16_t *to, uendian_t to_endian);
-int uc16_from_uc8_e(const uc8_t *from, uc16_t *to, uendian_t to_endian);
-int uc16_from_uc32(uc32_t from, uc16_t *to);
-int uc16_from_uc32le(uc32_t from, uc16_t *to);
-int uc16_from_uc32be(uc32_t from, uc16_t *to);
-int uc16_from_uc8(const uc8_t *from, uc16_t *to);
-int uc16le_from_uc32(uc32_t from, uc16_t *to);
-int uc16le_from_uc32le(uc32_t from, uc16_t *to);
-int uc16le_from_uc32be(uc32_t from, uc16_t *to);
-int uc16le_from_uc8(const uc8_t *from, uc16_t *to);
-int uc16be_from_uc32(uc32_t from, uc16_t *to);
-int uc16be_from_uc32le(uc32_t from, uc16_t *to);
-int uc16be_from_uc32be(uc32_t from, uc16_t *to);
-int uc16be_from_uc8(const uc8_t *from, uc16_t *to);
+int uc16_from_uc32_e(uc16_t *to, uendian_t to_endian, uc32_t from, uendian_t from_endian);
+int uc16_from_uc8_e(uc16_t *to, uendian_t to_endian, const uc8_t *from);
+int uc16_from_uc32(uc16_t *to, uc32_t from);
+int uc16_from_uc32le(uc16_t *to, uc32_t from);
+int uc16_from_uc32be(uc16_t *to, uc32_t from);
+int uc16_from_uc8(uc16_t *to, const uc8_t *from);
+int uc16le_from_uc32(uc16_t *to, uc32_t from);
+int uc16le_from_uc32le(uc16_t *to, uc32_t from);
+int uc16le_from_uc32be(uc16_t *to, uc32_t from);
+int uc16le_from_uc8(uc16_t *to, const uc8_t *from);
+int uc16be_from_uc32(uc16_t *to, uc32_t from);
+int uc16be_from_uc32le(uc16_t *to, uc32_t from);
+int uc16be_from_uc32be(uc16_t *to, uc32_t from);
+int uc16be_from_uc8(uc16_t *to, const uc8_t *from);
 
 // - To uc8_t
 
-int uc8_from_uc32_e(uc32_t from, uendian_t from_endian, uc8_t *to);
-int uc8_from_uc16_e(const uc16_t *from, uendian_t from_endian, uc8_t *to);
-int uc8_from_uc32(uc32_t from, uc8_t *to);
-int uc8_from_uc32le(uc32_t from, uc8_t *to);
-int uc8_from_uc32be(uc32_t from, uc8_t *to);
-int uc8_from_uc16(const uc16_t *from, uc8_t *to);
-int uc8_from_uc16le(const uc16_t *from, uc8_t *to);
-int uc8_from_uc16be(const uc16_t *from, uc8_t *to);
+int uc8_from_uc32_e(uc8_t *to, uc32_t from, uendian_t from_endian);
+int uc8_from_uc16_e(uc8_t *to, const uc16_t *from, uendian_t from_endian);
+int uc8_from_uc32(uc8_t *to, uc32_t from);
+int uc8_from_uc32le(uc8_t *to, uc32_t from);
+int uc8_from_uc32be(uc8_t *to, uc32_t from);
+int uc8_from_uc16(uc8_t *to, const uc16_t *from);
+int uc8_from_uc16le(uc8_t *to, const uc16_t *from);
+int uc8_from_uc16be(uc8_t *to, const uc16_t *from);
 
 // uc8_t Traits
 
