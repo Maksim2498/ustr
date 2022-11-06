@@ -1145,20 +1145,8 @@ bool uc16_srgt_high(uc16_t c) {
 
 // Human-readable:
 
-int uc16_len(const uc16_t *c) {
-	assert(c);
-
-	uc16_t low = c[0];
-
-	if (!uc16_srgt(low))
-		return 1;
-
-	if (uc16_srgt_high(low))
-		return 0;
-
-	uc16_t high = c[1];
-
-	return uc16_srgt_high(high) ? 2 : 0;
+int uc16_len(uc16_t c) {
+	return uc16_srgt_low(c) ? 2 : 1;
 }
 
 // Human-readable:

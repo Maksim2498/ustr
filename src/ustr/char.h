@@ -168,7 +168,7 @@ bool uc16_srgt_high(uc16_t c);
 
 // - Len
 
-int uc16_len(const uc16_t *c);
+int uc16_len(uc16_t c);
 
 // - Valid
 
