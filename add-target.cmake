@@ -3,6 +3,7 @@ add_library(ustr
             src/ustr/all.h
             src/ustr/char_t.h
             src/ustr/char.h       src/ustr/char.c
+            src/ustr/cstr.h       src/ustr/cstr.c
             src/ustr/cview_t.h
             src/ustr/cview.h      src/ustr/cview.c
             src/ustr/encoding_t.h
