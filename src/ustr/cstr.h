@@ -5,6 +5,11 @@
 
 #include "char_t.h"
 
+// Char Len
+
+size_t uz16_char_len(const uc16_t *cstr);
+size_t uz8_char_len(const uc8_t *cstr);
+
 // Len
 
 size_t uz32_len(const uc32_t *cstr);

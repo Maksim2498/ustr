@@ -929,7 +929,7 @@ int uc8_len(uc8_t c) {
 	if ((c & 0xF7) == 0xF0)
 		return 4;
 
-	return 0;
+	return 1;
 }
 
 // Human-readable:

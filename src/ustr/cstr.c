@@ -2,6 +2,35 @@
 
 #include <assert.h>
 
+#include "char.h"
+
+#define USTR_RETURN_CHAR_LEN_(n, cstr) \
+    {                                  \
+        assert(cstr);                  \
+                                       \
+        size_t len = 0;                \
+                                       \
+        for (size_t i = 0;;) {         \
+            uc##n##_t c = cstr[i];     \
+                                       \
+            if (!c)                    \
+                return len;            \
+                                       \
+            i += uc##n##_len(c);       \
+            ++len;                     \
+        }                              \
+                                       \
+        return len;                    \
+    }
+
+size_t uz16_char_len(const uc16_t *cstr) {
+    USTR_RETURN_CHAR_LEN_(16, cstr);
+}
+
+size_t uz8_char_len(const uc8_t *cstr) {
+    USTR_RETURN_CHAR_LEN_(8, cstr);
+}
+
 #define USTR_RETURN_LEN_(cstr) \
     {                          \
         assert(cstr);          \
