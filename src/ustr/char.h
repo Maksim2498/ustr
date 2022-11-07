@@ -118,6 +118,7 @@ bool uc8_trail(uc8_t c);
 // - Len
 
 int uc8_len(uc8_t c);
+int uc8_uc16_len(uc8_t c);
 
 // - Valid
 
@@ -169,6 +170,7 @@ bool uc16_srgt_high(uc16_t c);
 // - Len
 
 int uc16_len(uc16_t c);
+int uc16_uc8_len(uc16_t c);
 
 // - Valid
 

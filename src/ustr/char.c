@@ -934,6 +934,12 @@ int uc8_len(uc8_t c) {
 
 // Human-readable:
 
+int uc8_uc16_len(uc8_t c) {
+	return uc8_len(c) == 4 ? 2 : 1;
+}
+
+// Human-readable:
+
 int uc8_valid(const uc8_t *c) {
 	assert(c);
 
@@ -1147,6 +1153,21 @@ bool uc16_srgt_high(uc16_t c) {
 
 int uc16_len(uc16_t c) {
 	return uc16_srgt_low(c) ? 2 : 1;
+}
+
+// Human-readable:
+
+int uc16_uc8_len(uc16_t c) {
+	if (c <= 0x7F)
+		return 1;
+
+	if (c <= 0x7FF)
+		return 2;
+
+	if (uc16_srgt_low(c))
+		return 3;
+
+	return 4;
 }
 
 // Human-readable:
