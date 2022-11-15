@@ -11,6 +11,7 @@
 #include "encoding.h"
 #include "endian_t.h"
 #include "endian.h"
+#include "io.h"
 #include "mem.h"
 #include "str_t.h"
 #include "str.h"

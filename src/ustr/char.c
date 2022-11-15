@@ -755,12 +755,42 @@ bool uc8_rad(uc8_t c, unsigned radix) {
 
 // Human-readable:
 
+int uc8_to_upper_len(const uc8_t *c) {
+	assert(c);
+
+	uc32_t c32;
+
+	if (!uc32_from_uc8(&c32, c))
+		return 0;
+
+	c32 = uc32_to_upper(c32);
+
+	return uc32_uc8_len(c32);
+}
+
+// Human-readable:
+
+int uc8_to_lower_len(const uc8_t *c) {
+	assert(c);
+
+	uc32_t c32;
+
+	if (!uc32_from_uc8(&c32, c))
+		return 0;
+
+	c32 = uc32_to_lower(c32);
+
+	return uc32_uc8_len(c32);
+}
+
+// Human-readable:
+
 int uc8_to_upper(uc8_t *c) {
 	assert(c);
 
 	uc32_t c32;
 
-	if (uc32_from_uc8(&c32, c))
+	if (!uc32_from_uc8(&c32, c))
 		return 0;
 
 	c32 = uc32_to_upper(c32);
@@ -775,7 +805,7 @@ int uc8_to_lower(uc8_t *c) {
 
 	uc32_t c32;
 
-	if (uc32_from_uc8(&c32, c))
+	if (!uc32_from_uc8(&c32, c))
 		return 0;
 
 	c32 = uc32_to_lower(c32);
@@ -1015,12 +1045,42 @@ bool uc16_rad(uc16_t c, unsigned radix) {
 
 // Human-readable:
 
+int uc16_to_upper_len(const uc16_t *c) {
+	assert(c);
+
+	uc32_t c32;
+
+	if (!uc32_from_uc16(&c32, c))
+		return 0;
+
+	c32 = uc32_to_upper(c32);
+
+	return uc32_uc16_len(c32);
+}
+
+// Human-readable:
+
+int uc16_to_lower_len(const uc16_t *c) {
+	assert(c);
+
+	uc32_t c32;
+
+	if (!uc32_from_uc16(&c32, c))
+		return 0;
+
+	c32 = uc32_to_lower(c32);
+
+	return uc32_uc16_len(c32);
+}
+
+// Human-readable:
+
 int uc16_to_upper(uc16_t *c) {
 	assert(c);
 
 	uc32_t c32;
 
-	if (uc32_from_uc16(&c32, c))
+	if (!uc32_from_uc16(&c32, c))
 		return 0;
 
 	c32 = uc32_to_upper(c32);
@@ -1035,7 +1095,7 @@ int uc16_to_lower(uc16_t *c) {
 
 	uc32_t c32;
 
-	if (uc32_from_uc16(&c32, c))
+	if (!uc32_from_uc16(&c32, c))
 		return 0;
 
 	c32 = uc32_to_lower(c32);

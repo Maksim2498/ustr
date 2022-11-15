@@ -87,6 +87,9 @@ bool uc8_rad(uc8_t c, unsigned radix);
 
 // - Case chage
 
+int uc8_to_upper_len(const uc8_t *c);
+int uc8_to_lower_len(const uc8_t *c);
+
 int uc8_to_upper(uc8_t *c);
 int uc8_to_lower(uc8_t *c);
 
@@ -143,6 +146,9 @@ bool uc16_bin(uc16_t c);
 bool uc16_rad(uc16_t c, unsigned radix);
 
 // - Case chage
+
+int uc16_to_upper_len(const uc16_t *c);
+int uc16_to_lower_len(const uc16_t *c);
 
 int uc16_to_upper(uc16_t *c);
 int uc16_to_lower(uc16_t *c);
