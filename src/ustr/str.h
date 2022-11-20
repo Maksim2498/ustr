@@ -181,6 +181,15 @@ size_t us32_raise_e(us32_t *str, bool *error);
 size_t us32_raise_to(us32_t *str, size_t to);
 size_t us32_raise_to_e(us32_t *str, size_t to, bool *error);
 
+// Split
+
+size_t us32_new_csplit(const us32_t *str, uc32_t c, ucv32_t **array);
+size_t us32_new_csplit_e(const us32_t *str, uc32_t c, ucv32_t **array, bool *error);
+size_t us32_csplit(const us32_t *str, uc32_t c, ucv32_t *array, size_t array_len);
+size_t us32_new_split(us32_t *str, uc32_t c, uv32_t **array);
+size_t us32_new_split_e(us32_t *str, uc32_t c, uv32_t **array, bool *error);
+size_t us32_split(us32_t *str, uc32_t c, uv32_t *array, size_t array_len);
+
 // Valid
 
 bool us32_valid(const us32_t *str);

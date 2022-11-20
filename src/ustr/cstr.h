@@ -1,9 +1,12 @@
 #ifndef USTR_CSTR_H
 #define USTR_CSTR_H
 
+#include <stdbool.h>
 #include <stddef.h>
 
 #include "char_t.h"
+#include "cview_t.h"
+#include "view_t.h"
 
 // Creation
 
@@ -203,5 +206,21 @@ void uz16_n_reverse(uc16_t *cstr, size_t n);
 
 void uz8_reverse(uc8_t *cstr);
 void uz8_n_reverse(uc8_t *cstr, size_t n);
+
+// Split
+
+size_t uz32_new_csplit(const uc32_t *cstr, uc32_t c, ucv32_t **array);
+size_t uz32_new_csplit_e(const uc32_t *cstr, uc32_t c, ucv32_t **array, bool *error);
+size_t uz32_n_new_csplit(const uc32_t *cstr, size_t n, uc32_t c, ucv32_t **array);
+size_t uz32_n_new_csplit_e(const uc32_t *cstr, size_t n, uc32_t c, ucv32_t **array, bool *error);
+size_t uz32_csplit(const uc32_t *cstr, uc32_t c, ucv32_t *array, size_t array_len);
+size_t uz32_n_csplit(const uc32_t *cstr, size_t n, uc32_t c, ucv32_t *array, size_t array_len);
+
+size_t uz32_new_split(uc32_t *cstr, uc32_t c, uv32_t **array);
+size_t uz32_new_split_e(uc32_t *cstr, uc32_t c, uv32_t **array, bool *error);
+size_t uz32_n_new_split(uc32_t *cstr, size_t n, uc32_t c, uv32_t **array);
+size_t uz32_n_new_split_e(uc32_t *cstr, size_t n, uc32_t c, uv32_t **array, bool *error);
+size_t uz32_split(uc32_t *cstr, uc32_t c, uv32_t *array, size_t array_len);
+size_t uz32_n_split(uc32_t *cstr, size_t n, uc32_t c, uv32_t *array, size_t array_len);
 
 #endif

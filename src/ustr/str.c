@@ -751,6 +751,36 @@ size_t us32_raise_to_e(us32_t *str, size_t to, bool *error) {
 	return str->cap;
 }
 
+size_t us32_new_csplit(const us32_t *str, uc32_t c, ucv32_t **array) {
+	assert(us32_valid(str));
+	return uz32_n_new_csplit(str->chars, str->len, c, array);
+}
+
+size_t us32_new_csplit_e(const us32_t *str, uc32_t c, ucv32_t **array, bool *error) {
+	assert(us32_valid(str));
+	return uz32_n_new_csplit_e(str->chars, str->len, c, array, error);
+}
+
+size_t us32_csplit(const us32_t *str, uc32_t c, ucv32_t *array, size_t array_len) {
+	assert(us32_valid(str));
+	return uz32_n_csplit(str->chars, str->len, c, array, array_len);
+}
+
+size_t us32_new_split(us32_t *str, uc32_t c, uv32_t **array) {
+	assert(us32_valid(str));
+	return uz32_n_new_split(str->chars, str->len, c, array);
+}
+
+size_t us32_new_split_e(us32_t *str, uc32_t c, uv32_t **array, bool *error) {
+	assert(us32_valid(str));
+	return uz32_n_new_split_e(str->chars, str->len, c, array, error);
+}
+
+size_t us32_split(us32_t *str, uc32_t c, uv32_t *array, size_t array_len) {
+	assert(us32_valid(str));
+	return uz32_n_split(str->chars, str->len, c, array, array_len);
+}
+
 bool us32_valid(const us32_t *str) {
 	return str
 		&& (bool) str->chars == (bool) str->cap

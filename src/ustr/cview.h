@@ -89,6 +89,12 @@ bool ucv32_ebounds(ucv32_t view, size_t index);
 size_t ucv32_len(ucv32_t view);
 bool ucv32_empty(ucv32_t view);
 
+// Split
+
+size_t ucv32_new_csplit(ucv32_t view, uc32_t c, ucv32_t **array);
+size_t ucv32_new_csplit_e(ucv32_t view, uc32_t c, ucv32_t **array, bool *error);
+size_t ucv32_csplit(ucv32_t view, uc32_t c, ucv32_t *array, size_t array_len);
+
 // Valid
 
 bool ucv32_valid(ucv32_t view);

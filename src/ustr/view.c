@@ -443,6 +443,37 @@ bool uv32_empty(uv32_t view) {
     return !view.len;
 }
 
+size_t uv32_new_csplit(uv32_t view, uc32_t c, ucv32_t **array) {
+    assert(uv32_valid(view));
+    return uz32_n_new_csplit(view.chars, view.len, c, array);
+}
+
+size_t uv32_new_csplit_e(uv32_t view, uc32_t c, ucv32_t **array, bool *error) {
+    assert(uv32_valid(view));
+    return uz32_n_new_csplit_e(view.chars, view.len, c, array, error);
+}
+
+size_t uv32_csplit(uv32_t view, uc32_t c, ucv32_t *array, size_t array_len) {
+    assert(uv32_valid(view));
+    return uz32_n_csplit(view.chars, view.len, c, array, array_len);
+}
+
+size_t uv32_new_split(uv32_t view, uc32_t c, uv32_t **array) {
+    assert(uv32_valid(view));
+    return uz32_n_new_split(view.chars, view.len, c, array);
+}
+
+size_t uv32_new_split_e(uv32_t view, uc32_t c, uv32_t **array, bool *error) {
+    assert(uv32_valid(view));
+    return uz32_n_new_split_e(view.chars, view.len, c, array, error);
+}
+
+size_t uv32_split(uv32_t view, uc32_t c, uv32_t *array, size_t array_len) {
+    assert(uv32_valid(view));
+    return uz32_n_split(view.chars, view.len, c, array, array_len);
+}
+
 bool uv32_valid(uv32_t view) {
-    return !view.chars || view.len;
+    return  view.chars
+        || !view.chars && !view.len;
 }

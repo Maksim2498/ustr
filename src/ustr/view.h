@@ -130,6 +130,15 @@ bool uv32_ebounds(uv32_t view, size_t index);
 size_t uv32_len(uv32_t view);
 bool uv32_empty(uv32_t view);
 
+// Split
+
+size_t uv32_new_csplit(uv32_t view, uc32_t c, ucv32_t **array);
+size_t uv32_new_csplit_e(uv32_t view, uc32_t c, ucv32_t **array, bool *error);
+size_t uv32_csplit(uv32_t view, uc32_t c, ucv32_t *array, size_t array_len);
+size_t uv32_new_split(uv32_t view, uc32_t c, uv32_t **array);
+size_t uv32_new_split_e(uv32_t view, uc32_t c, uv32_t **array, bool *error);
+size_t uv32_split(uv32_t view, uc32_t c, uv32_t *array, size_t array_len);
+
 // Valid
 
 bool uv32_valid(uv32_t view);

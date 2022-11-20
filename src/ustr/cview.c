@@ -274,6 +274,22 @@ bool ucv32_empty(ucv32_t view) {
     return !view.len;
 }
 
+size_t ucv32_new_csplit(ucv32_t view, uc32_t c, ucv32_t **array) {
+    assert(ucv32_valid(view));
+    return uz32_n_new_csplit(view.chars, view.len, c, array);
+}
+
+size_t ucv32_new_csplit_e(ucv32_t view, uc32_t c, ucv32_t **array, bool *error) {
+    assert(ucv32_valid(view));
+    return uz32_n_new_csplit_e(view.chars, view.len, c, array, error);
+}
+
+size_t ucv32_csplit(ucv32_t view, uc32_t c, ucv32_t *array, size_t array_len) {
+    assert(ucv32_valid(view));
+    return uz32_n_csplit(view.chars, view.len, c, array, array_len);
+}
+
 bool ucv32_valid(ucv32_t view) {
-    return !view.chars || view.len;
+    return  view.chars
+        || !view.chars && !view.len;
 }
