@@ -17,12 +17,17 @@
         .len   = sizeof(U##literal) / sizeof(uc32_t) \
     }
 
+ucv32_t ucv32_mk(void);
 ucv32_t ucv32_from_us32(const us32_t *str);
 ucv32_t ucv32_from_us32_range(const us32_t *str, size_t from, size_t len);
 ucv32_t ucv32_from_uv32(uv32_t view);
 ucv32_t ucv32_from_uv32_range(uv32_t view, size_t from, size_t len);
 ucv32_t ucv32_from_uz32(const uc32_t *cstr);
 ucv32_t ucv32_from_uz32_n(const uc32_t *cstr, size_t n);
+
+// Trim
+
+size_t ucv32_trim_right(ucv32_t *view);
 
 // Char
 
@@ -80,6 +85,7 @@ const uc32_t *ucv32_cat(ucv32_t view, size_t index);
 // Len
 
 bool ucv32_bounds(ucv32_t view, size_t index);
+bool ucv32_ebounds(ucv32_t view, size_t index);
 size_t ucv32_len(ucv32_t view);
 bool ucv32_empty(ucv32_t view);
 

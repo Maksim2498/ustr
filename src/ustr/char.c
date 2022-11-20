@@ -887,6 +887,14 @@ bool uc8_space(const uc8_t *c) {
 
 // Human-readable:
 
+bool uc8_wspace(const uc8_t *c) {
+	assert(c);
+	uc32_t c32;
+	return uc32_from_uc8(&c32, c) && uc32_wspace(c32);
+}
+
+// Human-readable:
+
 bool uc8_punct(const uc8_t *c) {
 	assert(c);
 	uc32_t c32;
@@ -1173,6 +1181,14 @@ bool uc16_space(const uc16_t *c) {
 	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(&c32, c) && uc32_space(c32);
+}
+
+// Human-readable:
+
+bool uc16_wspace(const uc16_t *c) {
+	assert(c);
+	uc32_t c32;
+	return uc32_from_uc16(&c32, c) && uc32_wspace(c32);
 }
 
 // Human-readable:
@@ -33327,6 +33343,40 @@ bool uc32_space(uc32_t c) {
         default:
             return false;
     }
+}
+
+bool uc32_wspace(uc32_t c) {
+	switch (c) {
+		 case 0x0009:
+		 case 0x000A:
+		 case 0x000B:
+		 case 0x000C:
+		 case 0x000D:
+		 case 0x0020:
+		 case 0x0085:
+		 case 0x00A0:
+		 case 0x1680:
+		 case 0x2000:
+		 case 0x2001:
+		 case 0x2002:
+		 case 0x2003:
+		 case 0x2004:
+		 case 0x2005:
+		 case 0x2007:
+		 case 0x2008:
+		 case 0x2009:
+		 case 0x200A:
+		 case 0x2028:
+		 case 0x2029:
+		 case 0x202F:
+		 case 0x205F:
+		 case 0x3000:
+
+			return true;
+
+		default:
+			return false;
+	}
 }
 
 bool uc32_punct(uc32_t c) {
