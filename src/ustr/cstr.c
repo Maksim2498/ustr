@@ -1266,3 +1266,138 @@ size_t uz32_n_split(uc32_t *cstr, size_t n, uc32_t c, uv32_t *array, size_t arra
 
 	return count;
 }
+
+size_t uz32_new_csplit_uz32(const uc32_t *cstr, const uc32_t *another, ucv32_t **array) {
+    return uz32_new_split_uz32((uc32_t *) cstr, another, (uv32_t **) array);
+}
+
+size_t uz32_new_csplit_uz32_e(const uc32_t *cstr, const uc32_t *another, ucv32_t **array, bool *error) {
+    return uz32_new_split_uz32_e((uc32_t *) cstr, another, (uv32_t **) array, error);
+}
+
+size_t uz32_n_new_csplit_uz32(const uc32_t *cstr, size_t n, const uc32_t *another, ucv32_t **array) {
+    return uz32_n_new_split_uz32((uc32_t *) cstr, n, another, (uv32_t **) array);
+}
+
+size_t uz32_n_new_csplit_uz32_e(const uc32_t *cstr, size_t n, const uc32_t *another, ucv32_t **array, bool *error) {
+    return uz32_n_new_split_uz32_e((uc32_t *) cstr, n, another, (uv32_t **) array, error);
+}
+
+size_t uz32_csplit_uz32(const uc32_t *cstr, const uc32_t *another, ucv32_t *array, size_t array_len) {
+    return uz32_split_uz32((uc32_t *) cstr, another, (uv32_t *) array, array_len);
+}
+
+size_t uz32_n_csplit_uz32(const uc32_t *cstr, size_t n, const uc32_t *another, ucv32_t *array, size_t array_len) {
+    return uz32_n_split_uz32((uc32_t *) cstr, n, another, (uv32_t *) array, array_len);
+}
+
+size_t uz32_new_split_uz32(uc32_t *cstr, const uc32_t *another, uv32_t **array) {
+    return uz32_new_split_uz32_e(cstr, another, array, NULL);
+}
+
+size_t uz32_new_split_uz32_e(uc32_t *cstr, const uc32_t *another, uv32_t **array, bool *error) {
+    return uz32_n_new_split_uz32_e(cstr, uz32_len(cstr), another, array, error);
+}
+
+size_t uz32_n_new_split_uz32(uc32_t *cstr, size_t n, const uc32_t *another, uv32_t **array) {
+    return uz32_n_new_split_uz32_e(cstr, n, another, array, NULL);
+}
+
+size_t uz32_n_new_split_uz32_e(uc32_t *cstr, size_t n, const uc32_t *another, uv32_t **array, bool *error) {
+    return uz32_n_new_split_uz32_n_e(cstr, n, another, uz32_len(another), array, error);
+}
+
+size_t uz32_split_uz32(uc32_t *cstr, const uc32_t *another, uv32_t *array, size_t array_len) {
+    return uz32_n_split_uz32(cstr, uz32_len(cstr), another, array, array_len);
+}
+
+size_t uz32_n_split_uz32(uc32_t *cstr, size_t n, const uc32_t *another, uv32_t *array, size_t array_len) {
+    return uz32_n_split_uz32_n(cstr, n, another, uz32_len(another), array, array_len);
+}
+
+size_t uz32_new_csplit_uz32_n(const uc32_t *cstr, const uc32_t *another, size_t n, ucv32_t **array) {
+    return uz32_new_split_uz32_n((uc32_t *) cstr, another, n, (uv32_t **) array);
+}
+
+size_t uz32_new_csplit_uz32_n_e(const uc32_t *cstr, const uc32_t *another, size_t n, ucv32_t **array, bool *error) {
+    return uz32_new_split_uz32_n_e((uc32_t *) cstr, another, n, (uv32_t **) array, error);
+}
+
+size_t uz32_n_new_csplit_uz32_n(const uc32_t *cstr, size_t cstr_len, const uc32_t *another, size_t another_len, ucv32_t **array) {
+    return uz32_n_new_split_uz32_n((uc32_t *) cstr, cstr_len, another, another_len, (uv32_t **) array);
+}
+
+size_t uz32_n_new_csplit_uz32_n_e(const uc32_t *cstr, size_t cstr_len, const uc32_t *another, size_t another_len, ucv32_t **array, bool *error) {
+    return uz32_n_new_split_uz32_n_e((uc32_t *) cstr, cstr_len, another, another_len, (uv32_t **) array, error);
+}
+
+size_t uz32_csplit_uz32_n(const uc32_t *cstr, const uc32_t *another, size_t n, ucv32_t *array, size_t array_len) {
+    return uz32_split_uz32_n((uc32_t *) cstr, another, n, (uv32_t *) array, array_len);
+}
+
+size_t uz32_n_csplit_uz32_n(const uc32_t *cstr, size_t cstr_len, const uc32_t *another, size_t another_len, ucv32_t *array, size_t array_len) {
+    return uz32_n_split_uz32_n((uc32_t *) cstr, cstr_len, another, array_len, (uv32_t *) array, array_len);
+}
+
+size_t uz32_new_split_uz32_n(uc32_t *cstr, const uc32_t *another, size_t n, uv32_t **array) {
+    return uz32_new_split_uz32_n_e(cstr, another, n, array, NULL);
+}
+
+size_t uz32_new_split_uz32_n_e(uc32_t *cstr, const uc32_t *another, size_t n, uv32_t **array, bool *error) {
+    return uz32_n_new_split_uz32_n_e(cstr, uz32_len(cstr), another, n, array, error);
+}
+
+size_t uz32_n_new_split_uz32_n(uc32_t *cstr, size_t cstr_len, const uc32_t *another, size_t another_len, uv32_t **array) {
+    return uz32_n_new_split_uz32_n_e(cstr, cstr_len, another, another_len, array, NULL);
+}
+
+size_t uz32_n_new_split_uz32_n_e(uc32_t *cstr, size_t cstr_len, const uc32_t *another, size_t another_len, uv32_t **array, bool *error) {
+    assert(cstr && another);
+
+    size_t array_len = uz32_n_split_uz32_n(cstr, cstr_len, another, another_len, NULL, 0);
+
+    if (!array)
+        return array_len;
+
+    uv32_t *new_array = ualloc(sizeof(uv32_t) * array_len);
+
+    if (!new_array) {
+        if (error)
+            *error = true;
+    
+        return array_len;
+    }
+
+    *array = new_array;
+
+    return uz32_n_split_uz32_n(cstr, cstr_len, another, another_len, new_array, array_len);
+}
+
+size_t uz32_split_uz32_n(uc32_t *cstr, const uc32_t *another, size_t n, uv32_t *array, size_t array_len) {
+    return uz32_n_split_uz32_n(cstr, uz32_len(cstr), another, n, array, array_len);
+}
+
+size_t uz32_n_split_uz32_n(uc32_t *cstr, size_t cstr_len, const uc32_t *another, size_t another_len, uv32_t *array, size_t array_len) {
+    assert(cstr && another);
+
+    if (another_len > cstr_len)
+        return 0;
+
+    size_t count = 0;
+
+    for (ptrdiff_t prev_pos = 0; prev_pos >= 0; ++count) {
+        uc32_t   *begin   = cstr + prev_pos;
+        size_t    len     = cstr_len - prev_pos;
+        ptrdiff_t rel_pos = uz32_n_pos_n(begin, len, another, another_len);
+        ptrdiff_t pos     = rel_pos;
+
+        if (array && count < array_len) {
+            size_t view_len = pos < 0 ? len : rel_pos;
+            array[count] = uv32_from_uz32_n(begin, view_len);
+        }
+
+        prev_pos = pos >= 0 ? pos + prev_pos + another_len : pos;
+    }
+
+	return count;
+}

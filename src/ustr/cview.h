@@ -9,6 +9,10 @@
 #include "str_t.h"
 #include "view_t.h"
 
+// Expand
+
+#define UCV32_CEXPAND(view) ucv32_cchars(view), (view).len
+
 // Creation
 
 #define ucv32(literal)                               \
@@ -94,6 +98,30 @@ bool ucv32_empty(ucv32_t view);
 size_t ucv32_new_csplit(ucv32_t view, uc32_t c, ucv32_t **array);
 size_t ucv32_new_csplit_e(ucv32_t view, uc32_t c, ucv32_t **array, bool *error);
 size_t ucv32_csplit(ucv32_t view, uc32_t c, ucv32_t *array, size_t array_len);
+
+size_t ucv32_new_csplit_uz32(ucv32_t view, const uc32_t *cstr, ucv32_t **array);
+size_t ucv32_new_csplit_uz32_e(ucv32_t view, const uc32_t *cstr, ucv32_t **array, bool *error);
+size_t ucv32_csplit_uz32(ucv32_t view, const uc32_t *cstr, ucv32_t *array, size_t array_len);
+
+size_t ucv32_new_csplit_uz32_n(ucv32_t view, const uc32_t *cstr, size_t n, ucv32_t **array);
+size_t ucv32_new_csplit_uz32_n_e(ucv32_t view, const uc32_t *cstr, size_t n, ucv32_t **array, bool *error);
+size_t ucv32_csplit_uz32_n(ucv32_t view, const uc32_t *cstr, size_t n, ucv32_t *array, size_t array_len);
+
+size_t ucv32_new_csplit_ucv32(ucv32_t view, ucv32_t another, ucv32_t **array);
+size_t ucv32_new_csplit_ucv32_e(ucv32_t view, ucv32_t another, ucv32_t **array, bool *error);
+size_t ucv32_csplit_ucv32(ucv32_t view, ucv32_t another, ucv32_t *array, size_t array_len);
+
+size_t ucv32_new_csplit_us32(ucv32_t view, const us32_t *str, ucv32_t **array);
+size_t ucv32_new_csplit_us32_e(ucv32_t view, const us32_t *str, ucv32_t **array, bool *error);
+size_t ucv32_csplit_us32(ucv32_t view, const us32_t *str, ucv32_t *array, size_t array_len);
+
+size_t ucv32_new_csplit_uv32(ucv32_t view, uv32_t another, ucv32_t **array);
+size_t ucv32_new_csplit_uv32_e(ucv32_t view, uv32_t another, ucv32_t **array, bool *error);
+size_t ucv32_csplit_uv32(ucv32_t view, uv32_t another, ucv32_t *array, size_t array_len);
+
+// Chars
+
+const uc32_t *ucv32_cchars(ucv32_t view);
 
 // Valid
 

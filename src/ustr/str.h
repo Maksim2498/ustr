@@ -9,6 +9,11 @@
 #include "str_t.h"
 #include "view_t.h"
 
+// Expand
+
+#define US32_EXPAND(str)  us32_chars(str),  (str)->len
+#define US32_CEXPAND(str) us32_cchars(str), (str)->len
+
 // Creation
 
 #define us32(literal) us32_from_uz32_n(U##literal, sizeof(U""literal) / 4)
@@ -116,30 +121,30 @@ ptrdiff_t us32_ucv32_pos_from_r(const us32_t *str, ucv32_t view, size_t from);
 
 // Fill
 
-void us32_fill(const us32_t *str, uc32_t c);
-void us32_fill_from(const us32_t *str, uc32_t c, size_t from);
-void us32_fill_to(const us32_t *str, uc32_t c, size_t to);
-void us32_fill_range(const us32_t *str, uc32_t c, size_t from, size_t len);
-void us32_fill_uz32(const us32_t *str, const uc32_t *cstr);
-void us32_fill_uz32_from(const us32_t *str, const uc32_t *cstr, size_t from);
-void us32_fill_uz32_to(const us32_t *str, const uc32_t *cstr, size_t to);
-void us32_fill_uz32_range(const us32_t *str, const uc32_t *cstr, size_t from, size_t len);
-void us32_fill_uz32_n(const us32_t *str, const uc32_t *cstr, size_t n);
-void us32_fill_uz32_n_from(const us32_t *str, const uc32_t *cstr, size_t n, size_t from);
-void us32_fill_uz32_n_to(const us32_t *str, const uc32_t *cstr, size_t n, size_t to);
-void us32_fill_uz32_n_range(const us32_t *str, const uc32_t *cstr, size_t n, size_t from, size_t len);
-void us32_fill_uv32(const us32_t *str, uv32_t view);
-void us32_fill_uv32_from(const us32_t *str, uv32_t view, size_t from);
-void us32_fill_uv32_to(const us32_t *str, uv32_t view, size_t to);
-void us32_fill_uv32_range(const us32_t *str, uv32_t view, size_t from, size_t len);
-void us32_fill_ucv32(const us32_t *str, ucv32_t view);
-void us32_fill_ucv32_from(const us32_t *str, ucv32_t view, size_t from);
-void us32_fill_ucv32_to(const us32_t *str, ucv32_t view, size_t to);
-void us32_fill_ucv32_range(const us32_t *str, ucv32_t view, size_t from, size_t len);
-void us32_fill_us32(const us32_t *str, const us32_t *another);
-void us32_fill_us32_from(const us32_t *str, const us32_t *another, size_t from);
-void us32_fill_us32_to(const us32_t *str, const us32_t *another, size_t to);
-void us32_fill_us32_range(const us32_t *str, const us32_t *another, size_t from, size_t len);
+void us32_fill(us32_t *str, uc32_t c);
+void us32_fill_from(us32_t *str, uc32_t c, size_t from);
+void us32_fill_to(us32_t *str, uc32_t c, size_t to);
+void us32_fill_range(us32_t *str, uc32_t c, size_t from, size_t len);
+void us32_fill_uz32(us32_t *str, const uc32_t *cstr);
+void us32_fill_uz32_from(us32_t *str, const uc32_t *cstr, size_t from);
+void us32_fill_uz32_to(us32_t *str, const uc32_t *cstr, size_t to);
+void us32_fill_uz32_range(us32_t *str, const uc32_t *cstr, size_t from, size_t len);
+void us32_fill_uz32_n(us32_t *str, const uc32_t *cstr, size_t n);
+void us32_fill_uz32_n_from(us32_t *str, const uc32_t *cstr, size_t n, size_t from);
+void us32_fill_uz32_n_to(us32_t *str, const uc32_t *cstr, size_t n, size_t to);
+void us32_fill_uz32_n_range(us32_t *str, const uc32_t *cstr, size_t n, size_t from, size_t len);
+void us32_fill_uv32(us32_t *str, uv32_t view);
+void us32_fill_uv32_from(us32_t *str, uv32_t view, size_t from);
+void us32_fill_uv32_to(us32_t *str, uv32_t view, size_t to);
+void us32_fill_uv32_range(us32_t *str, uv32_t view, size_t from, size_t len);
+void us32_fill_ucv32(us32_t *str, ucv32_t view);
+void us32_fill_ucv32_from(us32_t *str, ucv32_t view, size_t from);
+void us32_fill_ucv32_to(us32_t *str, ucv32_t view, size_t to);
+void us32_fill_ucv32_range(us32_t *str, ucv32_t view, size_t from, size_t len);
+void us32_fill_us32(us32_t *str, const us32_t *another);
+void us32_fill_us32_from(us32_t *str, const us32_t *another, size_t from);
+void us32_fill_us32_to(us32_t *str, const us32_t *another, size_t to);
+void us32_fill_us32_range(us32_t *str, const us32_t *another, size_t from, size_t len);
 
 // Case Change
 
@@ -189,6 +194,46 @@ size_t us32_csplit(const us32_t *str, uc32_t c, ucv32_t *array, size_t array_len
 size_t us32_new_split(us32_t *str, uc32_t c, uv32_t **array);
 size_t us32_new_split_e(us32_t *str, uc32_t c, uv32_t **array, bool *error);
 size_t us32_split(us32_t *str, uc32_t c, uv32_t *array, size_t array_len);
+
+size_t us32_new_csplit_uz32(const us32_t *str, const uc32_t *cstr, ucv32_t **array);
+size_t us32_new_csplit_uz32_e(const us32_t *str, const uc32_t *cstr, ucv32_t **array, bool *error);
+size_t us32_csplit_uz32(const us32_t *str, const uc32_t *cstr, ucv32_t *array, size_t array_len);
+size_t us32_new_split_uz32(us32_t *str, const uc32_t *cstr, uv32_t **array);
+size_t us32_new_split_uz32_e(us32_t *str, const uc32_t *cstr, uv32_t **array, bool *error);
+size_t us32_split_uz32(us32_t *str, const uc32_t *cstr, uv32_t *array, size_t array_len);
+
+size_t us32_new_csplit_uz32_n(const us32_t *str, const uc32_t *cstr, size_t n, ucv32_t **array);
+size_t us32_new_csplit_uz32_n_e(const us32_t *str, const uc32_t *cstr, size_t n, ucv32_t **array, bool *error);
+size_t us32_csplit_uz32_n(const us32_t *str, const uc32_t *cstr, size_t n, ucv32_t *array, size_t array_len);
+size_t us32_new_split_uz32_n(us32_t *str, const uc32_t *cstr, size_t n, uv32_t **array);
+size_t us32_new_split_uz32_n_e(us32_t *str, const uc32_t *cstr, size_t n, uv32_t **array, bool *error);
+size_t us32_split_uz32_n(us32_t *str, const uc32_t *cstr, size_t n, uv32_t *array, size_t array_len);
+
+size_t us32_new_csplit_us32(const us32_t *str, const us32_t *another, ucv32_t **array);
+size_t us32_new_csplit_us32_e(const us32_t *str, const us32_t *another, ucv32_t **array, bool *error);
+size_t us32_csplit_us32(const us32_t *str, const us32_t *another, ucv32_t *array, size_t array_len);
+size_t us32_new_split_us32(us32_t *str, const us32_t *another, uv32_t **array);
+size_t us32_new_split_us32_e(us32_t *str, const us32_t *another, uv32_t **array, bool *error);
+size_t us32_split_us32(us32_t *str, const us32_t *another, uv32_t *array, size_t array_len);
+
+size_t us32_new_csplit_uv32(const us32_t *str, uv32_t view, ucv32_t **array);
+size_t us32_new_csplit_uv32_e(const us32_t *str, uv32_t view, ucv32_t **array, bool *error);
+size_t us32_csplit_uv32(const us32_t *str, uv32_t view, ucv32_t *array, size_t array_len);
+size_t us32_new_split_uv32(us32_t *str, uv32_t view, uv32_t **array);
+size_t us32_new_split_uv32_e(us32_t *str, uv32_t view, uv32_t **array, bool *error);
+size_t us32_split_uv32(us32_t *str, uv32_t view, uv32_t *array, size_t array_len);
+
+size_t us32_new_csplit_ucv32(const us32_t *str, ucv32_t view, ucv32_t **array);
+size_t us32_new_csplit_ucv32_e(const us32_t *str, ucv32_t view, ucv32_t **array, bool *error);
+size_t us32_csplit_ucv32(const us32_t *str, ucv32_t view, ucv32_t *array, size_t array_len);
+size_t us32_new_split_ucv32(us32_t *str, ucv32_t view, uv32_t **array);
+size_t us32_new_split_ucv32_e(us32_t *str, ucv32_t view, uv32_t **array, bool *error);
+size_t us32_split_ucv32(us32_t *str, ucv32_t view, uv32_t *array, size_t array_len);
+
+// Chars
+
+const uc32_t *us32_cchars(const us32_t *str);
+uc32_t *us32_chars(us32_t *str);
 
 // Valid
 

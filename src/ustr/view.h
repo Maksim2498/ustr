@@ -9,6 +9,11 @@
 #include "str_t.h"
 #include "view_t.h"
 
+// Expand
+
+#define UV32_EXPAND(view)  uv32_chars(view),  (view).len
+#define UV32_CEXPAND(view) uv32_cchars(view), (view).len
+
 // Creation
 
 #define uv32(literal)                                \
@@ -138,6 +143,46 @@ size_t uv32_csplit(uv32_t view, uc32_t c, ucv32_t *array, size_t array_len);
 size_t uv32_new_split(uv32_t view, uc32_t c, uv32_t **array);
 size_t uv32_new_split_e(uv32_t view, uc32_t c, uv32_t **array, bool *error);
 size_t uv32_split(uv32_t view, uc32_t c, uv32_t *array, size_t array_len);
+
+size_t uv32_new_csplit_uz32(uv32_t view, const uc32_t *cstr, ucv32_t **array);
+size_t uv32_new_csplit_uz32_e(uv32_t view, const uc32_t *cstr, ucv32_t **array, bool *error);
+size_t uv32_csplit_uz32(uv32_t view, const uc32_t *cstr, ucv32_t *array, size_t array_len);
+size_t uv32_new_split_uz32(uv32_t view, const uc32_t *cstr, uv32_t **array);
+size_t uv32_new_split_uz32_e(uv32_t view, const uc32_t *cstr, uv32_t **array, bool *error);
+size_t uv32_split_uz32(uv32_t view, const uc32_t *cstr, uv32_t *array, size_t array_len);
+
+size_t uv32_new_csplit_uz32_n(uv32_t view, const uc32_t *cstr, size_t n, ucv32_t **array);
+size_t uv32_new_csplit_uz32_n_e(uv32_t view, const uc32_t *cstr, size_t n, ucv32_t **array, bool *error);
+size_t uv32_csplit_uz32_n(uv32_t view, const uc32_t *cstr, size_t n, ucv32_t *array, size_t array_len);
+size_t uv32_new_split_uz32_n(uv32_t view, const uc32_t *cstr, size_t n, uv32_t **array);
+size_t uv32_new_split_uz32_n_e(uv32_t view, const uc32_t *cstr, size_t n, uv32_t **array, bool *error);
+size_t uv32_split_uz32_n(uv32_t view, const uc32_t *cstr, size_t n, uv32_t *array, size_t array_len);
+
+size_t uv32_new_csplit_ucv32(uv32_t view, ucv32_t another, ucv32_t **array);
+size_t uv32_new_csplit_ucv32_e(uv32_t view, ucv32_t another, ucv32_t **array, bool *error);
+size_t uv32_csplit_ucv32(uv32_t view, ucv32_t another, ucv32_t *array, size_t array_len);
+size_t uv32_new_split_ucv32(uv32_t view, ucv32_t another, uv32_t **array);
+size_t uv32_new_split_ucv32_e(uv32_t view, ucv32_t another, uv32_t **array, bool *error);
+size_t uv32_split_ucv32(uv32_t view, ucv32_t another, uv32_t *array, size_t array_len);
+
+size_t uv32_new_csplit_us32(uv32_t view, const us32_t *str, ucv32_t **array);
+size_t uv32_new_csplit_us32_e(uv32_t view, const us32_t *str, ucv32_t **array, bool *error);
+size_t uv32_csplit_us32(uv32_t view, const us32_t *str, ucv32_t *array, size_t array_len);
+size_t uv32_new_split_us32(uv32_t view, const us32_t *str, uv32_t **array);
+size_t uv32_new_split_us32_e(uv32_t view, const us32_t *str, uv32_t **array, bool *error);
+size_t uv32_split_us32(uv32_t view, const us32_t *str, uv32_t *array, size_t array_len);
+
+size_t uv32_new_csplit_uv32(uv32_t view, uv32_t another, ucv32_t **array);
+size_t uv32_new_csplit_uv32_e(uv32_t view, uv32_t another, ucv32_t **array, bool *error);
+size_t uv32_csplit_uv32(uv32_t view, uv32_t another, ucv32_t *array, size_t array_len);
+size_t uv32_new_split_uv32(uv32_t view, uv32_t another, uv32_t **array);
+size_t uv32_new_split_uv32_e(uv32_t view, uv32_t another, uv32_t **array, bool *error);
+size_t uv32_split_uv32(uv32_t view, uv32_t another, uv32_t *array, size_t array_len);
+
+// Chars
+
+const uc32_t *uv32_cchars(uv32_t view);
+uc32_t *uv32_chars(uv32_t view);
 
 // Valid
 
