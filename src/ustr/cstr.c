@@ -1401,3 +1401,552 @@ size_t uz32_n_split_uz32_n(uc32_t *cstr, size_t cstr_len, const uc32_t *another,
 
 	return count;
 }
+
+#define USTR_RETURN_REPLACE_C_C_(cstr, from, to, count) \
+    {                                                   \
+        assert(cstr);                                   \
+                                                        \
+        size_t inner_count = 0;                         \
+        size_t len         = 0;                         \
+                                                        \
+        for (; cstr[len]; ++len)                        \
+            if (cstr[len] == from) {                    \
+                cstr[len] = to;                         \
+                ++inner_count;                          \
+            }                                           \
+                                                        \
+        if (count)                                      \
+            *count = inner_count;                       \
+                                                        \
+        return len;                                     \
+    }
+
+#define USTR_RETURN_N_REPLACE_C_C_(cstr, cstr_len, from, to, count) \
+    {                                                               \
+        assert(cstr);                                               \
+                                                                    \
+        size_t inner_count = 0;                                     \
+                                                                    \
+        for (size_t i = 0; i < cstr_len; ++i)                       \
+            if (cstr[i] == from) {                                  \
+                cstr[i] = to;                                       \
+                ++inner_count;                                      \
+            }                                                       \
+                                                                    \
+            if (count)                                              \
+                *count = inner_count;                               \
+                                                                    \
+        return cstr_len;                                            \
+    }
+
+#define USTR_RETURN_N_REPLACE_Z_N_C_(N, cstr, cstr_len, from, from_len, to, count) \
+    {                                                                              \
+        assert(cstr && from);                                                      \
+                                                                                   \
+        if (from_len > cstr_len) {                                                 \
+            if (count)                                                             \
+                *count = 0;                                                        \
+                                                                                   \
+            return cstr_len;                                                       \
+        }                                                                          \
+                                                                                   \
+        size_t inner_count  = 0;                                                   \
+        size_t new_cstr_len = cstr_len;                                            \
+        size_t len_delta    = from_len - 1;                                        \
+                                                                                   \
+        while (true) {                                                             \
+            ptrdiff_t pos = uz##N##_n_pos_n(cstr, cstr_len, from, from_len);       \
+                                                                                   \
+            if (pos < 0)                                                           \
+                break;                                                             \
+                                                                                   \
+            cstr[pos]     = to;                                                    \
+            cstr_len     -= len_delta + pos;                                       \
+            new_cstr_len -= len_delta;                                             \
+            cstr         += pos + 1;                                               \
+                                                                                   \
+            uz##N##_move(cstr, cstr + len_delta, cstr_len);                        \
+                                                                                   \
+            ++inner_count;                                                         \
+        }                                                                          \
+                                                                                   \
+        if (count)                                                                 \
+            *count = inner_count;                                                  \
+                                                                                   \
+        return new_cstr_len;                                                       \
+    }
+
+#define USTR_RETURN_N_REPLACE_C_Z_N_(N, cstr, cstr_len, from, to, to_len, count) \
+    {                                                                            \
+        assert(cstr && to);                                                      \
+                                                                                 \
+        size_t inner_count = 0;                                                  \
+                                                                                 \
+        for (size_t i = 0; i < cstr_len; ++i)                                    \
+            if (cstr[i] == from) {                                               \
+                uz##N##_move(cstr + i + to_len, cstr + i + 1, cstr_len - i - 1); \
+                uz##N##_copy_n(cstr + i, to, to_len);                            \
+                cstr_len += to_len - 1;                                          \
+                ++inner_count;                                                   \
+            }                                                                    \
+                                                                                 \
+        if (count)                                                               \
+            *count = inner_count;                                                \
+                                                                                 \
+        return cstr_len;                                                         \
+    }
+
+#define USTR_RETURN_N_REPLACE_C_Z_N_LEN_(cstr, cstr_len, from, to_len, count) \
+    {                                                                         \
+        assert(cstr);                                                         \
+                                                                              \
+        size_t inner_count = 0;                                               \
+                                                                              \
+        for (size_t i = 0; i < cstr_len; ++i)                                 \
+            if (cstr[i] == from)                                              \
+                ++inner_count;                                                \
+                                                                              \
+        if (count)                                                            \
+            *count = inner_count;                                             \
+                                                                              \
+        return cstr_len + to_len * inner_count - inner_count;                 \
+    }
+
+#define USTR_RETURN_N_REPLACE_Z_N_Z_N_(N, cstr, cstr_len, from, from_len, to, to_len, count) \
+    {                                                                                        \
+        assert(cstr && from && to);                                                          \
+                                                                                             \
+        if (cstr_len < from_len) {                                                           \
+            if (count)                                                                       \
+                *count = 0;                                                                  \
+                                                                                             \
+            return cstr_len;                                                                 \
+        }                                                                                    \
+                                                                                             \
+        size_t    inner_count  = 0;                                                          \
+        size_t    new_cstr_len = cstr_len;                                                   \
+        ptrdiff_t len_delta    = from_len - to_len;                                          \
+                                                                                             \
+        while (true) {                                                                       \
+            ptrdiff_t pos = uz##N##_n_pos_n(cstr, cstr_len, from, from_len);                 \
+                                                                                             \
+            if (pos < 0)                                                                     \
+                break;                                                                       \
+                                                                                             \
+            cstr         += pos;                                                             \
+            cstr_len     -= len_delta + pos;                                                 \
+            new_cstr_len -= len_delta;                                                       \
+                                                                                             \
+            uc##N##_t *new_cstr = cstr + to_len;                                             \
+                                                                                             \
+            uz##N##_move(new_cstr, cstr + from_len, cstr_len);                               \
+            uz##N##_copy_n(cstr, to, to_len);                                                \
+                                                                                             \
+            cstr = new_cstr;                                                                 \
+                                                                                             \
+            ++inner_count;                                                                   \
+        }                                                                                    \
+                                                                                             \
+        if (count)                                                                           \
+            *count = inner_count;                                                            \
+                                                                                             \
+        return new_cstr_len;                                                                 \
+    }
+
+#define USTR_RETURN_N_REPLACE_Z_N_Z_N_LEN_(N, cstr, cstr_len, from, from_len, to_len, count) \
+    {                                                                                        \
+        assert(cstr && from);                                                                \
+                                                                                             \
+        if (cstr_len < from_len) {                                                           \
+            if (count)                                                                       \
+                *count = 0;                                                                  \
+                                                                                             \
+            return cstr_len;                                                                 \
+        }                                                                                    \
+                                                                                             \
+        size_t    inner_count   = 0;                                                         \
+        size_t    new_cstr_len  = cstr_len;                                                  \
+        ptrdiff_t new_len_delta = from_len - to_len;                                         \
+                                                                                             \
+        while (true) {                                                                       \
+            ptrdiff_t pos = uz##N##_n_pos_n(cstr, cstr_len, from, from_len);                 \
+                                                                                             \
+            if (pos < 0)                                                                     \
+                break;                                                                       \
+                                                                                             \
+            size_t len_delta = from_len + pos;                                               \
+                                                                                             \
+            cstr         += len_delta;                                                       \
+            cstr_len     -= len_delta;                                                       \
+            new_cstr_len -= new_len_delta;                                                   \
+                                                                                             \
+            ++inner_count;                                                                   \
+        }                                                                                    \
+                                                                                             \
+        if (count)                                                                           \
+            *count = inner_count;                                                            \
+                                                                                             \
+        return new_cstr_len;                                                                 \
+    }
+
+size_t uz32_replace_uc32_uc32(uc32_t *cstr, uc32_t from, uc32_t to, size_t *count) {
+    USTR_RETURN_REPLACE_C_C_(cstr, from, to, count);
+}
+
+size_t uz32_n_replace_uc32_uc32(uc32_t *cstr, size_t cstr_len, uc32_t from, uc32_t to, size_t *count) {
+    USTR_RETURN_N_REPLACE_C_C_(cstr, cstr_len, from, to, count);
+}
+
+size_t uz32_replace_uz32_uc32(uc32_t *cstr, const uc32_t *from, uc32_t to, size_t *count) {
+	return uz32_replace_uz32_n_uc32(cstr, from, uz32_len(from), to, count);
+}
+
+size_t uz32_n_replace_uz32_uc32(uc32_t *cstr, size_t cstr_len, const uc32_t *from, uc32_t to, size_t *count) {
+	return uz32_n_replace_uz32_n_uc32(cstr, cstr_len, from, uz32_len(from), to, count);
+}
+
+size_t uz32_replace_uz32_n_uc32(uc32_t *cstr, const uc32_t *from, size_t from_len, uc32_t to, size_t *count) {
+    return uz32_n_replace_uz32_n_uc32(cstr, uz32_len(cstr), from, from_len, to, count);
+}
+
+size_t uz32_n_replace_uz32_n_uc32(uc32_t *cstr, size_t cstr_len, const uc32_t *from, size_t from_len, uc32_t to, size_t *count) {
+    USTR_RETURN_N_REPLACE_Z_N_C_(32, cstr, cstr_len, from, from_len, to, count);
+}
+
+size_t uz32_replace_uc32_uz32(uc32_t *cstr, uc32_t from, const uc32_t *to, size_t *count) {
+	return uz32_n_replace_uc32_uz32_n(cstr, uz32_len(cstr), from, to, uz32_len(to), count);
+}
+
+size_t uz32_replace_uc32_uz32_len(const uc32_t *cstr, uc32_t from, const uc32_t *to, size_t *count) {
+	return uz32_n_replace_uc32_uz32_n_len(cstr, uz32_len(cstr), from, uz32_len(to), count);
+}
+
+size_t uz32_n_replace_uc32_uz32(uc32_t *cstr, size_t cstr_len, uc32_t from, const uc32_t *to, size_t *count) {
+	return uz32_n_replace_uc32_uz32_n(cstr, cstr_len, from, to, uz32_len(to), count);
+}
+
+size_t uz32_n_replace_uc32_uz32_len(const uc32_t *cstr, size_t cstr_len, uc32_t from, const uc32_t *to, size_t *count) {
+	return uz32_n_replace_uc32_uz32_n_len(cstr, cstr_len, from, uz32_len(to), count);
+}
+
+size_t uz32_replace_uc32_uz32_n(uc32_t *cstr, uc32_t from, const uc32_t *to, size_t to_len, size_t *count) {
+	return uz32_n_replace_uc32_uz32_n(cstr, uz32_len(cstr), from, to, to_len, count);
+}
+
+size_t uz32_replace_uc32_uz32_n_len(const uc32_t *cstr, uc32_t from, size_t to_len, size_t *count) {
+	return uz32_n_replace_uc32_uz32_n_len(cstr, uz32_len(cstr), from, to_len, count);
+}
+
+size_t uz32_n_replace_uc32_uz32_n(uc32_t *cstr, size_t cstr_len, uc32_t from, const uc32_t *to, size_t to_len, size_t *count) {
+    USTR_RETURN_N_REPLACE_C_Z_N_(32, cstr, cstr_len, from, to, to_len, count);
+}
+
+size_t uz32_n_replace_uc32_uz32_n_len(const uc32_t *cstr, size_t cstr_len, uc32_t from, size_t to_len, size_t *count) {
+    USTR_RETURN_N_REPLACE_C_Z_N_LEN_(cstr, cstr_len, from, to_len, count);
+}
+
+size_t uz32_replace_uz32_uz32(uc32_t *cstr, const uc32_t *from, const uc32_t *to, size_t *count) {
+	return uz32_n_replace_uz32_n_uz32_n(cstr, uz32_len(cstr), from, uz32_len(from), to, uz32_len(to), count);
+}
+
+size_t uz32_replace_uz32_uz32_len(const uc32_t *cstr, const uc32_t *from, const uc32_t *to, size_t *count) {
+	return uz32_n_replace_uz32_n_uz32_n_len(cstr, uz32_len(cstr), from, uz32_len(from), uz32_len(to), count);
+}
+
+size_t uz32_n_replace_uz32_uz32(uc32_t *cstr, size_t cstr_len, const uc32_t *from, const uc32_t *to, size_t *count) {
+	return uz32_n_replace_uz32_n_uz32_n(cstr, cstr_len, from, uz32_len(from), to, uz32_len(to), count);
+}
+
+size_t uz32_n_replace_uz32_uz32_len(const uc32_t *cstr, size_t cstr_len, const uc32_t *from, const uc32_t *to, size_t *count) {
+	return uz32_n_replace_uz32_n_uz32_n_len(cstr, cstr_len, from, uz32_len(from), uz32_len(to), count);
+}
+
+size_t uz32_replace_uz32_n_uz32(uc32_t *cstr, const uc32_t *from, size_t from_len, const uc32_t *to, size_t *count) {
+	return uz32_n_replace_uz32_n_uz32_n(cstr, uz32_len(cstr), from, from_len, to, uz32_len(to), count);
+}
+
+size_t uz32_replace_uz32_n_uz32_len(const uc32_t *cstr, const uc32_t *from, size_t from_len, const uc32_t *to, size_t *count) {
+	return uz32_n_replace_uz32_n_uz32_n_len(cstr, uz32_len(cstr), from, from_len, uz32_len(to), count);
+}
+
+size_t uz32_n_replace_uz32_n_uz32(uc32_t *cstr, size_t cstr_len, const uc32_t *from, size_t from_len, const uc32_t *to, size_t *count) {
+	return uz32_n_replace_uz32_n_uz32_n(cstr, cstr_len, from, from_len, to, uz32_len(to), count);
+}
+
+size_t uz32_n_replace_uz32_n_uz32_len(const uc32_t *cstr, size_t cstr_len, const uc32_t *from, size_t from_len, const uc32_t *to, size_t *count) {
+	return uz32_n_replace_uz32_n_uz32_n_len(cstr, cstr_len, from, from_len, uz32_len(to), count);
+}
+
+size_t uz32_replace_uz32_uz32_n(uc32_t *cstr, const uc32_t *from, const uc32_t *to, size_t to_len, size_t *count) {
+	return uz32_n_replace_uz32_n_uz32_n(cstr, uz32_len(cstr), from, uz32_len(from), to, to_len, count);
+}
+
+size_t uz32_replace_uz32_uz32_n_len(const uc32_t *cstr, const uc32_t *from, size_t to_len, size_t *count) {
+	return uz32_n_replace_uz32_n_uz32_n_len(cstr, uz32_len(cstr), from, uz32_len(from), to_len, count);
+}
+
+size_t uz32_n_replace_uz32_uz32_n(uc32_t *cstr, size_t cstr_len, const uc32_t *from, const uc32_t *to, size_t to_len, size_t *count) {
+	return uz32_n_replace_uz32_n_uz32_n(cstr, cstr_len, from, uz32_len(from), to, to_len, count);
+}
+
+size_t uz32_n_replace_uz32_uz32_n_len(const uc32_t *cstr, size_t cstr_len, const uc32_t *from, size_t to_len, size_t *count) {
+	return uz32_n_replace_uz32_n_uz32_n_len(cstr, cstr_len, from, uz32_len(from), to_len, count);
+}
+
+size_t uz32_replace_uz32_n_uz32_n(uc32_t *cstr, const uc32_t *from, size_t from_len, const uc32_t *to, size_t to_len, size_t *count) {
+	return uz32_n_replace_uz32_n_uz32_n(cstr, uz32_len(cstr), from, from_len, to, to_len, count);
+}
+
+size_t uz32_replace_uz32_n_uz32_n_len(const uc32_t *cstr, const uc32_t *from, size_t from_len, size_t to_len, size_t *count) {
+	return uz32_n_replace_uz32_n_uz32_n_len(cstr, uz32_len(cstr), from, from_len, to_len, count);
+}
+
+size_t uz32_n_replace_uz32_n_uz32_n(uc32_t *cstr, size_t cstr_len, const uc32_t *from, size_t from_len, const uc32_t *to, size_t to_len, size_t *count) {
+    USTR_RETURN_N_REPLACE_Z_N_Z_N_(32, cstr, cstr_len, from, from_len, to, to_len, count);
+}
+
+size_t uz32_n_replace_uz32_n_uz32_n_len(const uc32_t *cstr, size_t cstr_len, const uc32_t *from, size_t from_len, size_t to_len, size_t *count) {
+    USTR_RETURN_N_REPLACE_Z_N_Z_N_LEN_(32, cstr, cstr_len, from, from_len, to_len, count);
+}
+
+size_t uz16_replace_uc16_uc16(uc16_t *cstr, uc16_t from, uc16_t to, size_t *count) {
+    USTR_RETURN_REPLACE_C_C_(cstr, from, to, count);
+}
+
+size_t uz16_n_replace_uc16_uc16(uc16_t *cstr, size_t cstr_len, uc16_t from, uc16_t to, size_t *count) {
+    USTR_RETURN_N_REPLACE_C_C_(cstr, cstr_len, from, to, count);
+}
+
+size_t uz16_replace_uz16_uc16(uc16_t *cstr, const uc16_t *from, uc16_t to, size_t *count) {
+	return uz16_replace_uz16_n_uc16(cstr, from, uz16_len(from), to, count);
+}
+
+size_t uz16_n_replace_uz16_uc16(uc16_t *cstr, size_t cstr_len, const uc16_t *from, uc16_t to, size_t *count) {
+	return uz16_n_replace_uz16_n_uc16(cstr, cstr_len, from, uz16_len(from), to, count);
+}
+
+size_t uz16_replace_uz16_n_uc16(uc16_t *cstr, const uc16_t *from, size_t from_len, uc16_t to, size_t *count) {
+    return uz16_n_replace_uz16_n_uc16(cstr, uz16_len(cstr), from, from_len, to, count);
+}
+
+size_t uz16_n_replace_uz16_n_uc16(uc16_t *cstr, size_t cstr_len, const uc16_t *from, size_t from_len, uc16_t to, size_t *count) {
+    USTR_RETURN_N_REPLACE_Z_N_C_(16, cstr, cstr_len, from, from_len, to, count);
+}
+
+size_t uz16_replace_uc16_uz16(uc16_t *cstr, uc16_t from, const uc16_t *to, size_t *count) {
+	return uz16_n_replace_uc16_uz16_n(cstr, uz16_len(cstr), from, to, uz16_len(to), count);
+}
+
+size_t uz16_replace_uc16_uz16_len(const uc16_t *cstr, uc16_t from, const uc16_t *to, size_t *count) {
+	return uz16_n_replace_uc16_uz16_n_len(cstr, uz16_len(cstr), from, uz16_len(to), count);
+}
+
+size_t uz16_n_replace_uc16_uz16(uc16_t *cstr, size_t cstr_len, uc16_t from, const uc16_t *to, size_t *count) {
+	return uz16_n_replace_uc16_uz16_n(cstr, cstr_len, from, to, uz16_len(to), count);
+}
+
+size_t uz16_n_replace_uc16_uz16_len(const uc16_t *cstr, size_t cstr_len, uc16_t from, const uc16_t *to, size_t *count) {
+	return uz16_n_replace_uc16_uz16_n_len(cstr, cstr_len, from, uz16_len(to), count);
+}
+
+size_t uz16_replace_uc16_uz16_n(uc16_t *cstr, uc16_t from, const uc16_t *to, size_t to_len, size_t *count) {
+	return uz16_n_replace_uc16_uz16_n(cstr, uz16_len(cstr), from, to, to_len, count);
+}
+
+size_t uz16_replace_uc16_uz16_n_len(const uc16_t *cstr, uc16_t from, size_t to_len, size_t *count) {
+	return uz16_n_replace_uc16_uz16_n_len(cstr, uz16_len(cstr), from, to_len, count);
+}
+
+size_t uz16_n_replace_uc16_uz16_n(uc16_t *cstr, size_t cstr_len, uc16_t from, const uc16_t *to, size_t to_len, size_t *count) {
+    USTR_RETURN_N_REPLACE_C_Z_N_(16, cstr, cstr_len, from, to, to_len, count);
+}
+
+size_t uz16_n_replace_uc16_uz16_n_len(const uc16_t *cstr, size_t cstr_len, uc16_t from, size_t to_len, size_t *count) {
+    USTR_RETURN_N_REPLACE_C_Z_N_LEN_(cstr, cstr_len, from, to_len, count);
+}
+
+size_t uz16_replace_uz16_uz16(uc16_t *cstr, const uc16_t *from, const uc16_t *to, size_t *count) {
+	return uz16_n_replace_uz16_n_uz16_n(cstr, uz16_len(cstr), from, uz16_len(from), to, uz16_len(to), count);
+}
+
+size_t uz16_replace_uz16_uz16_len(const uc16_t *cstr, const uc16_t *from, const uc16_t *to, size_t *count) {
+	return uz16_n_replace_uz16_n_uz16_n_len(cstr, uz16_len(cstr), from, uz16_len(from), uz16_len(to), count);
+}
+
+size_t uz16_n_replace_uz16_uz16(uc16_t *cstr, size_t cstr_len, const uc16_t *from, const uc16_t *to, size_t *count) {
+	return uz16_n_replace_uz16_n_uz16_n(cstr, cstr_len, from, uz16_len(from), to, uz16_len(to), count);
+}
+
+size_t uz16_n_replace_uz16_uz16_len(const uc16_t *cstr, size_t cstr_len, const uc16_t *from, const uc16_t *to, size_t *count) {
+	return uz16_n_replace_uz16_n_uz16_n_len(cstr, cstr_len, from, uz16_len(from), uz16_len(to), count);
+}
+
+size_t uz16_replace_uz16_n_uz16(uc16_t *cstr, const uc16_t *from, size_t from_len, const uc16_t *to, size_t *count) {
+	return uz16_n_replace_uz16_n_uz16_n(cstr, uz16_len(cstr), from, from_len, to, uz16_len(to), count);
+}
+
+size_t uz16_replace_uz16_n_uz16_len(const uc16_t *cstr, const uc16_t *from, size_t from_len, const uc16_t *to, size_t *count) {
+	return uz16_n_replace_uz16_n_uz16_n_len(cstr, uz16_len(cstr), from, from_len, uz16_len(to), count);
+}
+
+size_t uz16_n_replace_uz16_n_uz16(uc16_t *cstr, size_t cstr_len, const uc16_t *from, size_t from_len, const uc16_t *to, size_t *count) {
+	return uz16_n_replace_uz16_n_uz16_n(cstr, cstr_len, from, from_len, to, uz16_len(to), count);
+}
+
+size_t uz16_n_replace_uz16_n_uz16_len(const uc16_t *cstr, size_t cstr_len, const uc16_t *from, size_t from_len, const uc16_t *to, size_t *count) {
+	return uz16_n_replace_uz16_n_uz16_n_len(cstr, cstr_len, from, from_len, uz16_len(to), count);
+}
+
+size_t uz16_replace_uz16_uz16_n(uc16_t *cstr, const uc16_t *from, const uc16_t *to, size_t to_len, size_t *count) {
+	return uz16_n_replace_uz16_n_uz16_n(cstr, uz16_len(cstr), from, uz16_len(from), to, to_len, count);
+}
+
+size_t uz16_replace_uz16_uz16_n_len(const uc16_t *cstr, const uc16_t *from, size_t to_len, size_t *count) {
+	return uz16_n_replace_uz16_n_uz16_n_len(cstr, uz16_len(cstr), from, uz16_len(from), to_len, count);
+}
+
+size_t uz16_n_replace_uz16_uz16_n(uc16_t *cstr, size_t cstr_len, const uc16_t *from, const uc16_t *to, size_t to_len, size_t *count) {
+	return uz16_n_replace_uz16_n_uz16_n(cstr, cstr_len, from, uz16_len(from), to, to_len, count);
+}
+
+size_t uz16_n_replace_uz16_uz16_n_len(const uc16_t *cstr, size_t cstr_len, const uc16_t *from, size_t to_len, size_t *count) {
+	return uz16_n_replace_uz16_n_uz16_n_len(cstr, cstr_len, from, uz16_len(from), to_len, count);
+}
+
+size_t uz16_replace_uz16_n_uz16_n(uc16_t *cstr, const uc16_t *from, size_t from_len, const uc16_t *to, size_t to_len, size_t *count) {
+	return uz16_n_replace_uz16_n_uz16_n(cstr, uz16_len(cstr), from, from_len, to, to_len, count);
+}
+
+size_t uz16_replace_uz16_n_uz16_n_len(const uc16_t *cstr, const uc16_t *from, size_t from_len, size_t to_len, size_t *count) {
+	return uz16_n_replace_uz16_n_uz16_n_len(cstr, uz16_len(cstr), from, from_len, to_len, count);
+}
+
+size_t uz16_n_replace_uz16_n_uz16_n(uc16_t *cstr, size_t cstr_len, const uc16_t *from, size_t from_len, const uc16_t *to, size_t to_len, size_t *count) {
+    USTR_RETURN_N_REPLACE_Z_N_Z_N_(16, cstr, cstr_len, from, from_len, to, to_len, count);
+}
+
+size_t uz16_n_replace_uz16_n_uz16_n_len(const uc16_t *cstr, size_t cstr_len, const uc16_t *from, size_t from_len, size_t to_len, size_t *count) {
+    USTR_RETURN_N_REPLACE_Z_N_Z_N_LEN_(16, cstr, cstr_len, from, from_len, to_len, count);
+}
+
+size_t uz8_replace_uc8_uc8(uc8_t *cstr, uc8_t from, uc8_t to, size_t *count) {
+    USTR_RETURN_REPLACE_C_C_(cstr, from, to, count);
+}
+
+size_t uz8_n_replace_uc8_uc8(uc8_t *cstr, size_t cstr_len, uc8_t from, uc8_t to, size_t *count) {
+    USTR_RETURN_N_REPLACE_C_C_(cstr, cstr_len, from, to, count);
+}
+
+size_t uz8_replace_uz8_uc8(uc8_t *cstr, const uc8_t *from, uc8_t to, size_t *count) {
+	return uz8_replace_uz8_n_uc8(cstr, from, uz8_len(from), to, count);
+}
+
+size_t uz8_n_replace_uz8_uc8(uc8_t *cstr, size_t cstr_len, const uc8_t *from, uc8_t to, size_t *count) {
+	return uz8_n_replace_uz8_n_uc8(cstr, cstr_len, from, uz8_len(from), to, count);
+}
+
+size_t uz8_replace_uz8_n_uc8(uc8_t *cstr, const uc8_t *from, size_t from_len, uc8_t to, size_t *count) {
+    return uz8_n_replace_uz8_n_uc8(cstr, uz8_len(cstr), from, from_len, to, count);
+}
+
+size_t uz8_n_replace_uz8_n_uc8(uc8_t *cstr, size_t cstr_len, const uc8_t *from, size_t from_len, uc8_t to, size_t *count) {
+    USTR_RETURN_N_REPLACE_Z_N_C_(8, cstr, cstr_len, from, from_len, to, count);
+}
+
+size_t uz8_replace_uc8_uz8(uc8_t *cstr, uc8_t from, const uc8_t *to, size_t *count) {
+	return uz8_n_replace_uc8_uz8_n(cstr, uz8_len(cstr), from, to, uz8_len(to), count);
+}
+
+size_t uz8_replace_uc8_uz8_len(const uc8_t *cstr, uc8_t from, const uc8_t *to, size_t *count) {
+	return uz8_n_replace_uc8_uz8_n_len(cstr, uz8_len(cstr), from, uz8_len(to), count);
+}
+
+size_t uz8_n_replace_uc8_uz8(uc8_t *cstr, size_t cstr_len, uc8_t from, const uc8_t *to, size_t *count) {
+	return uz8_n_replace_uc8_uz8_n(cstr, cstr_len, from, to, uz8_len(to), count);
+}
+
+size_t uz8_n_replace_uc8_uz8_len(const uc8_t *cstr, size_t cstr_len, uc8_t from, const uc8_t *to, size_t *count) {
+	return uz8_n_replace_uc8_uz8_n_len(cstr, cstr_len, from, uz8_len(to), count);
+}
+
+size_t uz8_replace_uc8_uz8_n(uc8_t *cstr, uc8_t from, const uc8_t *to, size_t to_len, size_t *count) {
+	return uz8_n_replace_uc8_uz8_n(cstr, uz8_len(cstr), from, to, to_len, count);
+}
+
+size_t uz8_replace_uc8_uz8_n_len(const uc8_t *cstr, uc8_t from, size_t to_len, size_t *count) {
+	return uz8_n_replace_uc8_uz8_n_len(cstr, uz8_len(cstr), from, to_len, count);
+}
+
+size_t uz8_n_replace_uc8_uz8_n(uc8_t *cstr, size_t cstr_len, uc8_t from, const uc8_t *to, size_t to_len, size_t *count) {
+    USTR_RETURN_N_REPLACE_C_Z_N_(8, cstr, cstr_len, from, to, to_len, count);
+}
+
+size_t uz8_n_replace_uc8_uz8_n_len(const uc8_t *cstr, size_t cstr_len, uc8_t from, size_t to_len, size_t *count) {
+    USTR_RETURN_N_REPLACE_C_Z_N_LEN_(cstr, cstr_len, from, to_len, count);
+}
+
+size_t uz8_replace_uz8_uz8(uc8_t *cstr, const uc8_t *from, const uc8_t *to, size_t *count) {
+	return uz8_n_replace_uz8_n_uz8_n(cstr, uz8_len(cstr), from, uz8_len(from), to, uz8_len(to), count);
+}
+
+size_t uz8_replace_uz8_uz8_len(const uc8_t *cstr, const uc8_t *from, const uc8_t *to, size_t *count) {
+	return uz8_n_replace_uz8_n_uz8_n_len(cstr, uz8_len(cstr), from, uz8_len(from), uz8_len(to), count);
+}
+
+size_t uz8_n_replace_uz8_uz8(uc8_t *cstr, size_t cstr_len, const uc8_t *from, const uc8_t *to, size_t *count) {
+	return uz8_n_replace_uz8_n_uz8_n(cstr, cstr_len, from, uz8_len(from), to, uz8_len(to), count);
+}
+
+size_t uz8_n_replace_uz8_uz8_len(const uc8_t *cstr, size_t cstr_len, const uc8_t *from, const uc8_t *to, size_t *count) {
+	return uz8_n_replace_uz8_n_uz8_n_len(cstr, cstr_len, from, uz8_len(from), uz8_len(to), count);
+}
+
+size_t uz8_replace_uz8_n_uz8(uc8_t *cstr, const uc8_t *from, size_t from_len, const uc8_t *to, size_t *count) {
+	return uz8_n_replace_uz8_n_uz8_n(cstr, uz8_len(cstr), from, from_len, to, uz8_len(to), count);
+}
+
+size_t uz8_replace_uz8_n_uz8_len(const uc8_t *cstr, const uc8_t *from, size_t from_len, const uc8_t *to, size_t *count) {
+	return uz8_n_replace_uz8_n_uz8_n_len(cstr, uz8_len(cstr), from, from_len, uz8_len(to), count);
+}
+
+size_t uz8_n_replace_uz8_n_uz8(uc8_t *cstr, size_t cstr_len, const uc8_t *from, size_t from_len, const uc8_t *to, size_t *count) {
+	return uz8_n_replace_uz8_n_uz8_n(cstr, cstr_len, from, from_len, to, uz8_len(to), count);
+}
+
+size_t uz8_n_replace_uz8_n_uz8_len(const uc8_t *cstr, size_t cstr_len, const uc8_t *from, size_t from_len, const uc8_t *to, size_t *count) {
+	return uz8_n_replace_uz8_n_uz8_n_len(cstr, cstr_len, from, from_len, uz8_len(to), count);
+}
+
+size_t uz8_replace_uz8_uz8_n(uc8_t *cstr, const uc8_t *from, const uc8_t *to, size_t to_len, size_t *count) {
+	return uz8_n_replace_uz8_n_uz8_n(cstr, uz8_len(cstr), from, uz8_len(from), to, to_len, count);
+}
+
+size_t uz8_replace_uz8_uz8_n_len(const uc8_t *cstr, const uc8_t *from, size_t to_len, size_t *count) {
+	return uz8_n_replace_uz8_n_uz8_n_len(cstr, uz8_len(cstr), from, uz8_len(from), to_len, count);
+}
+
+size_t uz8_n_replace_uz8_uz8_n(uc8_t *cstr, size_t cstr_len, const uc8_t *from, const uc8_t *to, size_t to_len, size_t *count) {
+	return uz8_n_replace_uz8_n_uz8_n(cstr, cstr_len, from, uz8_len(from), to, to_len, count);
+}
+
+size_t uz8_n_replace_uz8_uz8_n_len(const uc8_t *cstr, size_t cstr_len, const uc8_t *from, size_t to_len, size_t *count) {
+	return uz8_n_replace_uz8_n_uz8_n_len(cstr, cstr_len, from, uz8_len(from), to_len, count);
+}
+
+size_t uz8_replace_uz8_n_uz8_n(uc8_t *cstr, const uc8_t *from, size_t from_len, const uc8_t *to, size_t to_len, size_t *count) {
+	return uz8_n_replace_uz8_n_uz8_n(cstr, uz8_len(cstr), from, from_len, to, to_len, count);
+}
+
+size_t uz8_replace_uz8_n_uz8_n_len(const uc8_t *cstr, const uc8_t *from, size_t from_len, size_t to_len, size_t *count) {
+    return uz8_n_replace_uz8_n_uz8_n_len(cstr, uz8_len(cstr), from, from_len, to_len, count);
+}
+
+size_t uz8_n_replace_uz8_n_uz8_n(uc8_t *cstr, size_t cstr_len, const uc8_t *from, size_t from_len, const uc8_t *to, size_t to_len, size_t *count) {
+    USTR_RETURN_N_REPLACE_Z_N_Z_N_(8, cstr, cstr_len, from, from_len, to, to_len, count);
+}
+
+size_t uz8_n_replace_uz8_n_uz8_n_len(const uc8_t *cstr, size_t cstr_len, const uc8_t *from, size_t from_len, size_t to_len, size_t *count) {
+
+
+    return 0;
+}
