@@ -26,9 +26,13 @@ int uz8_dec(const uc8_t *cstr);
 
 // Cross-UTF Len
 
+size_t uz16_uz8_len(const uc16_t *cstr);
+size_t uz16_n_uz8_len(const uc16_t *cstr, size_t n);
 size_t uz16_uz32_len(const uc16_t *cstr);
 size_t uz16_n_uz32_len(const uc16_t *cstr, size_t n);
 
+size_t uz8_uz16_len(const uc8_t *cstr);
+size_t uz8_n_uz16_len(const uc8_t *cstr, size_t n);
 size_t uz8_uz32_len(const uc8_t *cstr);
 size_t uz8_n_uz32_len(const uc8_t *cstr, size_t n);
 

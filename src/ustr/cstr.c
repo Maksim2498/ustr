@@ -45,7 +45,7 @@ int uz8_dec(const uc8_t *cstr) {
     return res;
 }
 
-#define USTR_RETURN_CLEN_(N, cstr) \
+#define USTR_RETURN_UZ32_LEN_(N, cstr) \
     {                              \
         assert(cstr);              \
                                    \
@@ -64,7 +64,7 @@ int uz8_dec(const uc8_t *cstr) {
         return len;                \
     }
 
-#define USTR_RETURN_N_CLEN_(N, cstr, n) \
+#define USTR_RETURN_N_UZ32_LEN_(N, cstr, n) \
     {                                   \
         assert(cstr);                   \
                                         \
@@ -83,20 +83,64 @@ int uz8_dec(const uc8_t *cstr) {
         return len;                     \
     }
 
+size_t uz16_uz8_len(const uc16_t *cstr) {
+    assert(cstr);
+
+    size_t len = 0;
+
+    for (; *cstr; cstr += uc16_len(*cstr)) 
+        len += uc16_uc8_len(*cstr);
+
+    return len;
+}
+
+size_t uz16_n_uz8_len(const uc16_t *cstr, size_t n) {
+    assert(cstr);
+
+    size_t len = 0;
+
+    for (; n--; cstr += uc16_len(*cstr)) 
+        len += uc16_uc8_len(*cstr);
+
+    return len;
+}
+
 size_t uz16_uz32_len(const uc16_t *cstr) {
-    USTR_RETURN_CLEN_(16, cstr);
+    USTR_RETURN_UZ32_LEN_(16, cstr);
 }
 
 size_t uz16_n_uz32_len(const uc16_t *cstr, size_t n) {
-    USTR_RETURN_N_CLEN_(16, cstr, n);
+    USTR_RETURN_N_UZ32_LEN_(16, cstr, n);
+}
+
+size_t uz8_uz16_len(const uc8_t *cstr) {
+    assert(cstr);
+
+    size_t len = 0;
+
+    for (; *cstr; cstr += uc8_len(*cstr))
+        len += uc8_uc16_len(*cstr);
+
+    return len;
+}
+
+size_t uz8_n_uz16_len(const uc8_t *cstr, size_t n) {
+    assert(cstr);
+
+    size_t len = 0;
+
+    for (; n--; cstr += uc8_len(*cstr))
+        len += uc8_uc16_len(*cstr);
+
+    return len;
 }
 
 size_t uz8_uz32_len(const uc8_t *cstr) {
-    USTR_RETURN_CLEN_(8, cstr);
+    USTR_RETURN_UZ32_LEN_(8, cstr);
 }
 
 size_t uz8_n_uz32_len(const uc8_t *cstr, size_t n) {
-    USTR_RETURN_N_CLEN_(8, cstr, n);
+    USTR_RETURN_N_UZ32_LEN_(8, cstr, n);
 }
 
 #define USTR_RETURN_LEN_(cstr) \
