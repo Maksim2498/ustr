@@ -3,12 +3,11 @@
 
 #include <stdbool.h>
 
-#include <ustr/type/char.h>
 #include <ustr/type/cview.h>
 
 #include "case.h"
 
-// Value:      2498249824982498
+// Value: 2498249824982498
 //
 //            |  precision  |
 //            |-------------|
