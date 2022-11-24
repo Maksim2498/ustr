@@ -3,8 +3,8 @@
 #include <assert.h>
 #include <stdbool.h>
 
+#include "util/mem.h"
 #include "char.h"
-#include "mem.h"
 #include "view.h"
 
 size_t uz8_trail(const uc8_t *cstr) {

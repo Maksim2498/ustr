@@ -1,6 +1,6 @@
 #include "endian.h"
 
-#include "config.h"
+#include <ustr/config.h>
 
 ucv32_t uendian_name(uendian_t endian) {
     switch (endian) {

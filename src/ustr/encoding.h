@@ -1,8 +1,8 @@
 #ifndef USTR_ENCODING_H
 #define USTR_ENCODING_H
 
+#include "type/encoding.h"
 #include "cview.h"
-#include "encoding_t.h"
 
 static const ucv32_t UENCODING_UTF8_NAME     = ucv32("UTF-8");
 static const ucv32_t UENCODING_UTF16_LE_NAME = ucv32("UTF-16LE");

@@ -1,9 +1,9 @@
-#ifndef USTR_STR_T_H
-#define USTR_STR_T_H
+#ifndef USTR_TYPE_STR_H
+#define USTR_TYPE_STR_H
 
 #include <stddef.h>
 
-#include "char_t.h"
+#include "char.h"
 
 typedef struct {
     uc32_t *chars;

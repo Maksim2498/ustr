@@ -1,9 +1,9 @@
-#ifndef USTR_CVIEW_T_H
-#define USTR_CVIEW_T_H
+#ifndef USTR_TYPE_CVIEW_H
+#define USTR_TYPE_CVIEW_H
 
 #include <stddef.h>
 
-#include "char_t.h"
+#include "char.h"
 
 typedef struct {
     const uc32_t *chars;

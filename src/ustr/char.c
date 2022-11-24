@@ -2,8 +2,8 @@
 
 #include <assert.h>
 
+#include "util/endian.h"
 #include "config.h"
-#include "endian.h"
 
 /*
     Most in this file isn't human readable

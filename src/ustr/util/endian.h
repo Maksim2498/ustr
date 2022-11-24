@@ -1,10 +1,10 @@
-#ifndef USTR_ENDIAN_H
-#define USTR_ENDIAN_H
+#ifndef USTR_UTIL_ENDIAN_H
+#define USTR_UTIL_ENDIAN_H
 
 #include <stddef.h>
 
-#include "cview.h"
-#include "endian_t.h"
+#include <ustr/type/endian.h>
+#include <ustr/cview.h>
 
 static const ucv32_t UENDIAN_BIG_NAME    = ucv32("BIG-ENDIAN");
 static const ucv32_t UENDIAN_LITTLE_NAME = ucv32("LITTLE-ENDIAN");

@@ -1,5 +1,5 @@
-#ifndef USTR_CHAR_T_H
-#define USTR_CHAR_T_H
+#ifndef USTR_TYPE_CHAR_H
+#define USTR_TYPE_CHAR_H
 
 #include <stdint.h>
 

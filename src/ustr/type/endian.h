@@ -1,7 +1,7 @@
-#ifndef USTR_ENDIAN_T_H
-#define USTR_ENDIAN_T_H
+#ifndef USTR_TYPE_ENDIAN_H
+#define USTR_TYPE_ENDIAN_H
 
-#include "config.h"
+#include <ustr/config.h>
 
 typedef enum {
     UENDIAN_BIG,

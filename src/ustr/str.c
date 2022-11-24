@@ -2,10 +2,10 @@
 
 #include <assert.h>
 
+#include "util/mem.h"
 #include "config.h"
 #include "cstr.h"
 #include "cview.h"
-#include "mem.h"
 #include "view.h"
 
 us32_t us32_mk(void) {

@@ -1,5 +1,5 @@
-#ifndef USTR_MEM_H
-#define USTR_MEM_H
+#ifndef USTR_UTIL_MEM_H
+#define USTR_UTIL_MEM_H
 
 #include <stddef.h>
 

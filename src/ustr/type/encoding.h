@@ -1,5 +1,5 @@
-#ifndef USTR_ENCODING_T_H
-#define USTR_ENCODING_T_H
+#ifndef USTR_TYPE_ENCODING_H
+#define USTR_TYPE_ENCODING_H
 
 typedef enum {
     UENCODING_UTF8,

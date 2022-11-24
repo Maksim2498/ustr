@@ -3,8 +3,8 @@
 
 #include <stdbool.h>
 
-#include "char_t.h"
-#include "endian_t.h"
+#include "type/char.h"
+#include "type/endian.h"
 
 enum {
     UBOM_LITTLE_ENDIAN = 0xFFFE,

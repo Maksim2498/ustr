@@ -4,9 +4,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "char_t.h"
-#include "cview_t.h"
-#include "view_t.h"
+#include "type/char.h"
+#include "type/cview.h"
+#include "type/view.h"
 
 // Creation
 
