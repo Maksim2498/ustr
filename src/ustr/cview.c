@@ -250,6 +250,19 @@ size_t ucv32_len(ucv32_t view) {
     return view.len;
 }
 
+size_t ucv32_add_len(ucv32_t *view, ptrdiff_t delta) {
+    assert(view
+        && ucv32_valid(*view)
+        && -(ptrdiff_t) view->len <= delta);
+
+    return view->len += delta;
+}
+
+void ucv32_set_len(ucv32_t *view, size_t len) {
+    assert(view && ucv32_valid(*view));
+    view->len = len;
+}
+
 bool ucv32_empty(ucv32_t view) {
     assert(ucv32_valid(view));
     return !view.len;
@@ -330,6 +343,14 @@ size_t ucv32_csplit_uv32(ucv32_t view, uv32_t another, ucv32_t *array, size_t ar
 const uc32_t *ucv32_cchars(ucv32_t view) {
     assert(ucv32_valid(view));
     return view.chars ? view.chars : U"";
+}
+
+void ucv32_set_chars(ucv32_t *view, const uc32_t *chars) {
+    assert(view 
+        && ucv32_valid(*view) 
+        && chars);
+
+    view->chars = chars;
 }
 
 bool ucv32_valid(ucv32_t view) {

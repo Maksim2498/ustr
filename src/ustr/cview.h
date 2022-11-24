@@ -91,6 +91,8 @@ const uc32_t *ucv32_cat(ucv32_t view, size_t index);
 bool ucv32_bounds(ucv32_t view, size_t index);
 bool ucv32_ebounds(ucv32_t view, size_t index);
 size_t ucv32_len(ucv32_t view);
+size_t ucv32_add_len(ucv32_t *view, ptrdiff_t delta);
+void ucv32_set_len(ucv32_t *view, size_t len);
 bool ucv32_empty(ucv32_t view);
 
 // Split
@@ -122,6 +124,7 @@ size_t ucv32_csplit_uv32(ucv32_t view, uv32_t another, ucv32_t *array, size_t ar
 // Chars
 
 const uc32_t *ucv32_cchars(ucv32_t view);
+void ucv32_set_chars(ucv32_t *view, const uc32_t *chars);
 
 // Valid
 

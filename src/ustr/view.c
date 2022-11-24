@@ -397,6 +397,19 @@ size_t uv32_len(uv32_t view) {
     return view.len;
 }
 
+size_t uv32_add_len(uv32_t *view, ptrdiff_t delta) {
+    assert(view
+        && uv32_valid(*view)
+        && -(ptrdiff_t) view->len <= delta);
+
+    return view->len += delta;
+}
+
+void uv32_set_len(uv32_t *view, size_t len) {
+    assert(view && uv32_valid(*view));
+    view->len = len;
+}
+
 bool uv32_empty(uv32_t view) {
     assert(uv32_valid(view));
     return !view.len;
@@ -555,6 +568,14 @@ uc32_t *uv32_chars(uv32_t view) {
     assert(uv32_valid(view));
     static uc32_t chars[] = U"";
     return view.chars ? view.chars : chars;
+}
+
+void uv32_set_chars(uv32_t *view, uc32_t *chars) {
+    assert(view
+        && uv32_valid(*view)
+        && chars);
+        
+    view->chars = chars;
 }
 
 bool uv32_valid(uv32_t view) {
