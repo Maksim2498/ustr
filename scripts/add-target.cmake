@@ -1,4 +1,7 @@
 add_library(ustr
+            src/ustr/type/fmt/all.h
+            src/ustr/type/fmt/case.h
+            src/ustr/type/fmt/int.h
             src/ustr/type/all.h
             src/ustr/type/char.h
             src/ustr/type/cview.h
