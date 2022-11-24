@@ -9,13 +9,15 @@
 #include "case.h"
 
 // Value:      2498249824982498
+//
+//            |  precision  |
+//            |-------------|
 // Formatted: +2,498,249,824,000,000
-//            ^ ^   |___|   |_______|       radix: 10 - from 2 to 36
-//            | |   |       |               show_radix_prefix: true/false - doesn't matter for radix with no prefix
-//            | |   |       +- precision                                    (only 2, 8, and 16 has prefix)
-//            | |   |                       prefix_case: UCASE_UPPER/UCASE_LOWER - doesn't matter for radix with no prefix
-//            | |   +- group size           digit_case: UCASE_UPPER/UCASE_LOWER - doesn't matter for radix <= 10
-//            | |
+//            ^ ^   |___|                radix: 10 - from 2 to 36
+//            | |   |                    show_radix_prefix: true/false - doesn't matter for radix with no prefix
+//            | |   |                                       (only 2, 8, and 16 has prefix)
+//            | |   +- group size        prefix_case: UCASE_UPPER/UCASE_LOWER - doesn't matter for radix with no prefix
+//            | |                        digit_case: UCASE_UPPER/UCASE_LOWER - doesn't matter for radix <= 10
 //            | +- group separator
 //            |
 //            +- show plus
