@@ -16,7 +16,7 @@
 
 // Creation
 
-#define us32(literal) us32_from_uz32_n(U##literal, sizeof(U""literal) / 4)
+#define us32(literal) us32_from_uz32_n(U##literal, sizeof(U""literal) / sizeof(uc32_t) - 1)
 
 us32_t us32_mk(void);
 us32_t us32_from(us32_t *str);
@@ -229,6 +229,176 @@ size_t us32_csplit_ucv32(const us32_t *str, ucv32_t view, ucv32_t *array, size_t
 size_t us32_new_split_ucv32(us32_t *str, ucv32_t view, uv32_t **array);
 size_t us32_new_split_ucv32_e(us32_t *str, ucv32_t view, uv32_t **array, bool *error);
 size_t us32_split_ucv32(us32_t *str, ucv32_t view, uv32_t *array, size_t array_len);
+
+// Replace
+
+size_t us32_replace_uc32_uc32(us32_t *str, uc32_t from, uc32_t to);
+size_t us32_replace_uc32_uc32_c(us32_t *str, uc32_t from, uc32_t to, size_t *count);
+
+size_t us32_replace_uz32_uc32(us32_t *str, const uc32_t *from, uc32_t to);
+size_t us32_replace_uz32_uc32_c(us32_t *str, const uc32_t *from, uc32_t to, size_t *count);
+
+size_t us32_replace_uz32_n_uc32(us32_t *str, const uc32_t *from, size_t from_len, uc32_t to);
+size_t us32_replace_uz32_n_uc32_c(us32_t *str, const uc32_t *from, size_t from_len, uc32_t to, size_t *count);
+
+size_t us32_replace_ucv32_uc32(us32_t *str, ucv32_t from, uc32_t to);
+size_t us32_replace_ucv32_uc32_c(us32_t *str, ucv32_t from, uc32_t to, size_t *count);
+
+size_t us32_replace_us32_uc32(us32_t *str, const us32_t *from, uc32_t to);
+size_t us32_replace_us32_uc32_c(us32_t *str, const us32_t *from, uc32_t to, size_t *count);
+
+size_t us32_replace_uv32_uc32(us32_t *str, uv32_t from, uc32_t to);
+size_t us32_replace_uv32_uc32_c(us32_t *str, uv32_t from, uc32_t to, size_t *count);
+
+size_t us32_replace_uc32_uz32(us32_t *str, uc32_t from, const uc32_t *to);
+size_t us32_replace_uc32_uz32_e(us32_t *str, uc32_t from, const uc32_t *to, bool *error);
+size_t us32_replace_uc32_uz32_c(us32_t *str, uc32_t from, const uc32_t *to, size_t *count);
+size_t us32_replace_uc32_uz32_c_e(us32_t *str, uc32_t from, const uc32_t *to, size_t *count, bool *error);
+
+size_t us32_replace_uc32_uz32_n(us32_t *str, uc32_t from, const uc32_t *to, size_t to_len);
+size_t us32_replace_uc32_uz32_n_e(us32_t *str, uc32_t from, const uc32_t *to, size_t to_len, bool *error);
+size_t us32_replace_uc32_uz32_n_c(us32_t *str, uc32_t from, const uc32_t *to, size_t to_len, size_t *count);
+size_t us32_replace_uc32_uz32_n_c_e(us32_t *str, uc32_t from, const uc32_t *to, size_t to_len, size_t *count, bool *error);
+
+size_t us32_replace_uc32_ucv32(us32_t *str, uc32_t from, ucv32_t to);
+size_t us32_replace_uc32_ucv32_e(us32_t *str, uc32_t from, ucv32_t to, bool *error);
+size_t us32_replace_uc32_ucv32_c(us32_t *str, uc32_t from, ucv32_t to, size_t *count);
+size_t us32_replace_uc32_ucv32_c_e(us32_t *str, uc32_t from, ucv32_t to, size_t *count, bool *error);
+
+size_t us32_replace_uc32_us32(us32_t *str, uc32_t from, const us32_t *to);
+size_t us32_replace_uc32_us32_e(us32_t *str, uc32_t from, const us32_t *to, bool *error);
+size_t us32_replace_uc32_us32_c(us32_t *str, uc32_t from, const us32_t *to, size_t *count);
+size_t us32_replace_uc32_us32_c_e(us32_t *str, uc32_t from, const us32_t *to, size_t *count, bool *error);
+
+size_t us32_replace_uc32_uv32(us32_t *str, uc32_t from, uv32_t to);
+size_t us32_replace_uc32_uv32_e(us32_t *str, uc32_t from, uv32_t to, bool *error);
+size_t us32_replace_uc32_uv32_c(us32_t *str, uc32_t from, uv32_t to, size_t *count);
+size_t us32_replace_uc32_uv32_c_e(us32_t *str, uc32_t from, uv32_t to, size_t *count, bool *error);
+
+size_t us32_replace_uz32_uz32(us32_t *str, const uc32_t *from, const uc32_t *to);
+size_t us32_replace_uz32_uz32_e(us32_t *str, const uc32_t *from, const uc32_t *to, bool *error);
+size_t us32_replace_uz32_uz32_c(us32_t *str, const uc32_t *from, const uc32_t *to, size_t *count);
+size_t us32_replace_uz32_uz32_c_e(us32_t *str, const uc32_t *from, const uc32_t *to, size_t *count, bool *error);
+
+size_t us32_replace_uz32_n_uz32(us32_t *str, const uc32_t *from, size_t from_len, const uc32_t *to);
+size_t us32_replace_uz32_n_uz32_e(us32_t *str, const uc32_t *from, size_t from_len, const uc32_t *to, bool *error);
+size_t us32_replace_uz32_n_uz32_c(us32_t *str, const uc32_t *from, size_t from_len, const uc32_t *to, size_t *count);
+size_t us32_replace_uz32_n_uz32_c_e(us32_t *str, const uc32_t *from, size_t from_len, const uc32_t *to, size_t *count, bool *error);
+
+size_t us32_replace_ucv32_uz32(us32_t *str, ucv32_t from, const uc32_t *to);
+size_t us32_replace_ucv32_uz32_e(us32_t *str, ucv32_t from, const uc32_t *to, bool *error);
+size_t us32_replace_ucv32_uz32_c(us32_t *str, ucv32_t from, const uc32_t *to, size_t *count);
+size_t us32_replace_ucv32_uz32_c_e(us32_t *str, ucv32_t from, const uc32_t *to, size_t *count, bool *error);
+
+size_t us32_replace_us32_uz32(us32_t *str, const us32_t *from, const uc32_t *to);
+size_t us32_replace_us32_uz32_e(us32_t *str, const us32_t *from, const uc32_t *to, bool *error);
+size_t us32_replace_us32_uz32_c(us32_t *str, const us32_t *from, const uc32_t *to, size_t *count);
+size_t us32_replace_us32_uz32_c_e(us32_t *str, const us32_t *from, const uc32_t *to, size_t *count, bool *error);
+
+size_t us32_replace_uv32_uz32(us32_t *str, uv32_t from, const uc32_t *to);
+size_t us32_replace_uv32_uz32_e(us32_t *str, uv32_t from, const uc32_t *to, bool *error);
+size_t us32_replace_uv32_uz32_c(us32_t *str, uv32_t from, const uc32_t *to, size_t *count);
+size_t us32_replace_uv32_uz32_c_e(us32_t *str, uv32_t from, const uc32_t *to, size_t *count, bool *error);
+
+size_t us32_replace_uz32_uz32_n(us32_t *str, const uc32_t *from, const uc32_t *to, size_t to_len);
+size_t us32_replace_uz32_uz32_n_e(us32_t *str, const uc32_t *from, const uc32_t *to, size_t to_len, bool *error);
+size_t us32_replace_uz32_uz32_n_c(us32_t *str, const uc32_t *from, const uc32_t *to, size_t to_len, size_t *count);
+size_t us32_replace_uz32_uz32_n_c_e(us32_t *str, const uc32_t *from, const uc32_t *to, size_t to_len, size_t *count, bool *error);
+
+size_t us32_replace_uz32_n_uz32_n(us32_t *str, const uc32_t *from, size_t from_len, const uc32_t *to, size_t to_len);
+size_t us32_replace_uz32_n_uz32_n_e(us32_t *str, const uc32_t *from, size_t from_len, const uc32_t *to, size_t to_len, bool *error);
+size_t us32_replace_uz32_n_uz32_n_c(us32_t *str, const uc32_t *from, size_t from_len, const uc32_t *to, size_t to_len, size_t *count);
+size_t us32_replace_uz32_n_uz32_n_c_e(us32_t *str, const uc32_t *from, size_t from_len, const uc32_t *to, size_t to_len, size_t *count, bool *error);
+
+size_t us32_replace_ucv32_uz32_n(us32_t *str, ucv32_t from, const uc32_t *to, size_t to_len);
+size_t us32_replace_ucv32_uz32_n_e(us32_t *str, ucv32_t from, const uc32_t *to, size_t to_len, bool *error);
+size_t us32_replace_ucv32_uz32_n_c(us32_t *str, ucv32_t from, const uc32_t *to, size_t to_len, size_t *count);
+size_t us32_replace_ucv32_uz32_n_c_e(us32_t *str, ucv32_t from, const uc32_t *to, size_t to_len, size_t *count, bool *error);
+
+size_t us32_replace_us32_uz32_n(us32_t *str, const us32_t *from, const uc32_t *to, size_t to_len);
+size_t us32_replace_us32_uz32_n_e(us32_t *str, const us32_t *from, const uc32_t *to, size_t to_len, bool *error);
+size_t us32_replace_us32_uz32_n_c(us32_t *str, const us32_t *from, const uc32_t *to, size_t to_len, size_t *count);
+size_t us32_replace_us32_uz32_n_c_e(us32_t *str, const us32_t *from, const uc32_t *to, size_t to_len, size_t *count, bool *error);
+
+size_t us32_replace_uv32_uz32_n(us32_t *str, uv32_t from, const uc32_t *to, size_t to_len);
+size_t us32_replace_uv32_uz32_n_e(us32_t *str, uv32_t from, const uc32_t *to, size_t to_len, bool *error);
+size_t us32_replace_uv32_uz32_n_c(us32_t *str, uv32_t from, const uc32_t *to, size_t to_len, size_t *count);
+size_t us32_replace_uv32_uz32_n_c_e(us32_t *str, uv32_t from, const uc32_t *to, size_t to_len, size_t *count, bool *error);
+
+size_t us32_replace_uz32_ucv32(us32_t *str, const uc32_t *from, ucv32_t to);
+size_t us32_replace_uz32_ucv32_e(us32_t *str, const uc32_t *from, ucv32_t to, bool *error);
+size_t us32_replace_uz32_ucv32_c(us32_t *str, const uc32_t *from, ucv32_t to, size_t *count);
+size_t us32_replace_uz32_ucv32_c_e(us32_t *str, const uc32_t *from, ucv32_t to, size_t *count, bool *error);
+
+size_t us32_replace_uz32_n_ucv32(us32_t *str, const uc32_t *from, size_t from_len, ucv32_t to);
+size_t us32_replace_uz32_n_ucv32_e(us32_t *str, const uc32_t *from, size_t from_len, ucv32_t to, bool *error);
+size_t us32_replace_uz32_n_ucv32_c(us32_t *str, const uc32_t *from, size_t from_len, ucv32_t to, size_t *count);
+size_t us32_replace_uz32_n_ucv32_c_e(us32_t *str, const uc32_t *from, size_t from_len, ucv32_t to, size_t *count, bool *error);
+
+size_t us32_replace_ucv32_ucv32(us32_t *str, ucv32_t from, ucv32_t to);
+size_t us32_replace_ucv32_ucv32_e(us32_t *str, ucv32_t from, ucv32_t to, bool *error);
+size_t us32_replace_ucv32_ucv32_c(us32_t *str, ucv32_t from, ucv32_t to, size_t *count);
+size_t us32_replace_ucv32_ucv32_c_e(us32_t *str, ucv32_t from, ucv32_t to, size_t *count, bool *error);
+
+size_t us32_replace_us32_ucv32(us32_t *str, const us32_t *from, ucv32_t to);
+size_t us32_replace_us32_ucv32_e(us32_t *str, const us32_t *from, ucv32_t to, bool *error);
+size_t us32_replace_us32_ucv32_c(us32_t *str, const us32_t *from, ucv32_t to, size_t *count);
+size_t us32_replace_us32_ucv32_c_e(us32_t *str, const us32_t *from, ucv32_t to, size_t *count, bool *error);
+
+size_t us32_replace_uv32_ucv32(us32_t *str, uv32_t from, ucv32_t to);
+size_t us32_replace_uv32_ucv32_e(us32_t *str, uv32_t from, ucv32_t to, bool *error);
+size_t us32_replace_uv32_ucv32_c(us32_t *str, uv32_t from, ucv32_t to, size_t *count);
+size_t us32_replace_uv32_ucv32_c_e(us32_t *str, uv32_t from, ucv32_t to, size_t *count, bool *error);
+
+size_t us32_replace_uz32_us32(us32_t *str, const uc32_t *from, const us32_t *to);
+size_t us32_replace_uz32_us32_e(us32_t *str, const uc32_t *from, const us32_t *to, bool *error);
+size_t us32_replace_uz32_us32_c(us32_t *str, const uc32_t *from, const us32_t *to, size_t *count);
+size_t us32_replace_uz32_us32_c_e(us32_t *str, const uc32_t *from, const us32_t *to, size_t *count, bool *error);
+
+size_t us32_replace_uz32_n_us32(us32_t *str, const uc32_t *from, size_t from_len, const us32_t *to);
+size_t us32_replace_uz32_n_us32_e(us32_t *str, const uc32_t *from, size_t from_len, const us32_t *to, bool *error);
+size_t us32_replace_uz32_n_us32_c(us32_t *str, const uc32_t *from, size_t from_len, const us32_t *to, size_t *count);
+size_t us32_replace_uz32_n_us32_c_e(us32_t *str, const uc32_t *from, size_t from_len, const us32_t *to, size_t *count, bool *error);
+
+size_t us32_replace_ucv32_us32(us32_t *str, ucv32_t from, const us32_t *to);
+size_t us32_replace_ucv32_us32_e(us32_t *str, ucv32_t from, const us32_t *to, bool *error);
+size_t us32_replace_ucv32_us32_c(us32_t *str, ucv32_t from, const us32_t *to, size_t *count);
+size_t us32_replace_ucv32_us32_c_e(us32_t *str, ucv32_t from, const us32_t *to, size_t *count, bool *error);
+
+size_t us32_replace_us32_us32(us32_t *str, const us32_t *from, const us32_t *to);
+size_t us32_replace_us32_us32_e(us32_t *str, const us32_t *from, const us32_t *to, bool *error);
+size_t us32_replace_us32_us32_c(us32_t *str, const us32_t *from, const us32_t *to, size_t *count);
+size_t us32_replace_us32_us32_c_e(us32_t *str, const us32_t *from, const us32_t *to, size_t *count, bool *error);
+
+size_t us32_replace_uv32_us32(us32_t *str, uv32_t from, const us32_t *to);
+size_t us32_replace_uv32_us32_e(us32_t *str, uv32_t from, const us32_t *to, bool *error);
+size_t us32_replace_uv32_us32_c(us32_t *str, uv32_t from, const us32_t *to, size_t *count);
+size_t us32_replace_uv32_us32_c_e(us32_t *str, uv32_t from, const us32_t *to, size_t *count, bool *error);
+
+size_t us32_replace_uz32_uv32(us32_t *str, const uc32_t *from, uv32_t to);
+size_t us32_replace_uz32_uv32_e(us32_t *str, const uc32_t *from, uv32_t to, bool *error);
+size_t us32_replace_uz32_uv32_c(us32_t *str, const uc32_t *from, uv32_t to, size_t *count);
+size_t us32_replace_uz32_uv32_c_e(us32_t *str, const uc32_t *from, uv32_t to, size_t *count, bool *error);
+
+size_t us32_replace_uz32_n_uv32(us32_t *str, const uc32_t *from, size_t from_len, uv32_t to);
+size_t us32_replace_uz32_n_uv32_e(us32_t *str, const uc32_t *from, size_t from_len, uv32_t to, bool *error);
+size_t us32_replace_uz32_n_uv32_c(us32_t *str, const uc32_t *from, size_t from_len, uv32_t to, size_t *count);
+size_t us32_replace_uz32_n_uv32_c_e(us32_t *str, const uc32_t *from, size_t from_len, uv32_t to, size_t *count, bool *error);
+
+size_t us32_replace_ucv32_uv32(us32_t *str, ucv32_t from, uv32_t to);
+size_t us32_replace_ucv32_uv32_e(us32_t *str, ucv32_t from, uv32_t to, bool *error);
+size_t us32_replace_ucv32_uv32_c(us32_t *str, ucv32_t from, uv32_t to, size_t *count);
+size_t us32_replace_ucv32_uv32_c_e(us32_t *str, ucv32_t from, uv32_t to, size_t *count, bool *error);
+
+size_t us32_replace_us32_uv32(us32_t *str, const us32_t *from, uv32_t to);
+size_t us32_replace_us32_uv32_e(us32_t *str, const us32_t *from, uv32_t to, bool *error);
+size_t us32_replace_us32_uv32_c(us32_t *str, const us32_t *from, uv32_t to, size_t *count);
+size_t us32_replace_us32_uv32_c_e(us32_t *str, const us32_t *from, uv32_t to, size_t *count, bool *error);
+
+size_t us32_replace_uv32_uv32(us32_t *str, uv32_t from, uv32_t to);
+size_t us32_replace_uv32_uv32_e(us32_t *str, uv32_t from, uv32_t to, bool *error);
+size_t us32_replace_uv32_uv32_c(us32_t *str, uv32_t from, uv32_t to, size_t *count);
+size_t us32_replace_uv32_uv32_c_e(us32_t *str, uv32_t from, uv32_t to, size_t *count, bool *error);
 
 // Chars
 

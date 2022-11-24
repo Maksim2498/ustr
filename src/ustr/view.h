@@ -16,10 +16,10 @@
 
 // Creation
 
-#define uv32(literal)                                \
-    (uv32_t) {                                       \
-        .chars = (U##literal),                       \
-        .len   = sizeof(U##literal) / sizeof(uc32_t) \
+#define uv32(literal)                                    \
+    (uv32_t) {                                           \
+        .chars = (U##literal),                           \
+        .len   = sizeof(U##literal) / sizeof(uc32_t) - 1 \
     }
 
 uv32_t uv32_mk(void);

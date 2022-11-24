@@ -83,19 +83,19 @@ int uz8_dec(const uc8_t *cstr) {
         return len;                     \
     }
 
-size_t uz16_clen(const uc16_t *cstr) {
+size_t uz16_uz32_len(const uc16_t *cstr) {
     USTR_RETURN_CLEN_(16, cstr);
 }
 
-size_t uz16_n_clen(const uc16_t *cstr, size_t n) {
+size_t uz16_n_uz32_len(const uc16_t *cstr, size_t n) {
     USTR_RETURN_N_CLEN_(16, cstr, n);
 }
 
-size_t uz8_clen(const uc8_t *cstr) {
+size_t uz8_uz32_len(const uc8_t *cstr) {
     USTR_RETURN_CLEN_(8, cstr);
 }
 
-size_t uz8_n_clen(const uc8_t *cstr, size_t n) {
+size_t uz8_n_uz32_len(const uc8_t *cstr, size_t n) {
     USTR_RETURN_N_CLEN_(8, cstr, n);
 }
 
@@ -1443,7 +1443,7 @@ size_t uz32_n_split_uz32_n(uc32_t *cstr, size_t cstr_len, const uc32_t *another,
     {                                                                              \
         assert(cstr && from);                                                      \
                                                                                    \
-        if (from_len > cstr_len) {                                                 \
+        if (!from_len || from_len > cstr_len) {                                    \
             if (count)                                                             \
                 *count = 0;                                                        \
                                                                                    \
@@ -1516,7 +1516,7 @@ size_t uz32_n_split_uz32_n(uc32_t *cstr, size_t cstr_len, const uc32_t *another,
     {                                                                                        \
         assert(cstr && from && to);                                                          \
                                                                                              \
-        if (cstr_len < from_len) {                                                           \
+        if (!from_len || from_len > cstr_len) {                                              \
             if (count)                                                                       \
                 *count = 0;                                                                  \
                                                                                              \
@@ -1557,7 +1557,7 @@ size_t uz32_n_split_uz32_n(uc32_t *cstr, size_t cstr_len, const uc32_t *another,
     {                                                                                        \
         assert(cstr && from);                                                                \
                                                                                              \
-        if (cstr_len < from_len) {                                                           \
+        if (!from_len || from_len > cstr_len) {                                              \
             if (count)                                                                       \
                 *count = 0;                                                                  \
                                                                                              \

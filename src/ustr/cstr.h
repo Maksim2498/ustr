@@ -24,13 +24,13 @@ size_t uz8_n_trail(const uc8_t *cstr, size_t n);
 int uz16_dec(const uc16_t *cstr);
 int uz8_dec(const uc8_t *cstr);
 
-// Char Len
+// Cross-UTF Len
 
-size_t uz16_clen(const uc16_t *cstr);
-size_t uz16_n_clen(const uc16_t *cstr, size_t n);
+size_t uz16_uz32_len(const uc16_t *cstr);
+size_t uz16_n_uz32_len(const uc16_t *cstr, size_t n);
 
-size_t uz8_clen(const uc8_t *cstr);
-size_t uz8_n_clen(const uc8_t *cstr, size_t n);
+size_t uz8_uz32_len(const uc8_t *cstr);
+size_t uz8_n_uz32_len(const uc8_t *cstr, size_t n);
 
 // Len
 
@@ -317,8 +317,8 @@ size_t uz32_replace_uz32_n_uz32_n(uc32_t *cstr, const uc32_t *from, size_t from_
 size_t uz32_replace_uz32_n_uz32_n_c(uc32_t *cstr, const uc32_t *from, size_t from_len, const uc32_t *to, size_t to_len, size_t *count);
 size_t uz32_replace_uz32_n_uz32_n_len(const uc32_t *cstr, const uc32_t *from, size_t from_len, size_t to_len);
 size_t uz32_replace_uz32_n_uz32_n_len_c(const uc32_t *cstr, const uc32_t *from, size_t from_len, size_t to_len, size_t *count);
-size_t uz32_n_replace_uz32_n_uz32_n(uc32_t *cstr, size_t cstr_le, const uc32_t *from, size_t from_lenn, const uc32_t *to, size_t to_len);
-size_t uz32_n_replace_uz32_n_uz32_n_c(uc32_t *cstr, size_t cstr_le, const uc32_t *from, size_t from_lenn, const uc32_t *to, size_t to_len, size_t *count);
+size_t uz32_n_replace_uz32_n_uz32_n(uc32_t *cstr, size_t cstr_len, const uc32_t *from, size_t from_len, const uc32_t *to, size_t to_len);
+size_t uz32_n_replace_uz32_n_uz32_n_c(uc32_t *cstr, size_t cstr_len, const uc32_t *from, size_t from_len, const uc32_t *to, size_t to_len, size_t *count);
 size_t uz32_n_replace_uz32_n_uz32_n_len(const uc32_t *cstr, size_t cstr_len, const uc32_t *from, size_t from_len, size_t to_len);
 size_t uz32_n_replace_uz32_n_uz32_n_len_c(const uc32_t *cstr, size_t cstr_len, const uc32_t *from, size_t from_len, size_t to_len, size_t *count);
 
@@ -387,8 +387,8 @@ size_t uz16_replace_uz16_n_uz16_n(uc16_t *cstr, const uc16_t *from, size_t from_
 size_t uz16_replace_uz16_n_uz16_n_c(uc16_t *cstr, const uc16_t *from, size_t from_len, const uc16_t *to, size_t to_len, size_t *count);
 size_t uz16_replace_uz16_n_uz16_n_len(const uc16_t *cstr, const uc16_t *from, size_t from_len, size_t to_len);
 size_t uz16_replace_uz16_n_uz16_n_len_c(const uc16_t *cstr, const uc16_t *from, size_t from_len, size_t to_len, size_t *count);
-size_t uz16_n_replace_uz16_n_uz16_n(uc16_t *cstr, size_t cstr_le, const uc16_t *from, size_t from_lenn, const uc16_t *to, size_t to_len);
-size_t uz16_n_replace_uz16_n_uz16_n_c(uc16_t *cstr, size_t cstr_le, const uc16_t *from, size_t from_lenn, const uc16_t *to, size_t to_len, size_t *count);
+size_t uz16_n_replace_uz16_n_uz16_n(uc16_t *cstr, size_t cstr_len, const uc16_t *from, size_t from_len, const uc16_t *to, size_t to_len);
+size_t uz16_n_replace_uz16_n_uz16_n_c(uc16_t *cstr, size_t cstr_len, const uc16_t *from, size_t from_len, const uc16_t *to, size_t to_len, size_t *count);
 size_t uz16_n_replace_uz16_n_uz16_n_len(const uc16_t *cstr, size_t cstr_len, const uc16_t *from, size_t from_len, size_t to_len);
 size_t uz16_n_replace_uz16_n_uz16_n_len_c(const uc16_t *cstr, size_t cstr_len, const uc16_t *from, size_t from_len, size_t to_len, size_t *count);
 
@@ -457,8 +457,8 @@ size_t uz8_replace_uz8_n_uz8_n(uc8_t *cstr, const uc8_t *from, size_t from_len, 
 size_t uz8_replace_uz8_n_uz8_n_c(uc8_t *cstr, const uc8_t *from, size_t from_len, const uc8_t *to, size_t to_len, size_t *count);
 size_t uz8_replace_uz8_n_uz8_n_len(const uc8_t *cstr, const uc8_t *from, size_t from_len, size_t to_len);
 size_t uz8_replace_uz8_n_uz8_n_len_c(const uc8_t *cstr, const uc8_t *from, size_t from_len, size_t to_len, size_t *count);
-size_t uz8_n_replace_uz8_n_uz8_n(uc8_t *cstr, size_t cstr_le, const uc8_t *from, size_t from_lenn, const uc8_t *to, size_t to_len);
-size_t uz8_n_replace_uz8_n_uz8_n_c(uc8_t *cstr, size_t cstr_le, const uc8_t *from, size_t from_lenn, const uc8_t *to, size_t to_len, size_t *count);
+size_t uz8_n_replace_uz8_n_uz8_n(uc8_t *cstr, size_t cstr_len, const uc8_t *from, size_t from_len, const uc8_t *to, size_t to_len);
+size_t uz8_n_replace_uz8_n_uz8_n_c(uc8_t *cstr, size_t cstr_len, const uc8_t *from, size_t from_len, const uc8_t *to, size_t to_len, size_t *count);
 size_t uz8_n_replace_uz8_n_uz8_n_len(const uc8_t *cstr, size_t cstr_len, const uc8_t *from, size_t from_len, size_t to_len);
 size_t uz8_n_replace_uz8_n_uz8_n_len_c(const uc8_t *cstr, size_t cstr_len, const uc8_t *from, size_t from_len, size_t to_len, size_t *count);
 
