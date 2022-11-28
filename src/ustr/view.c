@@ -128,7 +128,8 @@ ptrdiff_t uv32_pos(uv32_t view, uv32_t another) {
 
 ptrdiff_t uv32_pos_from(uv32_t view, uv32_t another, size_t from) {
     assert(uv32_bounds(view, from));
-    return uz32_n_pos_n(uv32_chars(view) + from, view.len - from, UV32_EXPAND(another));
+    ptrdiff_t pos = uz32_n_pos_n(uv32_chars(view) + from, view.len - from, UV32_EXPAND(another));
+    return pos < 0 ? pos : pos + from;
 }
 
 ptrdiff_t uv32_uc32_pos(uv32_t view, uc32_t c) {
@@ -137,7 +138,8 @@ ptrdiff_t uv32_uc32_pos(uv32_t view, uc32_t c) {
 
 ptrdiff_t uv32_uc32_pos_from(uv32_t view, uc32_t c, size_t from) {
     assert(uv32_bounds(view, from));
-    return uz32_n_uc32_pos(uv32_chars(view) + from, view.len - from, c);
+    ptrdiff_t pos = uz32_n_uc32_pos(uv32_chars(view) + from, view.len - from, c);
+    return pos < 0 ? pos : pos + from;
 }
 
 ptrdiff_t uv32_uz32_pos(uv32_t view, const uc32_t *cstr) {
@@ -146,7 +148,8 @@ ptrdiff_t uv32_uz32_pos(uv32_t view, const uc32_t *cstr) {
 
 ptrdiff_t uv32_uz32_pos_from(uv32_t view, const uc32_t *cstr, size_t from) {
     assert(uv32_bounds(view, from));
-    return uz32_n_pos(uv32_chars(view) + from, view.len - from, cstr);
+    ptrdiff_t pos = uz32_n_pos(uv32_chars(view) + from, view.len - from, cstr);
+    return pos < 0 ? pos : pos + from;
 }
 
 ptrdiff_t uv32_uz32_n_pos(uv32_t view, const uc32_t *cstr, size_t n) {
@@ -164,7 +167,8 @@ ptrdiff_t uv32_ucv32_pos(uv32_t view, ucv32_t another) {
 
 ptrdiff_t uv32_ucv32_pos_from(uv32_t view, ucv32_t another, size_t from) {
     assert(uv32_bounds(view, from));
-    return uz32_n_pos_n(uv32_chars(view) + from, view.len - from, UCV32_CEXPAND(another));
+    ptrdiff_t pos = uz32_n_pos_n(uv32_chars(view) + from, view.len - from, UCV32_CEXPAND(another));
+    return pos < 0 ? pos : pos + from;
 }
 
 ptrdiff_t uv32_us32_pos(uv32_t view, const us32_t *str) {
@@ -173,7 +177,8 @@ ptrdiff_t uv32_us32_pos(uv32_t view, const us32_t *str) {
 
 ptrdiff_t uv32_us32_pos_from(uv32_t view, const us32_t *str, size_t from) {
     assert(uv32_bounds(view, from));
-    return uz32_n_pos_n(uv32_chars(view) + from, view.len - from, US32_CEXPAND(str));
+    ptrdiff_t pos = uz32_n_pos_n(uv32_chars(view) + from, view.len - from, US32_CEXPAND(str));
+    return pos < 0 ? pos : pos + from;
 }
 
 ptrdiff_t uv32_pos_r(uv32_t view, uv32_t another) {
@@ -342,6 +347,11 @@ void uv32_fill_us32_to(uv32_t view, const us32_t *str, size_t to) {
 void uv32_fill_us32_range(uv32_t view, const us32_t *str, size_t from, size_t len) {
     assert(uv32_bounds(view, from) && uv32_ebounds(view, from + len));
     return uz32_n_fill_uz32_n(uv32_chars(view) + from, len, US32_CEXPAND(str));
+}
+
+void uv32_to_case(uv32_t view, ucase_t ca) {
+    assert(uv32_valid(view));
+    uz32_n_to_case(UV32_EXPAND(view), ca);
 }
 
 void uv32_to_upper(uv32_t view) {

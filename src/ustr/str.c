@@ -286,7 +286,8 @@ ptrdiff_t us32_pos(const us32_t *str, const us32_t *another) {
 
 ptrdiff_t us32_pos_from(const us32_t *str, const us32_t *another, size_t from) {
 	assert(us32_bounds(str, from));
-	return uz32_n_pos_n(us32_cchars(str) + from, str->len - from, US32_CEXPAND(another));
+	ptrdiff_t pos = uz32_n_pos_n(us32_cchars(str) + from, str->len - from, US32_CEXPAND(another));
+	return pos < 0 ? pos : pos + from;
 }
 
 ptrdiff_t us32_uc32_pos(const us32_t *str, uc32_t c) {
@@ -295,7 +296,8 @@ ptrdiff_t us32_uc32_pos(const us32_t *str, uc32_t c) {
 
 ptrdiff_t us32_uc32_pos_from(const us32_t *str, uc32_t c, size_t from) {
 	assert(us32_bounds(str, from));
-	return uz32_n_uc32_pos(us32_cchars(str) + from, str->len - from, c);
+	ptrdiff_t pos = uz32_n_uc32_pos(us32_cchars(str) + from, str->len - from, c);
+	return pos < 0 ? pos : pos + from;
 }
 
 ptrdiff_t us32_uz32_pos(const us32_t *str, const uc32_t *cstr) {
@@ -304,7 +306,8 @@ ptrdiff_t us32_uz32_pos(const us32_t *str, const uc32_t *cstr) {
 
 ptrdiff_t us32_uz32_pos_from(const us32_t *str, const uc32_t *cstr, size_t from) {
 	assert(us32_bounds(str, from) && cstr);
-	return uz32_n_pos(us32_cchars(str) + from, str->len - from, cstr);
+	ptrdiff_t pos = uz32_n_pos(us32_cchars(str) + from, str->len - from, cstr);
+	return pos < 0 ? pos : pos + from;
 }
 
 ptrdiff_t us32_uz32_n_pos(const us32_t *str, const uc32_t *cstr, size_t n) {
@@ -313,7 +316,8 @@ ptrdiff_t us32_uz32_n_pos(const us32_t *str, const uc32_t *cstr, size_t n) {
 
 ptrdiff_t us32_uz32_n_pos_from(const us32_t *str, const uc32_t *cstr, size_t n, size_t from) {
 	assert(us32_bounds(str, from));
-	return uz32_n_pos_n(us32_cchars(str) + from, str->len - from, cstr, n);
+	ptrdiff_t pos = uz32_n_pos_n(us32_cchars(str) + from, str->len - from, cstr, n);
+	return pos < 0 ? pos : pos + from;
 }
 
 ptrdiff_t us32_uv32_pos(const us32_t *str, uv32_t view) {
@@ -322,7 +326,8 @@ ptrdiff_t us32_uv32_pos(const us32_t *str, uv32_t view) {
 
 ptrdiff_t us32_uv32_pos_from(const us32_t *str, uv32_t view, size_t from) {
 	assert(us32_bounds(str, from));
-	return uz32_n_pos_n(us32_cchars(str) + from, str->len - from, UV32_EXPAND(view));
+	ptrdiff_t pos = uz32_n_pos_n(us32_cchars(str) + from, str->len - from, UV32_EXPAND(view));
+	return pos < 0 ? pos : pos + from;
 }
 
 ptrdiff_t us32_ucv32_pos(const us32_t *str, ucv32_t view) {
@@ -331,7 +336,8 @@ ptrdiff_t us32_ucv32_pos(const us32_t *str, ucv32_t view) {
 
 ptrdiff_t us32_ucv32_pos_from(const us32_t *str, ucv32_t view, size_t from) {
 	assert(us32_bounds(str, from));
-	return uz32_n_pos_n(us32_cchars(str) + from, str->len - from, UCV32_CEXPAND(view));
+	ptrdiff_t pos = uz32_n_pos_n(us32_cchars(str) + from, str->len - from, UCV32_CEXPAND(view));
+	return pos < 0 ? pos : pos + from;
 }
 
 ptrdiff_t us32_pos_r(const us32_t *str, const us32_t *another) {
@@ -499,6 +505,11 @@ void us32_fill_us32_to(us32_t *str, const us32_t *another, size_t to) {
 void us32_fill_us32_range(us32_t *str, const us32_t *another, size_t from, size_t len) {
 	assert(us32_bounds(str, from) && us32_ebounds(str, from + len));
 	uz32_n_fill_uz32_n(us32_chars(str) + from, len, US32_CEXPAND(another));
+}
+
+void us32_to_case(us32_t *str, ucase_t ca) {
+	assert(us32_valid(str));
+	uz32_n_to_case(US32_EXPAND(str), ca);
 }
 
 void us32_to_upper(us32_t *str) {

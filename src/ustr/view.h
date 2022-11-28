@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "type/fmt/case.h"
 #include "type/char.h"
 #include "type/cview.h"
 #include "type/str.h"
@@ -116,6 +117,7 @@ void uv32_fill_us32_range(uv32_t view, const us32_t *str, size_t from, size_t le
 
 // Case Change
 
+void uv32_to_case(uv32_t view, ucase_t ca);
 void uv32_to_upper(uv32_t view);
 void uv32_to_lower(uv32_t view);
 

@@ -774,148 +774,216 @@ void uz8_n_fill_uz8_n(uc8_t *cstr, size_t cstr_len, const uc8_t *another, size_t
     USTR_N_FILL_Z_N_(cstr, cstr_len, another, another_len);
 }
 
-#define USTR_RETURN_TO_CASE_LEN_(N, case, cstr)   \
-    {                                             \
-        assert(cstr);                             \
-                                                  \
-        size_t len = 0;                           \
-                                                  \
-        for (; *cstr; cstr += uc##N##_len(*cstr)) \
-            len += uc##N##_to_##case##_len(cstr); \
-                                                  \
-        return len;                               \
-    }
-
-#define USTR_RETURN_TO_CASE_LEN_N_(N, case, cstr, n)         \
-    {                                                        \
-        assert(cstr);                                        \
-                                                             \
-        size_t len = 0;                                      \
-                                                             \
-        for (size_t i = 0; i < n; i += uc##N##_len(cstr[i])) \
-            len += uc##N##_to_##case##_len(cstr + i);        \
-                                                             \
-        return len;                                          \
-    }
-
-size_t uz16_to_upper_len(const uc16_t *cstr) {
-    USTR_RETURN_TO_CASE_LEN_(16, upper, cstr);
-}
-
-size_t uz16_n_to_upper_len(const uc16_t *cstr, size_t n) {
-    USTR_RETURN_TO_CASE_LEN_N_(16, upper, cstr, n);
-}
-
-size_t uz16_to_lower_len(const uc16_t *cstr) {
-    USTR_RETURN_TO_CASE_LEN_(16, lower, cstr);
-}
-
-size_t uz16_n_to_lower_len(const uc16_t *cstr, size_t n) {
-    USTR_RETURN_TO_CASE_LEN_N_(16, lower, cstr, n);
-}
-
 size_t uz8_to_upper_len(const uc8_t *cstr) {
-    USTR_RETURN_TO_CASE_LEN_(8, upper, cstr);
+    return uz8_to_case_len(cstr, UCASE_UPPER);
 }
 
 size_t uz8_n_to_upper_len(const uc8_t *cstr, size_t n) {
-    USTR_RETURN_TO_CASE_LEN_N_(8, upper, cstr, n);
+    return uz8_n_to_case_len(cstr, n, UCASE_UPPER);
 }
 
 size_t uz8_to_lower_len(const uc8_t *cstr) {
-    USTR_RETURN_TO_CASE_LEN_(8, lower, cstr);
+    return uz8_to_case_len(cstr, UCASE_LOWER);
 }
 
 size_t uz8_n_to_lower_len(const uc8_t *cstr, size_t n) {
-    USTR_RETURN_TO_CASE_LEN_N_(8, lower, cstr, n);
+    return uz8_n_to_case_len(cstr, n, UCASE_LOWER);
 }
 
-#define USTR_UZ32_TO_CASE_(case, cstr) \
-    assert(cstr);                      \
-                                       \
-    for (; *cstr; ++cstr)              \
-        *cstr = uc32_to_##case(*cstr);
+size_t uz8_to_case_len(const uc8_t *cstr, ucase_t ca) {
+    assert(cstr);
 
-#define USTR_UZ32_TO_CASE_N_(case, cstr, n) \
-    assert(cstr);                           \
-                                            \
-    for (size_t i = 0; i < n; ++i)          \
-        cstr[i] = uc32_to_##case(cstr[i]);
+    uc8_to_case_len_func_t func = uc8_to_case_len_func_from_ucase(ca);
+
+    if (!func)
+        return uz8_len(cstr);
+
+    size_t len = 0;
+
+    for (; *cstr; cstr += uc8_len(*cstr))
+        len += func(cstr);
+
+    return len;
+}
+
+size_t uz8_n_to_case_len(const uc8_t *cstr, size_t n, ucase_t ca) {
+    assert(cstr);
+
+    uc8_to_case_len_func_t func = uc8_to_case_len_func_from_ucase(ca);
+
+    if (!func)
+        return uz8_len(cstr);
+
+    size_t len = 0;
+
+    for (; n--; cstr += uc8_len(*cstr))
+        len += func(cstr);
+
+    return len;
+}
 
 void uz32_to_upper(uc32_t *cstr) {
-    USTR_UZ32_TO_CASE_(upper, cstr);
+    uz32_to_case(cstr, UCASE_UPPER);
 }
 
 void uz32_n_to_upper(uc32_t *cstr, size_t n) {
-    USTR_UZ32_TO_CASE_N_(upper, cstr, n);
+    uz32_n_to_case(cstr, n, UCASE_UPPER);
 }
 
 void uz32_to_lower(uc32_t *cstr) {
-    USTR_UZ32_TO_CASE_(lower, cstr);
+    uz32_to_case(cstr, UCASE_LOWER);
 }
 
 void uz32_n_to_lower(uc32_t *cstr, size_t n) {
-    USTR_UZ32_TO_CASE_N_(lower, cstr, n);
+    uz32_n_to_case(cstr, n, UCASE_LOWER);
 }
 
-#define USTR_Z_TO_CASE_(N, case, from, to)                 \
-    assert(from && to);                                    \
-                                                           \
-    for (size_t i = 0, j = 0; from[i];) {                  \
-        int len = uc##N##_len(from[i]);                    \
-                                                           \
-        uz##N##_copy_n(to + j, from + i, len);             \
-                                                           \
-        int to_len = uc##N##_to_##case(to + j);            \
-                                                           \
-        i += len;                                          \
-        j += to_len;                                       \
+void uz32_to_case(uc32_t *cstr, ucase_t ca) {
+    assert(cstr);
+
+    uc32_to_case_func_t func = uc32_to_case_func_from_ucase(ca);
+
+    if (!func)
+        return;
+
+    for (; *cstr; ++cstr)
+        *cstr = func(*cstr);
+}
+
+void uz32_n_to_case(uc32_t *cstr, size_t n, ucase_t ca) {
+    assert(cstr);
+
+    uc32_to_case_func_t func = uc32_to_case_func_from_ucase(ca);
+
+    if (!func)
+        return;
+
+    for (; n--; ++cstr)
+        *cstr = func(*cstr);
+}
+
+void uz16_to_upper(uc16_t *cstr) {
+    uz16_to_case(cstr, UCASE_UPPER);
+}
+
+void uz16_n_to_upper(uc16_t *cstr, size_t n) {
+    uz16_n_to_case(cstr, n, UCASE_UPPER);
+}
+
+void uz16_to_lower(uc16_t *cstr) {
+    uz16_to_case(cstr, UCASE_LOWER);
+}
+
+void uz16_n_to_lower(uc16_t *cstr, size_t n) {
+    uz16_n_to_case(cstr, n, UCASE_LOWER);
+}
+
+void uz16_to_case(uc16_t *cstr, ucase_t ca) {
+    assert(cstr);
+
+    uc16_to_case_func_t func = uc16_to_case_func_from_ucase(ca);
+
+    if (!func)
+        return;
+
+    while (*cstr)
+        cstr += func(cstr);
+}
+
+void uz16_n_to_case(uc16_t *cstr, size_t n, ucase_t ca) {
+    assert(cstr);
+
+    uc16_to_case_func_t func = uc16_to_case_func_from_ucase(ca);
+
+    if (!func)
+        return;
+
+    while (n--)
+        cstr += func(cstr);
+}
+
+#define USTR_UZ8_TO_CASE_(case, from, to)   \
+    assert(from && to);                     \
+                                            \
+    for (size_t i = 0, j = 0; from[i];) {   \
+        int len = uc8_len(from[i]);         \
+                                            \
+        uz8_copy_n(to + j, from + i, len);  \
+                                            \
+        int to_len = uc8_to_##case(to + j); \
+                                            \
+        i += len;                           \
+        j += to_len;                        \
     }
 
-#define USTR_Z_TO_CASE_N_(N, case, from, n, to)            \
-    assert(from && to);                                    \
-                                                           \
-    for (size_t i = 0, j = 0; i < n;) {                    \
-        int len = uc##N##_len(from[i]);                    \
-                                                           \
-        uz##N##_copy_n(to + j, from + i, len);             \
-                                                           \
-        int to_len = uc##N##_to_##case(to + j);            \
-                                                           \
-        i += len;                                          \
-        j += to_len;                                       \
+#define USTR_UZ8_TO_CASE_N_(case, from, n, to) \
+    assert(from && to);                        \
+                                               \
+    for (size_t i = 0, j = 0; i < n;) {        \
+        int len = uc8_len(from[i]);            \
+                                               \
+        uz8_copy_n(to + j, from + i, len);     \
+                                               \
+        int to_len = uc8_to_##case(to + j);    \
+                                               \
+        i += len;                              \
+        j += to_len;                           \
     }
-
-void uz16_to_upper(const uc16_t *from, uc16_t *to) {
-    USTR_Z_TO_CASE_(16, upper, from, to);
-}
-
-void uz16_n_to_upper(const uc16_t *from, size_t n, uc16_t *to) {
-    USTR_Z_TO_CASE_N_(16, upper, from, n, to);
-}
-
-void uz16_to_lower(const uc16_t *from, uc16_t *to) {
-    USTR_Z_TO_CASE_(16, lower, from, to);
-}
-
-void uz16_n_to_lower(const uc16_t *from, size_t n, uc16_t *to) {
-    USTR_Z_TO_CASE_N_(16, lower, from, n, to);
-}
 
 void uz8_to_upper(const uc8_t *from, uc8_t *to) {
-    USTR_Z_TO_CASE_(8, upper, from, to);
+    uz8_to_case(from, to, UCASE_UPPER);
 }
 
 void uz8_n_to_upper(const uc8_t *from, size_t n, uc8_t *to) {
-    USTR_Z_TO_CASE_N_(8, upper, from, n, to);
+    uz8_n_to_case(from, n, to, UCASE_UPPER);
 }
 
 void uz8_to_lower(const uc8_t *from, uc8_t *to) {
-    USTR_Z_TO_CASE_(8, lower, from, to);
+    uz8_to_case(from, to, UCASE_LOWER);
 }
 
 void uz8_n_to_lower(const uc8_t *from, size_t n, uc8_t *to) {
-    USTR_Z_TO_CASE_N_(8, lower, from, n, to);
+    uz8_n_to_case(from, n, to, UCASE_LOWER);
+}
+
+void uz8_to_case(const uc8_t *from, uc8_t *to, ucase_t ca) {
+    assert(from && to);
+
+    uc8_to_case_func_t func = uc8_to_case_func_from_ucase(ca);
+
+    if (!func)
+        return;
+
+    for (size_t i = 0, j = 0; from[i];) {
+        int len = uc8_len(from[i]);
+
+        uz8_copy_n(to + j, from + i, len);
+
+        int to_len = func(to + j);
+
+        i += len;
+        j += to_len;
+    }
+}
+
+void uz8_n_to_case(const uc8_t *from, size_t n, uc8_t *to, ucase_t ca) {
+    assert(from && to);
+
+    uc8_to_case_func_t func = uc8_to_case_func_from_ucase(ca);
+
+    if (!func)
+        return;
+
+    for (size_t i = 0, j = 0; i < n;) {
+        int len = uc8_len(from[i]);
+
+        uz8_copy_n(to + j, from + i, len);
+
+        int to_len = func(to + j);
+
+        i += len;
+        j += to_len;
+    }
 }
 
 #define USTR_RETURN_Z_N_TRIM_LEFT_(N, src, n) \

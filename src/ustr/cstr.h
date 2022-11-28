@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "type/fmt/case.h"
 #include "type/char.h"
 #include "type/cview.h"
 #include "type/view.h"
@@ -132,30 +133,33 @@ void uz8_n_fill_uz8_n(uc8_t *cstr, size_t cstr_len, const uc8_t *another, size_t
 
 // Case Change
 
-size_t uz16_to_upper_len(const uc16_t *cstr);
-size_t uz16_n_to_upper_len(const uc16_t *cstr, size_t n);
-size_t uz16_to_lower_len(const uc16_t *cstr);
-size_t uz16_n_to_lower_len(const uc16_t *cstr, size_t n);
-
 size_t uz8_to_upper_len(const uc8_t *cstr);
 size_t uz8_n_to_upper_len(const uc8_t *cstr, size_t n);
 size_t uz8_to_lower_len(const uc8_t *cstr);
 size_t uz8_n_to_lower_len(const uc8_t *cstr, size_t n);
+size_t uz8_to_case_len(const uc8_t *cstr, ucase_t ca);
+size_t uz8_n_to_case_len(const uc8_t *cstr, size_t n, ucase_t ca);
 
 void uz32_to_upper(uc32_t *cstr);
 void uz32_n_to_upper(uc32_t *cstr, size_t n);
 void uz32_to_lower(uc32_t *cstr);
 void uz32_n_to_lower(uc32_t *cstr, size_t n);
+void uz32_to_case(uc32_t *cstr, ucase_t ca);
+void uz32_n_to_case(uc32_t *cstr, size_t n, ucase_t ca);
 
-void uz16_to_upper(const uc16_t *from, uc16_t *to);
-void uz16_n_to_upper(const uc16_t *from, size_t n, uc16_t *to);
-void uz16_to_lower(const uc16_t *from, uc16_t *to);
-void uz16_n_to_lower(const uc16_t *from, size_t n, uc16_t *to);
+void uz16_to_upper(uc16_t *cstr);
+void uz16_n_to_upper(uc16_t *cstr, size_t n);
+void uz16_to_lower(uc16_t *cstr);
+void uz16_n_to_lower(uc16_t *cstr, size_t n);
+void uz16_to_case(uc16_t *cstr, ucase_t ca);
+void uz16_n_to_case(uc16_t *cstr, size_t n, ucase_t ca);
 
 void uz8_to_upper(const uc8_t *from, uc8_t *to);
 void uz8_n_to_upper(const uc8_t *from, size_t n, uc8_t *to);
 void uz8_to_lower(const uc8_t *from, uc8_t *to);
 void uz8_n_to_lower(const uc8_t *from, size_t n, uc8_t *to);
+void uz8_to_case(const uc8_t *from, uc8_t *to, ucase_t ca);
+void uz8_n_to_case(const uc8_t *from, size_t n, uc8_t *to, ucase_t ca);
 
 // Trim
 

@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "type/fmt/case.h"
 #include "type/char.h"
 #include "type/cview.h"
 #include "type/str.h"
@@ -148,6 +149,7 @@ void us32_fill_us32_range(us32_t *str, const us32_t *another, size_t from, size_
 
 // Case Change
 
+void us32_to_case(us32_t *str, ucase_t ca);
 void us32_to_upper(us32_t *str);
 void us32_to_lower(us32_t *str);
 

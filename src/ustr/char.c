@@ -755,6 +755,38 @@ bool uc8_rad(uc8_t c, unsigned radix) {
 
 // Human-readable:
 
+uc8_to_case_len_func_t uc8_to_case_len_func_from_ucase(ucase_t ca) {
+	switch (ca) {
+		case UCASE_UPPER:
+			return uc8_to_upper_len;
+
+		case UCASE_LOWER:
+			return uc8_to_lower_len;
+
+		default:
+			return NULL;
+	}
+}
+
+// Human-readable:
+
+int uc8_to_case_len(const uc8_t *c, ucase_t ca) {
+	assert(c);
+
+	switch (ca) {
+		case UCASE_UPPER:
+			return uc8_to_upper_len(c);
+
+		case UCASE_LOWER:
+			return uc8_to_lower_len(c);
+
+		default:
+			return uc8_len(*c);
+	}
+}
+
+// Human-readable:
+
 int uc8_to_upper_len(const uc8_t *c) {
 	assert(c);
 
@@ -781,6 +813,38 @@ int uc8_to_lower_len(const uc8_t *c) {
 	c32 = uc32_to_lower(c32);
 
 	return uc32_uc8_len(c32);
+}
+
+// Human-readable:
+
+uc8_to_case_func_t uc8_to_case_func_from_ucase(ucase_t ca) {
+	switch (ca) {
+		case UCASE_UPPER:
+			return uc8_to_upper;
+
+		case UCASE_LOWER:
+			return uc8_to_lower;
+
+		default:
+			return NULL;
+	}
+}
+
+// Human-readable:
+
+int uc8_to_case(uc8_t *c, ucase_t ca) {
+	assert(c);
+
+	switch (ca) {
+		case UCASE_UPPER:
+			return uc8_to_upper(c);
+
+		case UCASE_LOWER:
+			return uc8_to_lower(c);
+
+		default:
+			return uc8_len(*c);
+	}
 }
 
 // Human-readable:
@@ -1053,32 +1117,34 @@ bool uc16_rad(uc16_t c, unsigned radix) {
 
 // Human-readable:
 
-int uc16_to_upper_len(const uc16_t *c) {
-	assert(c);
+uc16_to_case_func_t uc16_to_case_func_from_ucase(ucase_t ca) {
+	switch (ca) {
+		case UCASE_UPPER:
+			return uc16_to_upper;
 
-	uc32_t c32;
+		case UCASE_LOWER:
+			return uc16_to_lower;
 
-	if (!uc32_from_uc16(&c32, c))
-		return 0;
-
-	c32 = uc32_to_upper(c32);
-
-	return uc32_uc16_len(c32);
+		default:
+			return NULL;
+	}
 }
 
 // Human-readable:
 
-int uc16_to_lower_len(const uc16_t *c) {
+int uc16_to_case(uc16_t *c, ucase_t ca) {
 	assert(c);
 
-	uc32_t c32;
+	switch (ca) {
+		case UCASE_UPPER:
+			return uc16_to_upper(c);
 
-	if (!uc32_from_uc16(&c32, c))
-		return 0;
+		case UCASE_LOWER:
+			return uc16_to_lower(c);
 
-	c32 = uc32_to_lower(c32);
-
-	return uc32_uc16_len(c32);
+		default:
+			return uc16_len(*c);
+	}
 }
 
 // Human-readable:
@@ -1359,6 +1425,36 @@ bool uc32_rad(uc32_t c, unsigned radix) {
         return false;
 
     return c < radix;
+}
+
+// Human-readable:
+
+uc32_to_case_func_t uc32_to_case_func_from_ucase(ucase_t ca) {
+	switch (ca) {
+		case UCASE_UPPER:
+			return uc32_to_upper;
+
+		case UCASE_LOWER:
+			return uc32_to_lower;
+
+		default:
+			return NULL;
+	}
+}
+
+// Human-readable:
+
+uc32_t uc32_to_case(uc32_t c, ucase_t ca) {
+	switch (ca) {
+		case UCASE_UPPER:
+			return uc32_to_upper(c);
+
+		case UCASE_LOWER:
+			return uc32_to_lower(c);
+
+		default:
+			return c;
+	}
 }
 
 uc32_t uc32_to_upper(uc32_t c) {

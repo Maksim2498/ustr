@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 
+#include "type/fmt/case.h"
 #include "type/char.h"
 #include "type/endian.h"
 
@@ -87,9 +88,13 @@ bool uc8_rad(uc8_t c, unsigned radix);
 
 // - Case chage
 
+uc8_to_case_len_func_t uc8_to_case_len_func_from_ucase(ucase_t ca);
+int uc8_to_case_len(const uc8_t *c, ucase_t ca);
 int uc8_to_upper_len(const uc8_t *c);
 int uc8_to_lower_len(const uc8_t *c);
 
+uc8_to_case_func_t uc8_to_case_func_from_ucase(ucase_t ca);
+int uc8_to_case(uc8_t *c, ucase_t ca);
 int uc8_to_upper(uc8_t *c);
 int uc8_to_lower(uc8_t *c);
 
@@ -148,9 +153,8 @@ bool uc16_rad(uc16_t c, unsigned radix);
 
 // - Case chage
 
-int uc16_to_upper_len(const uc16_t *c);
-int uc16_to_lower_len(const uc16_t *c);
-
+uc16_to_case_func_t uc16_to_case_func_from_ucase(ucase_t ca);
+int uc16_to_case(uc16_t *c, ucase_t ca);
 int uc16_to_upper(uc16_t *c);
 int uc16_to_lower(uc16_t *c);
 
@@ -204,6 +208,8 @@ bool uc32_rad(uc32_t c, unsigned radix);
 
 // - Case chage
 
+uc32_to_case_func_t uc32_to_case_func_from_ucase(ucase_t ca);
+uc32_t uc32_to_case(uc32_t c, ucase_t ca);
 uc32_t uc32_to_upper(uc32_t c);
 uc32_t uc32_to_lower(uc32_t c);
 
