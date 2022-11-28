@@ -2,5 +2,6 @@
 #define USTR_FMT_ALL_H
 
 #include "case.h"
+#include "radix.h"
 
 #endif

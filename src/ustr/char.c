@@ -2,6 +2,7 @@
 
 #include <assert.h>
 
+#include "fmt/radix.h"
 #include "util/endian.h"
 #include "config.h"
 
@@ -1366,7 +1367,7 @@ int uc32_bin_val(uc32_t c) {
 // Human-readable:
 
 int uc32_rad_val(uc32_t c, unsigned radix) {
-    assert(radix <= URADIX_MAX);
+    assert(uradix_valid(radix));
 
     if (U'0' <= c && c <= U'9')
         c -= U'0';
