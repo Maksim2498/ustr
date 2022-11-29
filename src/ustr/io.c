@@ -368,20 +368,20 @@ size_t ureadln_us32_e(us32_t *s, bool *error) {
 	return ufreadln_us32_e(stdin, s, error);
 }
 
-size_t ufreadln_us32(FILE *file, us32_t *s) {
-	return ufreadln_us32_e(file, s, NULL);
-}
-
-size_t ufreadln_us32_e(FILE *file, us32_t *s, bool *error) {
-	return ufreadln_us32_sep_e(file, s, '\n', error);
-}
-
 size_t ureadln_us32_sep(us32_t *s, uc32_t sep) {
 	return ureadln_us32_sep_e(s, sep, NULL);
 }
 
 size_t ureadln_us32_sep_e(us32_t *s, uc32_t sep, bool *error) {
 	return ufreadln_us32_sep_e(stdin, s, sep, error);
+}
+
+size_t ufreadln_us32(FILE *file, us32_t *s) {
+	return ufreadln_us32_e(file, s, NULL);
+}
+
+size_t ufreadln_us32_e(FILE *file, us32_t *s, bool *error) {
+	return ufreadln_us32_sep_e(file, s, '\n', error);
 }
 
 size_t ufreadln_us32_sep(FILE *file, us32_t *s, uc32_t sep) {
@@ -443,6 +443,22 @@ size_t uread_uc32(uc32_t *c) {
 	return ufread_uc32(stdin, c);
 }
 
+size_t uread_uc16_f(uc16_t *c) {
+	return ufread_uc16_f(stdin, c);
+}
+
+size_t uread_uc16(uc16_t *c) {
+	return ufread_uc16(stdin, c);
+}
+
+size_t uread_uc8_f(uc8_t *c) {
+	return ufread_uc8_f(stdin, c);
+}
+
+size_t uread_uc8(uc8_t *c) {
+	return ufread_uc8(stdin, c);
+}
+
 size_t ufread_uc32(FILE *file, uc32_t *c32) {
 	assert(c32);
 
@@ -456,28 +472,16 @@ size_t ufread_uc32(FILE *file, uc32_t *c32) {
 	return 1;
 }
 
-size_t uread_uc16(uc16_t *c) {
-	return ufread_uc16(stdin, c);
-}
-
 size_t ufread_uc16(FILE *file, uc16_t *c16) {
 	assert(c16);
 	uc32_t c32;
 	return ufread_uc32(file, &c32) && uc32_uc16_len(c32) == 1 ? uc16_from_uc32(c16, c32) : 0;
 }
 
-size_t uread_uc16_f(uc16_t *c) {
-	return ufread_uc16_f(stdin, c);
-}
-
 size_t ufread_uc16_f(FILE *file, uc16_t *c16) {
 	assert(c16);
 	uc32_t c32;
 	return ufread_uc32(file, &c32) ? uc16_from_uc32(c16, c32) : 0;
-}
-
-size_t uread_uc8_f(uc8_t *c) {
-	return ufread_uc8_f(stdin, c);
 }
 
 size_t ufread_uc8_f(FILE *file, uc8_t *c8) {
@@ -508,10 +512,6 @@ size_t ufread_uc8_f(FILE *file, uc8_t *c8) {
 		c8[i] = inner_c8[i];
 
 	return len;
-}
-
-size_t uread_uc8(uc8_t *c) {
-	return ufread_uc8(stdin, c);
 }
 
 size_t ufread_uc8(FILE *file, uc8_t *c8) {
