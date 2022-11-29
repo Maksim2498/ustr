@@ -1,6 +1,7 @@
 #ifndef USTR_IO_H
 #define USTR_IO_H
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 
@@ -13,7 +14,9 @@
 
 void uset_locale(void);
 
-// CView
+// Output
+
+// - CView
 
 size_t uprintln_ucv32(ucv32_t view);
 size_t uprint_ucv32(ucv32_t view);
@@ -21,7 +24,7 @@ size_t uprint_ucv32(ucv32_t view);
 size_t ufprintln_ucv32(FILE *file, ucv32_t view);
 size_t ufprint_ucv32(FILE *file, ucv32_t view);
 
-// Str
+// - Str
 
 size_t uprintln_us32(const us32_t *str);
 size_t uprint_us32(const us32_t *str);
@@ -29,7 +32,7 @@ size_t uprint_us32(const us32_t *str);
 size_t ufprintln_us32(FILE *file, const us32_t *str);
 size_t ufprint_us32(FILE *file, const us32_t *str);
 
-// View
+// - View
 
 size_t uprintln_uv32(uv32_t view);
 size_t uprint_uv32(uv32_t view);
@@ -37,7 +40,7 @@ size_t uprint_uv32(uv32_t view);
 size_t ufprintln_uv32(FILE *file, uv32_t view);
 size_t ufprint_uv32(FILE *file, uv32_t view);
 
-// CStr
+// - CStr
 
 size_t uprintln_uz32(const uc32_t *cstr);
 size_t uprint_uz32(const uc32_t *cstr);
@@ -65,7 +68,7 @@ size_t ufprint_uz8(FILE *file, const uc8_t *cstr);
 size_t ufprintln_uz8_n(FILE *file, const uc8_t *cstr, size_t n);
 size_t ufprint_uz8_n(FILE *file, const uc8_t *cstr, size_t n);
 
-// Char
+// - Char
 
 size_t uprintln_uc32(uc32_t c);
 size_t uprint_uc32(uc32_t c);
@@ -95,5 +98,16 @@ size_t ufprint_uc8_n(FILE *file, uc8_t c, size_t n);
 
 size_t uprintln(void);
 size_t ufprintln(FILE *file);
+
+// Input
+
+size_t ureadln(us32_t *s);
+size_t ureadln_e(us32_t *s, bool *error);
+size_t ufreadln(FILE *file, us32_t *s);
+size_t ufreadln_e(FILE *file, us32_t *s, bool *error);
+size_t ureadln_sep(us32_t *s, uc32_t sep);
+size_t ureadln_sep_e(us32_t *s, uc32_t sep, bool *error);
+size_t ufreadln_sep(FILE *file, us32_t *s, uc32_t sep);
+size_t ufreadln_sep_e(FILE *file, us32_t *s, uc32_t sep, bool *error);
 
 #endif
