@@ -101,13 +101,13 @@ size_t ufprintln(FILE *file);
 
 // Input
 
-size_t ureadln(us32_t *s);
-size_t ureadln_e(us32_t *s, bool *error);
-size_t ufreadln(FILE *file, us32_t *s);
-size_t ufreadln_e(FILE *file, us32_t *s, bool *error);
-size_t ureadln_sep(us32_t *s, uc32_t sep);
-size_t ureadln_sep_e(us32_t *s, uc32_t sep, bool *error);
-size_t ufreadln_sep(FILE *file, us32_t *s, uc32_t sep);
-size_t ufreadln_sep_e(FILE *file, us32_t *s, uc32_t sep, bool *error);
+size_t ureadln_us32(us32_t *s);
+size_t ureadln_us32_e(us32_t *s, bool *error);
+size_t ufreadln_us32(FILE *file, us32_t *s);
+size_t ufreadln_us32_e(FILE *file, us32_t *s, bool *error);
+size_t ureadln_us32_sep(us32_t *s, uc32_t sep);
+size_t ureadln_us32_sep_e(us32_t *s, uc32_t sep, bool *error);
+size_t ufreadln_us32_sep(FILE *file, us32_t *s, uc32_t sep);
+size_t ufreadln_us32_sep_e(FILE *file, us32_t *s, uc32_t sep, bool *error);
 
 #endif

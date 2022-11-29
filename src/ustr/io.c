@@ -360,35 +360,35 @@ size_t ufprintln(FILE *file) {
 	return ufprint_uc8(file, '\n');
 }
 
-size_t ureadln(us32_t *s) {
-	return ureadln_e(s, NULL);
+size_t ureadln_us32(us32_t *s) {
+	return ureadln_us32_e(s, NULL);
 }
 
-size_t ureadln_e(us32_t *s, bool *error) {
-	return ufreadln_e(stdin, s, error);
+size_t ureadln_us32_e(us32_t *s, bool *error) {
+	return ufreadln_us32_e(stdin, s, error);
 }
 
-size_t ufreadln(FILE *file, us32_t *s) {
-	return ufreadln_e(file, s, NULL);
+size_t ufreadln_us32(FILE *file, us32_t *s) {
+	return ufreadln_us32_e(file, s, NULL);
 }
 
-size_t ufreadln_e(FILE *file, us32_t *s, bool *error) {
-	return ufreadln_sep_e(file, s, '\n', error);
+size_t ufreadln_us32_e(FILE *file, us32_t *s, bool *error) {
+	return ufreadln_us32_sep_e(file, s, '\n', error);
 }
 
-size_t ureadln_sep(us32_t *s, uc32_t sep) {
-	return ureadln_sep_e(s, sep, NULL);
+size_t ureadln_us32_sep(us32_t *s, uc32_t sep) {
+	return ureadln_us32_sep_e(s, sep, NULL);
 }
 
-size_t ureadln_sep_e(us32_t *s, uc32_t sep, bool *error) {
-	return ufreadln_sep_e(stdin, s, sep, error);
+size_t ureadln_us32_sep_e(us32_t *s, uc32_t sep, bool *error) {
+	return ufreadln_us32_sep_e(stdin, s, sep, error);
 }
 
-size_t ufreadln_sep(FILE *file, us32_t *s, uc32_t sep) {
-	return ufreadln_sep_e(file, s, sep, NULL);
+size_t ufreadln_us32_sep(FILE *file, us32_t *s, uc32_t sep) {
+	return ufreadln_us32_sep_e(file, s, sep, NULL);
 }
 
-size_t ufreadln_sep_e(FILE *file, us32_t *s, uc32_t sep, bool *error) {
+size_t ufreadln_us32_sep_e(FILE *file, us32_t *s, uc32_t sep, bool *error) {
 	assert(us32_valid(s));
 
 	if (ferror(file))
@@ -399,12 +399,33 @@ size_t ufreadln_sep_e(FILE *file, us32_t *s, uc32_t sep, bool *error) {
 	bool inner_error = false;
 
 	while (true) {
-		int c = fgetc(file);
+		uc8_t c8[4];
+		int   c = fgetc(file);
 
-		if (EOF == c || sep == c)
+		if (EOF == c)
 			break;
 
-		us32_append_uc32_e(s, c, &inner_error);
+		c8[0] = c;
+
+		int len = uc8_len(c8[0]);
+
+		for (int i = 1; i < len; ++i) {
+			c = fgetc(file);
+
+			if (EOF == c)
+				goto exit;
+
+			c8[i] = c;
+		}
+
+		uc32_t c32;
+
+		uc32_from_uc8(&c32, c8);
+
+		if (c32 == sep)
+			break;
+
+		us32_append_uc32_e(s, c32, &inner_error);
 
 		if (inner_error) {
 			if (error)
@@ -414,5 +435,6 @@ size_t ufreadln_sep_e(FILE *file, us32_t *s, uc32_t sep, bool *error) {
 		}
 	}
 
+exit:
 	return us32_len(s);
 }
