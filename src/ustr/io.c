@@ -3,13 +3,83 @@
 #include <assert.h>
 #include <locale.h>
 
+#include "fmt/int.h"
 #include "char.h"
+#include "cstr.h"
 #include "cview.h"
 #include "str.h"
 #include "view.h"
 
 void uset_locale(void) {
     setlocale(LC_ALL, "en_US.UTF-8");
+}
+
+size_t uprintln_int(intmax_t i) {
+	return uprint_int(i) + uprintln();
+}
+
+size_t uprint_int(intmax_t i) {
+	return ufprint_int(stdout, i);
+}
+
+size_t uprintln_int_fmt(intmax_t i, const struct uifmt *fmt) {
+	return uprint_int_fmt(i, fmt) + uprintln();
+}
+
+size_t uprint_int_fmt(intmax_t i, const struct uifmt *fmt) {
+	return ufprint_int_fmt(stdout, i, fmt);
+}
+
+size_t uprintln_uint(uintmax_t i) {
+	return uprint_uint(i) + uprintln();
+}
+
+size_t uprint_uint(uintmax_t i) {
+	return ufprint_uint(stdout, i);
+}
+
+size_t uprintln_uint_fmt(uintmax_t i, const struct uifmt *fmt) {
+	return uprint_uint_fmt(i, fmt) + uprintln();
+}
+
+size_t uprint_uint_fmt(uintmax_t i, const struct uifmt *fmt) {
+	return ufprint_uint_fmt(stdout, i, fmt);
+}
+
+size_t ufprintln_int(FILE *file, intmax_t i) {
+	return ufprint_int(file, i) + ufprintln(file);
+}
+
+size_t ufprint_int(FILE *file, intmax_t i) {
+	return ufprint_int_fmt(file, i, &UIFMT_DEC);
+}
+
+size_t ufprintln_int_fmt(FILE *file, intmax_t i, const struct uifmt *fmt) {
+	return ufprint_int_fmt(file, i, fmt) + ufprintln(file);
+}
+
+size_t ufprint_int_fmt(FILE *file, intmax_t i, const struct uifmt *fmt) {
+	uc8_t  cstr[UINT_MAX_UC8_LEN];
+	size_t cstr_len = uz8_from_int_fmt(cstr, i, fmt);
+	return ufprint_uz8_n(file, cstr, cstr_len);
+}
+
+size_t ufprintln_uint(FILE *file, uintmax_t i) {
+	return ufprint_uint(file, i) + ufprintln(file);
+}
+
+size_t ufprint_uint(FILE *file, uintmax_t i) {
+	return ufprint_uint_fmt(file, i, &UIFMT_DEC);
+}
+
+size_t ufprintln_uint_fmt(FILE *file, uintmax_t i, const struct uifmt *fmt) {
+	return ufprint_uint_fmt(file, i, fmt) + ufprintln(file);
+}
+
+size_t ufprint_uint_fmt(FILE *file, uintmax_t i, const struct uifmt *fmt) {
+	uc8_t  cstr[UINT_MAX_UC8_LEN];
+	size_t cstr_len = uz8_from_uint_fmt(cstr, i, fmt);
+	return ufprint_uz8_n(file, cstr, cstr_len);
 }
 
 size_t uprintln_ucv32(ucv32_t view) {

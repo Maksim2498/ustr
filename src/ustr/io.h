@@ -4,7 +4,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <stdint.h>
 
+#include "type/fmt/int.h"
 #include "type/char.h"
 #include "type/cview.h"
 #include "type/str.h"
@@ -15,6 +17,26 @@
 void uset_locale(void);
 
 // Output
+
+// - Int
+
+size_t uprintln_int(intmax_t i);
+size_t uprint_int(intmax_t i);
+size_t uprintln_int_fmt(intmax_t i, const struct uifmt *fmt);
+size_t uprint_int_fmt(intmax_t i, const struct uifmt *fmt);
+size_t uprintln_uint(uintmax_t i);
+size_t uprint_uint(uintmax_t i);
+size_t uprintln_uint_fmt(uintmax_t i, const struct uifmt *fmt);
+size_t uprint_uint_fmt(uintmax_t i, const struct uifmt *fmt);
+
+size_t ufprintln_int(FILE *file, intmax_t i);
+size_t ufprint_int(FILE *file, intmax_t i);
+size_t ufprintln_int_fmt(FILE *file, intmax_t i, const struct uifmt *fmt);
+size_t ufprint_int_fmt(FILE *file, intmax_t i, const struct uifmt *fmt);
+size_t ufprintln_uint(FILE *file, uintmax_t i);
+size_t ufprint_uint(FILE *file, uintmax_t i);
+size_t ufprintln_uint_fmt(FILE *file, uintmax_t i, const struct uifmt *fmt);
+size_t ufprint_uint_fmt(FILE *file, uintmax_t i, const struct uifmt *fmt);
 
 // - CView
 
