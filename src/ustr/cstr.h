@@ -13,9 +13,13 @@
 
 // Creation
 
+// - From literal
+
 #define uz32(literal) (uc32_t *)  U##literal
 #define uz16(literal) (uc16_t *)  u##literal
 #define  uz8(literal)  (uc8_t *) u8##literal
+
+// - From int
 
 size_t uz32_from_int(uc32_t *cstr, intmax_t i);
 size_t uz32_from_int_fmt(uc32_t *cstr, intmax_t i, const struct uifmt *fmt);
@@ -31,6 +35,23 @@ size_t uz8_from_int(uc8_t *cstr, intmax_t i);
 size_t uz8_from_int_fmt(uc8_t *cstr, intmax_t i, const struct uifmt *fmt);
 size_t uz8_from_uint(uc8_t *cstr, uintmax_t i);
 size_t uz8_from_uint_fmt(uc8_t *cstr, uintmax_t i, const struct uifmt *fmt);
+
+// - From bool
+
+size_t uz32_from_bool(uc32_t *cstr, bool b);
+size_t uz32_from_bool_case(uc32_t *cstr, bool b, ucase_t c);
+size_t uz32_from_bool_upper(uc32_t *cstr, bool b);
+size_t uz32_from_bool_lower(uc32_t *cstr, bool b);
+
+size_t uz16_from_bool(uc16_t *cstr, bool b);
+size_t uz16_from_bool_case(uc16_t *cstr, bool b, ucase_t c);
+size_t uz16_from_bool_upper(uc16_t *cstr, bool b);
+size_t uz16_from_bool_lower(uc16_t *cstr, bool b);
+
+size_t uz8_from_bool(uc8_t *cstr, bool b);
+size_t uz8_from_bool_case(uc8_t *cstr, bool b, ucase_t c);
+size_t uz8_from_bool_upper(uc8_t *cstr, bool b);
+size_t uz8_from_bool_lower(uc8_t *cstr, bool b);
 
 // Lead Count
 
