@@ -3,6 +3,14 @@
 
 #include <stdint.h>
 
+enum {
+    UBOM_LITTLE_ENDIAN = 0xFFFE,
+    UBOM_BIG_ENDIAN    = 0xFEFF,
+    UBOM_UTF_8         = 0xEFBBBF,
+
+    UMAX_CP            = 0x10FFFF
+};
+
 typedef uint32_t uc32_t;
 typedef uint16_t uc16_t;
 typedef uint8_t  uc8_t;

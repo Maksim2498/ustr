@@ -2,6 +2,7 @@
 
 #include <assert.h>
 
+#include "fmt/int.h"
 #include "util/mem.h"
 #include "config.h"
 #include "cstr.h"
@@ -119,6 +120,54 @@ us32_t us32_from_uc32_n_e(uc32_t c, size_t n, bool *error) {
 	return res;
 }
 
+us32_t us32_from_int(intmax_t i) {
+	us32_t res = us32_mk();
+	us32_append_int(&res, i);
+	return res;
+}
+
+us32_t us32_from_int_e(intmax_t i, bool *error) {
+	us32_t res = us32_mk();
+	us32_append_int_e(&res, i, error);
+	return res;
+}
+
+us32_t us32_from_int_fmt(intmax_t i, const struct uifmt *fmt) {
+	us32_t res = us32_mk();
+	us32_append_int_fmt(&res, i, fmt);
+	return res;
+}
+
+us32_t us32_from_int_fmt_e(intmax_t i, const struct uifmt *fmt, bool *error) {
+	us32_t res = us32_mk();
+	us32_append_int_fmt_e(&res, i, fmt, error);
+	return res;
+}
+
+us32_t us32_from_uint(uintmax_t i) {
+	us32_t res = us32_mk();
+	us32_append_uint(&res, i);
+	return res;
+}
+
+us32_t us32_from_uint_e(uintmax_t i, bool *error) {
+	us32_t res = us32_mk();
+	us32_append_uint_e(&res, i, error);
+	return res;
+}
+
+us32_t us32_from_uint_fmt(uintmax_t i, const struct uifmt *fmt) {
+	us32_t res = us32_mk();
+	us32_append_uint_fmt(&res, i, fmt);
+	return res;
+}
+
+us32_t us32_from_uint_fmt_e(uintmax_t i, const struct uifmt *fmt, bool *error) {
+	us32_t res = us32_mk();
+	us32_append_uint_fmt_e(&res, i, fmt, error);
+	return res;
+}
+
 void us32_free(us32_t *str) {
 	assert(us32_valid(str));
 
@@ -127,6 +176,14 @@ void us32_free(us32_t *str) {
 	str->chars = NULL;
 	str->len   = 0;
 	str->cap   = 0;
+}
+
+size_t us32_uz16_len(const us32_t *str) {
+	return uz32_n_uz16_len(US32_CEXPAND(str));
+}
+
+size_t us32_uz8_len(const us32_t *str) {
+	return uz32_n_uz8_len(US32_CEXPAND(str));
 }
 
 size_t us32_append(us32_t *str, const us32_t *another) {
@@ -215,6 +272,70 @@ size_t us32_append_uz32_n_e(us32_t *str, const uc32_t *cstr, size_t n, bool *err
 	} else
 		while (n--)
 			str->chars[str->len++] = *cstr++;
+
+	return str->len;
+}
+
+size_t us32_append_int(us32_t *str, intmax_t i) {
+	return us32_append_int_e(str, i, NULL);
+}
+
+size_t us32_append_int_e(us32_t *str, intmax_t i, bool *error) {
+	return us32_append_int_fmt_e(str, i, &UIFMT_DEC, error);
+}
+
+size_t us32_append_int_fmt(us32_t *str, intmax_t i, const struct uifmt *fmt) {
+	return us32_append_int_fmt_e(str, i, fmt, NULL);
+}
+
+size_t us32_append_int_fmt_e(us32_t *str, intmax_t i, const struct uifmt *fmt, bool *error) {
+	assert(us32_valid(str));
+
+	bool inner_error = false;
+	size_t old_len   = str->len;
+
+	us32_add_len_e(str, uz32_from_int_fmt(NULL, i, fmt), &inner_error);
+
+	if (inner_error) {
+		if (error)
+			*error = true;
+
+		return old_len;
+	}
+
+	uz32_from_int_fmt(str->chars + old_len, i, fmt);
+
+	return str->len;
+}
+
+size_t us32_append_uint(us32_t *str, uintmax_t i) {
+	return us32_append_uint_e(str, i, NULL);
+}
+
+size_t us32_append_uint_e(us32_t *str, uintmax_t i, bool *error) {
+	return us32_append_uint_fmt_e(str, i, &UIFMT_DEC, error);
+}
+
+size_t us32_append_uint_fmt(us32_t *str, uintmax_t i, const struct uifmt *fmt) {
+	return us32_append_uint_fmt_e(str, i, fmt, NULL);
+}
+
+size_t us32_append_uint_fmt_e(us32_t *str, uintmax_t i, const struct uifmt *fmt, bool *error) {
+	assert(us32_valid(str));
+
+	bool inner_error = false;
+	size_t old_len   = str->len;
+
+	us32_add_len_e(str, uz32_from_uint_fmt(NULL, i, fmt), &inner_error);
+
+	if (inner_error) {
+		if (error)
+			*error = true;
+
+		return old_len;
+	}
+
+	uz32_from_uint_fmt(str->chars + old_len, i, fmt);
 
 	return str->len;
 }

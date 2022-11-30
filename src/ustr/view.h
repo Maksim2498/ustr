@@ -30,6 +30,11 @@ uv32_t uv32_from_uv32_range(uv32_t view, size_t from, size_t len);
 uv32_t uv32_from_uz32(uc32_t *cstr);
 uv32_t uv32_from_uz32_n(uc32_t *cstr, size_t n);
 
+// Cross-UTF Len
+
+size_t uv32_uz16_len(uv32_t view);
+size_t uv32_uz8_len(uv32_t view);
+
 // Reverse
 
 void uv32_reverse(uv32_t view);

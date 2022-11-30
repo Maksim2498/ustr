@@ -3,9 +3,280 @@
 #include <assert.h>
 #include <stdbool.h>
 
+#include "fmt/int.h"
+#include "fmt/radix.h"
+#include "util/bit.h"
 #include "util/mem.h"
 #include "char.h"
+#include "config.h"
 #include "view.h"
+
+static size_t uz_from_int_fmt_(void *cstr, unsigned n, uintmax_t i, bool s, const struct uifmt *fmt);
+static size_t uz_from_int_fmt_len_(unsigned n, uintmax_t i, bool s, const struct uifmt *fmt);
+static size_t uz_from_int_fmt_write_(void *cstr, unsigned n, uintmax_t i, bool s, const struct uifmt *fmt);
+
+size_t uz32_from_int(uc32_t *cstr, intmax_t i) {
+	return uz32_from_int_fmt(cstr, i, &UIFMT_DEC);
+}
+
+size_t uz32_from_int_fmt(uc32_t *cstr, intmax_t i, const struct uifmt *fmt) {
+	return uz_from_int_fmt_(cstr, 4, i, true, fmt);
+}
+
+size_t uz32_from_uint(uc32_t *cstr, uintmax_t i) {
+	return uz32_from_uint_fmt(cstr, i, &UIFMT_DEC);
+}
+
+size_t uz32_from_uint_fmt(uc32_t *cstr, uintmax_t i, const struct uifmt *fmt) {
+	return uz_from_int_fmt_(cstr, 4, i, false, fmt);
+}
+
+size_t uz16_from_int(uc16_t *cstr, intmax_t i) {
+	return uz16_from_int_fmt(cstr, i, &UIFMT_DEC);
+}
+
+size_t uz16_from_int_fmt(uc16_t *cstr, intmax_t i, const struct uifmt *fmt) {
+	return uz_from_int_fmt_(cstr, 2, i, true, fmt);
+}
+
+size_t uz16_from_uint(uc16_t *cstr, uintmax_t i) {
+	return uz16_from_uint_fmt(cstr, i, &UIFMT_DEC);
+}
+
+size_t uz16_from_uint_fmt(uc16_t *cstr, uintmax_t i, const struct uifmt *fmt) {
+	return uz_from_int_fmt_(cstr, 2, i, false, fmt);
+}
+
+size_t uz8_from_int(uc8_t *cstr, intmax_t i) {
+	return uz8_from_int_fmt(cstr, i, &UIFMT_DEC);
+}
+
+size_t uz8_from_int_fmt(uc8_t *cstr, intmax_t i, const struct uifmt *fmt) {
+	return uz_from_int_fmt_(cstr, 1, i, true, fmt);
+}
+
+size_t uz8_from_uint(uc8_t *cstr, uintmax_t i) {
+	return uz8_from_uint_fmt(cstr, i, &UIFMT_DEC);
+}
+
+size_t uz8_from_uint_fmt(uc8_t *cstr, uintmax_t i, const struct uifmt *fmt) {
+	return uz_from_int_fmt_(cstr, 1, i, false, fmt);
+}
+
+size_t uz_from_int_fmt_(void *cstr, unsigned n, uintmax_t i, bool s, const struct uifmt *fmt) {
+    assert(uifmt_valid(fmt));
+    return cstr ? uz_from_int_fmt_write_(cstr, n, i, s, fmt) : uz_from_int_fmt_len_(n, i, s, fmt);
+}
+
+size_t uz_from_int_fmt_len_(unsigned n, uintmax_t i, bool s, const struct uifmt *fmt) {
+    size_t len = 0;
+
+    bool neg = (intmax_t) i < 0;
+
+    // Count sign
+
+    if (neg) {
+        i = -i;
+
+        if (fmt->show_minus)
+            ++len;
+    } else if (fmt->show_plus)
+        ++len;
+
+    // Count digits
+
+    while (i) {
+        i /= fmt->radix;
+        ++len;
+    }
+
+    // Count leading zeroes
+
+    if (fmt->show_leading_zeroes && upower_of_2(fmt->radix)) {
+        int zeroes_count = fmt->leading_zeroes_limit - len;
+
+        if (zeroes_count > 0) 
+            len += zeroes_count;
+    }
+
+    // Count separators
+
+    if (fmt->group_size && fmt->group_size < len) {
+        int sep_count = len / fmt->group_size - 1;
+
+        switch (n) {
+            case 1:
+                len += sep_count * uc32_uc8_len(fmt->group_separator);
+                break;
+
+            case 2:
+                len += sep_count * uc32_uc16_len(fmt->group_separator);
+                break;
+
+            case 4:
+                len += sep_count;
+                break;
+
+            default:
+                assert(false);
+                break;
+        }
+    }
+
+    // Count radix prefix
+
+    if (fmt->show_radix_prefix && uradix_has_prefix(fmt->radix)) {
+        ucv32_t prefix = uradix_prefix(fmt->radix, fmt->radix_prefix_case);
+
+        switch (n) {
+            case 1:
+                len += ucv32_uz8_len(prefix);
+                break;
+
+            case 2:
+                len += ucv32_uz16_len(prefix);
+                break;
+
+            case 4:
+                len += ucv32_len(prefix);
+                break;
+
+            default:
+                assert(false);
+                break;
+        }
+    }
+
+    return len;
+}
+
+size_t uz_from_int_fmt_write_(void *cstr, unsigned n, uintmax_t i, bool s, const struct uifmt *fmt) {
+    bool neg = (intmax_t) i < 0;
+
+    if (neg)
+        i = -i;
+
+    uc8_t res[UINT_MAX_UC8_LEN];
+    int   res_len = 0;
+
+    // Init separator
+
+    uc8_t sep[4];
+    int   sep_len;
+    
+    if (fmt->group_size) 
+        sep_len = uc8_from_uc32(sep, fmt->group_separator);
+
+    // Add digits and group separators marks
+
+    int digit_count = 0;
+
+    while (true) {
+        res[res_len++] = uc8_case_radix_from_val(i % fmt->radix, fmt->radix, fmt->digit_case);
+        ++digit_count;
+    
+        i /= fmt->radix;
+
+        if (!i)
+            break;
+
+        if (fmt->group_size && digit_count % fmt->group_size == 0) 
+            for (int i = 0; i < sep_len; ++i)
+                res[res_len++] = 0;
+    }
+
+    // Apply precision
+
+    if (fmt->precision)
+        for (int i = res_len - 1, precision = fmt->precision; i >= 0; --i)
+        if (res[i] && --precision < 0) 
+            res[i] = '0';
+
+    // Add leading zeroes
+
+    if (fmt->show_leading_zeroes && upower_of_2(fmt->radix)) {
+        int zeroes_count = fmt->leading_zeroes_limit - digit_count;
+
+        if (zeroes_count > 0)
+            while (true) {
+                res[res_len++] = '0';
+                ++digit_count;
+
+                if (--zeroes_count <= 0)
+                    break;
+
+                if (fmt->group_size && digit_count % fmt->group_size == 0) 
+                    for (int i = 0; i < sep_len; ++i)
+                        res[res_len++] = 0;
+            }
+    }
+
+    // Replace marks with separator
+
+    if (fmt->group_size) 
+        for (int i = 0; i < res_len;) {
+            if (res[i])
+                ++i;
+            else
+                for (int j = 0; j < sep_len; ++j)
+                    res[i++] = sep[j];
+        }
+
+    // Add reversed radix prefix
+
+    if (fmt->show_radix_prefix && uradix_has_prefix(fmt->radix)) {
+        ucv32_t prefix = uradix_prefix(fmt->radix, fmt->radix_prefix_case);
+
+        for (int i = ucv32_len(prefix) - 1; i >= 0; --i) {
+            uc32_t c32    = ucv32_uc32(prefix, i);
+            uc8_t  c8[4];
+            int    c8_len = uc8_from_uc32(c8, c32);
+
+            for (int j = 0; j < c8_len; ++j)
+                res[res_len++] = c8[j];
+        }
+    }
+
+    // Add sign
+
+    if (neg) {
+        if (fmt->show_minus)
+            res[res_len++] = '-';
+    } else if (fmt->show_plus)
+        res[res_len++] = '+';
+
+    // Reverse
+
+    uz8_n_reverse(res, res_len);
+
+    // Write res to cstr
+
+    switch (n) {
+        case 1:
+            for (int i = 0; i < res_len; ++i)
+                *((uc8_t *) cstr++) = res[i];
+
+            break;
+
+        case 2:
+            for (int i = 0; i < res_len; i += uc8_len(res[i]))
+                cstr += 2 * uc16_from_uc8(cstr, res + i);
+
+            break;
+
+        case 4:
+            for (int i = 0; i < res_len; i += uc8_len(res[i]), cstr += 4)
+                uc32_from_uc8(cstr, res + i);
+
+            break;
+
+        default:
+            assert(false);
+            break;
+    }
+
+    return res_len;
+}
 
 size_t uz8_trail(const uc8_t *cstr) {
     assert(cstr);
@@ -82,6 +353,50 @@ int uz8_dec(const uc8_t *cstr) {
                                         \
         return len;                     \
     }
+
+size_t uz32_uz8_len(const uc32_t *cstr) {
+    assert(cstr);
+
+    size_t len = 0;
+
+    while (*cstr)
+        len += uc32_uc8_len(*cstr++);
+
+    return len;
+}
+
+size_t uz32_n_uz8_len(const uc32_t *cstr, size_t n) {
+    assert(cstr);
+
+    size_t len = 0;
+
+    while (n--)
+        len += uc32_uc8_len(*cstr++);
+
+    return len;
+}
+
+size_t uz32_uz16_len(const uc32_t *cstr) {
+    assert(cstr);
+
+    size_t len = 0;
+
+    while (*cstr)
+        len += uc32_uc16_len(*cstr++);
+
+    return len;
+}
+
+size_t uz32_n_uz16_len(const uc32_t *cstr, size_t n) {
+    assert(cstr);
+
+    size_t len = 0;
+
+    while (n--)
+        len += uc32_uc16_len(*cstr++);
+
+    return len;
+}
 
 size_t uz16_uz8_len(const uc16_t *cstr) {
     assert(cstr);

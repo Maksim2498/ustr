@@ -696,6 +696,62 @@ int uc8_from_uc16be(uc8_t *to, const uc16_t *from) {
 	#endif
 }
 
+// Human-readable:
+
+uc8_t uc8_dec_from_val(unsigned char val) {
+	return uc32_dec_from_val(val);
+}
+
+// Human-readable:
+
+uc8_t uc8_case_hex_from_val(unsigned char val, ucase_t ca) {
+	return uc32_case_hex_from_val(val, ca);
+}
+
+// Human-readable:
+
+uc8_t uc8_upper_hex_from_val(unsigned char val) {
+	return uc32_upper_hex_from_val(val);
+}
+
+// Human-readable:
+
+uc8_t uc8_lower_hex_from_val(unsigned char val) {
+	return uc32_lower_hex_from_val(val);
+}
+
+// Human-readable:
+
+uc8_t uc8_oct_from_val(unsigned char val) {
+	return uc32_oct_from_val(val);
+}
+
+// Human-readable:
+
+uc8_t uc8_bin_from_val(unsigned char val) {
+	return uc32_bin_from_val(val);
+}
+
+// Human-readable:
+
+uc8_t uc8_case_radix_from_val(unsigned char val, uradix_t radix, ucase_t ca) {
+	return uc32_case_radix_from_val(val, radix, ca);
+}
+
+// Human-readable:
+
+uc8_t uc8_upper_radix_from_val(unsigned char val, uradix_t radix) {
+	return uc32_upper_radix_from_val(val, radix);
+}
+
+// Human-readable:
+
+uc8_t uc8_lower_radix_from_val(unsigned char val, uradix_t radix) {
+	return uc32_lower_radix_from_val(val, radix);
+}
+
+// Human-readable:
+
 int uc8_dec_val(uc8_t c) {
 	return uc32_dec_val(c);
 }
@@ -704,6 +760,24 @@ int uc8_dec_val(uc8_t c) {
 
 int uc8_hex_val(uc8_t c) {
 	return uc32_hex_val(c);
+}
+
+// Human-readable:
+
+int uc8_case_hex_val(uc8_t c, ucase_t ca) {
+	return uc32_case_hex_val(c, ca);
+}
+
+// Human-readable:
+
+int uc8_lower_hex_val(uc8_t c) {
+	return uc32_lower_hex_val(c);
+}
+
+// Human-readable:
+
+int uc8_upper_hex_val(uc8_t c) {
+	return uc32_upper_hex_val(c);
 }
 
 // Human-readable:
@@ -720,8 +794,26 @@ int uc8_bin_val(uc8_t c) {
 
 // Human-readable:
 
-int uc8_rad_val(uc8_t c, unsigned radix) {
-	return uc32_rad_val(c, radix);
+int uc8_radix_val(uc8_t c, uradix_t radix) {
+	return uc32_radix_val(c, radix);
+}
+
+// Human-readable:
+
+int uc8_case_radix_val(uc8_t c, uradix_t radix, ucase_t ca) {
+	return uc32_case_radix_val(c, radix, ca);
+}
+
+// Human-readable:
+
+int uc8_lower_radix_val(uc8_t c, uradix_t radix) {
+	return uc32_lower_radix_val(c, radix);
+}
+
+// Human-readable:
+
+int uc8_upper_radix_val(uc8_t c, uradix_t radix) {
+	return uc32_radix_upper_val(c, radix);
 }
 
 // Human-readable:
@@ -738,6 +830,24 @@ bool uc8_hex(uc8_t c) {
 
 // Human-readable:
 
+bool uc8_case_hex(uc8_t c, ucase_t ca) {
+	return uc32_case_hex(c, ca);
+}
+
+// Human-readable:
+
+bool uc8_lower_hex(uc8_t c) {
+	return uc32_lower_hex(c);
+}
+
+// Human-readable:
+
+bool uc8_upper_hex(uc8_t c) {
+	return uc32_upper_hex(c);
+}
+
+// Human-readable:
+
 bool uc8_oct(uc8_t c) {
 	return uc32_oct(c);
 }
@@ -750,8 +860,26 @@ bool uc8_bin(uc8_t c) {
 
 // Human-readable:
 
-bool uc8_rad(uc8_t c, unsigned radix) {
-	return uc32_rad(c, radix);
+bool uc8_radix(uc8_t c, uradix_t radix) {
+	return uc32_radix(c, radix);
+}
+
+// Human-readable:
+
+bool uc8_case_radix(uc8_t c, uradix_t radix, ucase_t ca) {
+	return uc32_case_radix(c, radix, ca);
+}
+
+// Human-readable:
+
+bool uc8_lower_radix(uc8_t c, uradix_t radix) {
+	return uc32_lower_radix(c, radix);
+}
+
+// Human-readable:
+
+bool uc8_upper_radix(uc8_t c, uradix_t radix) {
+	return uc32_upper_radix(c, radix);
 }
 
 // Human-readable:
@@ -1058,6 +1186,60 @@ int uc8_valid(const uc8_t *c) {
 
 // Human-readable:
 
+uc16_t uc16_dec_from_val(unsigned char val) {
+	return uc32_dec_from_val(val);
+}
+
+// Human-readable:
+
+uc16_t uc16_case_hex_from_val(unsigned char val, ucase_t ca) {
+	return uc32_case_hex_from_val(val, ca);
+}
+
+// Human-readable:
+
+uc16_t uc16_upper_hex_from_val(unsigned char val) {
+	return uc32_upper_hex_from_val(val);
+}
+
+// Human-readable:
+
+uc16_t uc16_lower_hex_from_val(unsigned char val) {
+	return uc32_lower_hex_from_val(val);
+}
+
+// Human-readable:
+
+uc16_t uc16_oct_from_val(unsigned char val) {
+	return uc32_oct_from_val(val);
+}
+
+// Human-readable:
+
+uc16_t uc16_bin_from_val(unsigned char val) {
+	return uc32_bin_from_val(val);
+}
+
+// Human-readable:
+
+uc16_t uc16_case_radix_from_val(unsigned char val, uradix_t radix, ucase_t ca) {
+	return uc32_case_radix_from_val(val, radix, ca);
+}
+
+// Human-readable:
+
+uc16_t uc16_upper_radix_from_val(unsigned char val, uradix_t radix) {
+	return uc32_upper_radix_from_val(val, radix);
+}
+
+// Human-readable:
+
+uc16_t uc16_lower_radix_from_val(unsigned char val, uradix_t radix) {
+	return uc32_lower_radix_from_val(val, radix);
+}
+
+// Human-readable:
+
 int uc16_dec_val(uc16_t c) {
 	return uc32_dec_val(c);
 }
@@ -1066,6 +1248,24 @@ int uc16_dec_val(uc16_t c) {
 
 int uc16_hex_val(uc16_t c) {
 	return uc32_hex_val(c);
+}
+
+// Human-readable:
+
+int uc16_case_hex_val(uc16_t c, ucase_t ca) {
+	return uc32_case_hex_val(c, ca);
+}
+
+// Human-readable:
+
+int uc16_lower_hex_val(uc16_t c) {
+	return uc32_lower_hex_val(c);
+}
+
+// Human-readable:
+
+int uc16_upper_hex_val(uc16_t c) {
+	return uc32_upper_hex_val(c);
 }
 
 // Human-readable:
@@ -1082,8 +1282,26 @@ int uc16_bin_val(uc16_t c) {
 
 // Human-readable:
 
-int uc16_rad_val(uc16_t c, unsigned radix) {
-	return uc32_rad_val(c, radix);
+int uc16_radix_val(uc16_t c, uradix_t radix) {
+	return uc32_radix_val(c, radix);
+}
+
+// Human-readable:
+
+int uc16_case_radix_val(uc16_t c, uradix_t radix, ucase_t ca) {
+	return uc32_case_radix_val(c, radix, ca);
+}
+
+// Human-readable:
+
+int uc16_lower_radix_val(uc16_t c, uradix_t radix) {
+	return uc32_lower_radix_val(c, radix);
+}
+
+// Human-readable:
+
+int uc16_upper_radix_val(uc16_t c, uradix_t radix) {
+	return uc32_radix_upper_val(c, radix);
 }
 
 // Human-readable:
@@ -1100,6 +1318,24 @@ bool uc16_hex(uc16_t c) {
 
 // Human-readable:
 
+bool uc16_case_hex(uc16_t c, ucase_t ca) {
+	return uc32_case_hex(c, ca);
+}
+
+// Human-readable:
+
+bool uc16_hex_lower(uc16_t c) {
+	return uc32_lower_hex(c);
+}
+
+// Human-readable:
+
+bool uc16_upper_hex(uc16_t c) {
+	return uc32_upper_hex(c);
+}
+
+// Human-readable:
+
 bool uc16_oct(uc16_t c) {
 	return uc32_oct(c);
 }
@@ -1112,8 +1348,26 @@ bool uc16_bin(uc16_t c) {
 
 // Human-readable:
 
-bool uc16_rad(uc16_t c, unsigned radix) {
-	return uc32_rad(c, radix);
+bool uc16_rad(uc16_t c, uradix_t radix) {
+	return uc32_radix(c, radix);
+}
+
+// Human-readable:
+
+bool uc16_rad_case(uc16_t c, uradix_t radix, ucase_t ca) {
+	return uc32_case_radix(c, radix, ca);
+}
+
+// Human-readable:
+
+bool uc16_rad_lower(uc16_t c, uradix_t radix) {
+	return uc32_lower_radix(c, radix);
+}
+
+// Human-readable:
+
+bool uc16_upper_radix(uc16_t c, uradix_t radix) {
+	return uc32_upper_radix(c, radix);
 }
 
 // Human-readable:
@@ -1333,6 +1587,97 @@ bool uc16_valid(const uc16_t *c) {
 
 // Human-readable:
 
+uc32_t uc32_dec_from_val(unsigned char val) {
+	return val < 10 ? U'0' + val : 0;
+}
+
+// Human-readable:
+
+uc32_t uc32_case_hex_from_val(unsigned char val, ucase_t ca) {
+	return UCASE_LOWER == ca ? uc32_lower_hex_from_val(val) : uc32_upper_hex_from_val(val);
+}
+
+// Human-readable:
+
+uc32_t uc32_upper_hex_from_val(unsigned char val) {
+	if (val < 10)
+		return U'0' + val;
+
+	if (val < 16)
+		return U'A' + val - 10;
+
+	return 0;
+}
+
+// Human-readable:
+
+uc32_t uc32_lower_hex_from_val(unsigned char val) {
+	if (val < 10)
+		return U'0' + val;
+
+	if (val < 16)
+		return U'a' + val - 10;
+
+	return 0;
+}
+
+// Human-readable:
+
+uc32_t uc32_oct_from_val(unsigned char val) {
+	return val < 8 ? U'0' + val : 0;
+}
+
+// Human-readable:
+
+uc32_t uc32_bin_from_val(unsigned char val) {
+	switch (val) {
+		case 0:
+			return U'0';
+		
+		case 1:
+			return U'1';
+			
+		default:
+			return 0;
+	}
+}
+
+// Human-readable:
+
+uc32_t uc32_case_radix_from_val(unsigned char val, uradix_t radix, ucase_t ca) {
+	return UCASE_LOWER == ca ? uc32_lower_radix_from_val(val, radix) : uc32_upper_radix_from_val(val, radix);
+}
+
+// Human-readable:
+
+uc32_t uc32_upper_radix_from_val(unsigned char val, uradix_t radix) {
+	assert(uradix_valid(radix));
+
+	if (val >= radix)
+		return 0;
+
+	if (val < 10)
+		return U'0' + val;
+
+	return U'A' + val - 10;
+}
+
+// Human-readable:
+
+uc32_t uc32_lower_radix_from_val(unsigned char val, uradix_t radix) {
+	assert(uradix_valid(radix));
+
+	if (val >= radix)
+		return 0;
+
+	if (val < 10)
+		return U'0' + val;
+
+	return U'a' + val - 10;
+}
+
+// Human-readable:
+
 int uc32_dec_val(uc32_t c) {
     return uc32_dec(c) ? c - U'0' : -1;
 }
@@ -1354,6 +1699,45 @@ int uc32_hex_val(uc32_t c) {
 
 // Human-readable:
 
+int uc32_case_hex_val(uc32_t c, ucase_t ca) {
+	switch (ca) {
+		case UCASE_UPPER:
+			return uc32_upper_hex_val(c);
+
+		case UCASE_LOWER:
+			return uc32_lower_hex_val(c);
+
+		default:
+			return uc32_hex_val(c);
+	}
+}
+
+// Human-readable:
+
+int uc32_lower_hex_val(uc32_t c) {
+    if (uc32_dec(c))
+        return c - U'0';
+
+    if (U'a' <= c && c <= U'f')
+        return c - U'a' + 10;
+
+    return -1;
+}
+
+// Human-readable:
+
+int uc32_upper_hex_val(uc32_t c) {
+    if (uc32_dec(c))
+        return c - U'0';
+
+    if (U'A' <= c && c <= U'F')
+        return c - U'A' + 10;
+
+    return -1;
+}
+
+// Human-readable:
+
 int uc32_oct_val(uc32_t c) {
     return uc32_oct(c) ? c - U'0' : -1;
 }
@@ -1366,7 +1750,7 @@ int uc32_bin_val(uc32_t c) {
 
 // Human-readable:
 
-int uc32_rad_val(uc32_t c, unsigned radix) {
+int uc32_radix_val(uc32_t c, uradix_t radix) {
     assert(uradix_valid(radix));
 
     if (U'0' <= c && c <= U'9')
@@ -1385,8 +1769,70 @@ int uc32_rad_val(uc32_t c, unsigned radix) {
 
 // Human-readable:
 
+int uc32_case_radix_val(uc32_t c, uradix_t radix, ucase_t ca) {
+	switch (ca) {
+		case UCASE_UPPER:
+			return uc32_radix_upper_val(c, radix);
+
+		case UCASE_LOWER:
+			return uc32_lower_radix_val(c, radix);
+
+		default:
+			return uc32_radix_val(c, radix);
+	}
+}
+
+// Human-readable:
+
+int uc32_lower_radix_val(uc32_t c, uradix_t radix) {
+    assert(uradix_valid(radix));
+
+    if (U'0' <= c && c <= U'9')
+        c -= U'0';
+    else if (U'a' <= c && c <= U'z') {
+        c -= U'a';
+        c += 10;
+    } else
+        return -1;
+
+    return c < radix ? c : -1;
+}
+
+// Human-readable:
+
+int uc32_radix_upper_val(uc32_t c, uradix_t radix) {
+    assert(uradix_valid(radix));
+
+    if (U'0' <= c && c <= U'9')
+        c -= U'0';
+    else if (U'A' <= c && c <= U'Z') {
+        c -= U'A';
+        c += 10;
+    } else
+        return -1;
+
+    return c < radix ? c : -1;
+}
+
+// Human-readable:
+
 bool uc32_dec(uc32_t c) {
     return U'0' <= c && c <= U'9';
+}
+
+// Human-readable:
+
+bool uc32_case_hex(uc32_t c, ucase_t ca) {
+	switch (ca) {
+		case UCASE_UPPER:
+			return uc32_upper_hex(c);
+
+		case UCASE_LOWER:
+			return uc32_lower_hex(c);
+
+		default:
+			return uc32_hex(c);
+	}
 }
 
 // Human-readable:
@@ -1395,6 +1841,20 @@ bool uc32_hex(uc32_t c) {
     return U'0' <= c && c <= U'9'
         || U'A' <= c && c <= U'F'
         || U'a' <= c && c <= U'f';
+}
+
+// Human-readable:
+
+bool uc32_lower_hex(uc32_t c) {
+	return U'0' <= c && c <= U'9'
+        || U'a' <= c && c <= U'f';
+}
+
+// Human-readable:
+
+bool uc32_upper_hex(uc32_t c) {
+	return U'0' <= c && c <= U'9'
+        || U'A' <= c && c <= U'F';
 }
 
 // Human-readable:
@@ -1411,7 +1871,7 @@ bool uc32_bin(uc32_t c) {
 
 // Human-readable:
 
-bool uc32_rad(uc32_t c, unsigned radix) {
+bool uc32_radix(uc32_t c, uradix_t radix) {
     assert(radix <= URADIX_MAX);
 
     if (uc32_dec(c))
@@ -1421,6 +1881,53 @@ bool uc32_rad(uc32_t c, unsigned radix) {
         c += 10;
     } else if (U'a' <= c && c <= U'f') {
         c -= U'a';
+        c += 10;
+    } else
+        return false;
+
+    return c < radix;
+}
+
+// Human-readable:
+
+bool uc32_case_radix(uc32_t c, uradix_t radix, ucase_t ca) {
+	switch (ca) {
+		case UCASE_UPPER:
+			return uc32_upper_radix(c, radix);
+
+		case UCASE_LOWER:
+			return uc32_lower_radix(c, radix);
+
+		default:
+			return uc32_radix(c, radix);
+	}
+}
+
+// Human-readable:
+
+bool uc32_lower_radix(uc32_t c, uradix_t radix) {
+    assert(radix <= URADIX_MAX);
+
+    if (uc32_dec(c))
+        c -= U'0';
+    else if (U'a' <= c && c <= U'f') {
+        c -= U'a';
+        c += 10;
+    } else
+        return false;
+
+    return c < radix;
+}
+
+// Human-readable:
+
+bool uc32_upper_radix(uc32_t c, uradix_t radix) {
+    assert(radix <= URADIX_MAX);
+
+    if (uc32_dec(c))
+        c -= U'0';
+    else if (U'A' <= c && c <= U'F') {
+        c -= U'A';
         c += 10;
     } else
         return false;

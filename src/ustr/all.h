@@ -1,6 +1,7 @@
 #ifndef USTR_ALL_H
 #define USTR_ALL_H
 
+#include "fmt/all.h"
 #include "type/all.h"
 #include "util/all.h"
 #include "char.h"

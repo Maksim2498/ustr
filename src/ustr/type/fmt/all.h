@@ -3,5 +3,6 @@
 
 #include "case.h"
 #include "int.h"
+#include "radix.h"
 
 #endif

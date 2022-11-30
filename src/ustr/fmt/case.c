@@ -15,3 +15,7 @@ ucv32_t ucase_name(ucase_t c) {
             return ucv32("invalid case");
     }
 }
+
+bool ucase_valid(ucase_t c) {
+    return c < UCASE_COUNT;
+}

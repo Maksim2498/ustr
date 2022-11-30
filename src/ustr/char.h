@@ -4,16 +4,9 @@
 #include <stdbool.h>
 
 #include "type/fmt/case.h"
+#include "type/fmt/radix.h"
 #include "type/char.h"
 #include "type/endian.h"
-
-enum {
-    UBOM_LITTLE_ENDIAN = 0xFFFE,
-    UBOM_BIG_ENDIAN    = 0xFEFF,
-    UBOM_UTF_8         = 0xEFBBBF,
-
-    UMAX_CP            = 0x10FFFF
-};
 
 #define uc32(literal) U##literal
 #define uc16(literal) u##literal
@@ -68,21 +61,45 @@ int uc8_from_uc16be(uc8_t *to, const uc16_t *from);
 
 // uc8_t Traits
 
-// - Digit vals
+// - Digit from val
+
+uc8_t uc8_dec_from_val(unsigned char val);
+uc8_t uc8_case_hex_from_val(unsigned char val, ucase_t ca);
+uc8_t uc8_upper_hex_from_val(unsigned char val);
+uc8_t uc8_lower_hex_from_val(unsigned char val);
+uc8_t uc8_oct_from_val(unsigned char val);
+uc8_t uc8_bin_from_val(unsigned char val);
+uc8_t uc8_case_radix_from_val(unsigned char val, uradix_t radix, ucase_t ca);
+uc8_t uc8_upper_radix_from_val(unsigned char val, uradix_t radix);
+uc8_t uc8_lower_radix_from_val(unsigned char val, uradix_t radix);
+
+// - Digit val
 
 int uc8_dec_val(uc8_t c);
 int uc8_hex_val(uc8_t c);
+int uc8_case_hex_val(uc8_t c, ucase_t ca);
+int uc8_lower_hex_val(uc8_t c);
+int uc8_upper_hex_val(uc8_t c);
 int uc8_oct_val(uc8_t c);
 int uc8_bin_val(uc8_t c);
-int uc8_rad_val(uc8_t c, unsigned radix);
+int uc8_radix_val(uc8_t c, uradix_t radix);
+int uc8_case_radix_val(uc8_t c, uradix_t radix, ucase_t ca);
+int uc8_lower_radix_val(uc8_t c, uradix_t radix);
+int uc8_upper_radix_val(uc8_t c, uradix_t radix);
 
 // - Digit
 
 bool uc8_dec(uc8_t c);
 bool uc8_hex(uc8_t c);
+bool uc8_case_hex(uc8_t c, ucase_t ca);
+bool uc8_lower_hex(uc8_t c);
+bool uc8_upper_hex(uc8_t c);
 bool uc8_oct(uc8_t c);
 bool uc8_bin(uc8_t c);
-bool uc8_rad(uc8_t c, unsigned radix);
+bool uc8_radix(uc8_t c, uradix_t radix);
+bool uc8_case_radix(uc8_t c, uradix_t radix, ucase_t ca);
+bool uc8_lower_radix(uc8_t c, uradix_t radix);
+bool uc8_upper_radix(uc8_t c, uradix_t radix);
 
 // - Case chage
 
@@ -133,21 +150,45 @@ int uc8_valid(const uc8_t *c);
 
 // uc16_t Traits
 
-// - Digit vals
+// - Digit from val
+
+uc16_t uc16_dec_from_val(unsigned char val);
+uc16_t uc16_case_hex_from_val(unsigned char val, ucase_t ca);
+uc16_t uc16_upper_hex_from_val(unsigned char val);
+uc16_t uc16_lower_hex_from_val(unsigned char val);
+uc16_t uc16_oct_from_val(unsigned char val);
+uc16_t uc16_bin_from_val(unsigned char val);
+uc16_t uc16_case_radix_from_val(unsigned char val, uradix_t radix, ucase_t ca);
+uc16_t uc16_upper_radix_from_val(unsigned char val, uradix_t radix);
+uc16_t uc16_lower_radix_from_val(unsigned char val, uradix_t radix);
+
+// - Digit val
 
 int uc16_dec_val(uc16_t c);
 int uc16_hex_val(uc16_t c);
+int uc16_case_hex_val(uc16_t c, ucase_t ca);
+int uc16_lower_hex_val(uc16_t c);
+int uc16_upper_hex_val(uc16_t c);
 int uc16_oct_val(uc16_t c);
 int uc16_bin_val(uc16_t c);
-int uc16_rad_val(uc16_t c, unsigned radix);
+int uc16_radix_val(uc16_t c, uradix_t radix);
+int uc16_case_radix_val(uc16_t c, uradix_t radix, ucase_t ca);
+int uc16_lower_radix_val(uc16_t c, uradix_t radix);
+int uc16_upper_radix_val(uc16_t c, uradix_t radix);
 
 // - Digit
 
 bool uc16_dec(uc16_t c);
 bool uc16_hex(uc16_t c);
+bool uc16_case_hex(uc16_t c, ucase_t ca);
+bool uc16_hex_lower(uc16_t c);
+bool uc16_upper_hex(uc16_t c);
 bool uc16_oct(uc16_t c);
 bool uc16_bin(uc16_t c);
-bool uc16_rad(uc16_t c, unsigned radix);
+bool uc16_rad(uc16_t c, uradix_t radix);
+bool uc16_rad_case(uc16_t c, uradix_t radix, ucase_t ca);
+bool uc16_rad_lower(uc16_t c, uradix_t radix);
+bool uc16_upper_radix(uc16_t c, uradix_t radix);
 
 // - Case chage
 
@@ -188,21 +229,45 @@ bool uc16_valid(const uc16_t *c);
 
 // uc32_t Traits
 
-// - Digit vals
+// - Digit from val
+
+uc32_t uc32_dec_from_val(unsigned char val);
+uc32_t uc32_case_hex_from_val(unsigned char val, ucase_t ca);
+uc32_t uc32_upper_hex_from_val(unsigned char val);
+uc32_t uc32_lower_hex_from_val(unsigned char val);
+uc32_t uc32_oct_from_val(unsigned char val);
+uc32_t uc32_bin_from_val(unsigned char val);
+uc32_t uc32_case_radix_from_val(unsigned char val, uradix_t radix, ucase_t ca);
+uc32_t uc32_upper_radix_from_val(unsigned char val, uradix_t radix);
+uc32_t uc32_lower_radix_from_val(unsigned char val, uradix_t radix);
+
+// - Digit val
 
 int uc32_dec_val(uc32_t c);
 int uc32_hex_val(uc32_t c);
+int uc32_case_hex_val(uc32_t c, ucase_t ca);
+int uc32_lower_hex_val(uc32_t c);
+int uc32_upper_hex_val(uc32_t c);
 int uc32_oct_val(uc32_t c);
 int uc32_bin_val(uc32_t c);
-int uc32_rad_val(uc32_t c, unsigned radix);
+int uc32_radix_val(uc32_t c, uradix_t radix);
+int uc32_case_radix_val(uc32_t c, uradix_t radix, ucase_t ca);
+int uc32_lower_radix_val(uc32_t c, uradix_t radix);
+int uc32_radix_upper_val(uc32_t c, uradix_t radix);
 
 // - Digit
 
 bool uc32_dec(uc32_t c);
 bool uc32_hex(uc32_t c);
+bool uc32_case_hex(uc32_t c, ucase_t ca);
+bool uc32_lower_hex(uc32_t c);
+bool uc32_upper_hex(uc32_t c);
 bool uc32_oct(uc32_t c);
 bool uc32_bin(uc32_t c);
-bool uc32_rad(uc32_t c, unsigned radix);
+bool uc32_radix(uc32_t c, uradix_t radix);
+bool uc32_case_radix(uc32_t c, uradix_t radix, ucase_t ca);
+bool uc32_lower_radix(uc32_t c, uradix_t radix);
+bool uc32_upper_radix(uc32_t c, uradix_t radix);
 
 // - Case chage
 

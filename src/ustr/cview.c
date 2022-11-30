@@ -67,6 +67,14 @@ ucv32_t ucv32_from_uz32_n(const uc32_t *cstr, size_t n) {
     };
 }
 
+size_t ucv32_uz16_len(ucv32_t view) {
+    return uz32_n_uz16_len(UCV32_CEXPAND(view));
+}
+
+size_t ucv32_uz8_len(ucv32_t view) {
+    return uz32_n_uz8_len(UCV32_CEXPAND(view));
+}
+
 size_t ucv32_trim_right(ucv32_t *view) {
     assert(view);
     return view->len = uz32_n_trim_right(UCV32_CEXPAND(*view));

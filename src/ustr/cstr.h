@@ -3,8 +3,10 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include "type/fmt/case.h"
+#include "type/fmt/int.h"
 #include "type/char.h"
 #include "type/cview.h"
 #include "type/view.h"
@@ -14,6 +16,21 @@
 #define uz32(literal) (uc32_t *)  U##literal
 #define uz16(literal) (uc16_t *)  u##literal
 #define  uz8(literal)  (uc8_t *) u8##literal
+
+size_t uz32_from_int(uc32_t *cstr, intmax_t i);
+size_t uz32_from_int_fmt(uc32_t *cstr, intmax_t i, const struct uifmt *fmt);
+size_t uz32_from_uint(uc32_t *cstr, uintmax_t i);
+size_t uz32_from_uint_fmt(uc32_t *cstr, uintmax_t i, const struct uifmt *fmt);
+
+size_t uz16_from_int(uc16_t *cstr, intmax_t i);
+size_t uz16_from_int_fmt(uc16_t *cstr, intmax_t i, const struct uifmt *fmt);
+size_t uz16_from_uint(uc16_t *cstr, uintmax_t i);
+size_t uz16_from_uint_fmt(uc16_t *cstr, uintmax_t i, const struct uifmt *fmt);
+
+size_t uz8_from_int(uc8_t *cstr, intmax_t i);
+size_t uz8_from_int_fmt(uc8_t *cstr, intmax_t i, const struct uifmt *fmt);
+size_t uz8_from_uint(uc8_t *cstr, uintmax_t i);
+size_t uz8_from_uint_fmt(uc8_t *cstr, uintmax_t i, const struct uifmt *fmt);
 
 // Lead Count
 
@@ -26,6 +43,11 @@ int uz16_dec(const uc16_t *cstr);
 int uz8_dec(const uc8_t *cstr);
 
 // Cross-UTF Len
+
+size_t uz32_uz8_len(const uc32_t *cstr);
+size_t uz32_n_uz8_len(const uc32_t *cstr, size_t n);
+size_t uz32_uz16_len(const uc32_t *cstr);
+size_t uz32_n_uz16_len(const uc32_t *cstr, size_t n);
 
 size_t uz16_uz8_len(const uc16_t *cstr);
 size_t uz16_n_uz8_len(const uc16_t *cstr, size_t n);

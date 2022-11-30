@@ -29,6 +29,11 @@ ucv32_t ucv32_from_uv32_range(uv32_t view, size_t from, size_t len);
 ucv32_t ucv32_from_uz32(const uc32_t *cstr);
 ucv32_t ucv32_from_uz32_n(const uc32_t *cstr, size_t n);
 
+// Cross-UTF Len
+
+size_t ucv32_uz16_len(ucv32_t view);
+size_t ucv32_uz8_len(ucv32_t view);
+
 // Trim
 
 size_t ucv32_trim_right(ucv32_t *view);

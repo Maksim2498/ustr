@@ -3,8 +3,10 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include "type/fmt/case.h"
+#include "type/fmt/int.h"
 #include "type/char.h"
 #include "type/cview.h"
 #include "type/str.h"
@@ -40,10 +42,23 @@ us32_t us32_from_uc32(uc32_t c);
 us32_t us32_from_uc32_e(uc32_t c, bool *error);
 us32_t us32_from_uc32_n(uc32_t c, size_t n);
 us32_t us32_from_uc32_n_e(uc32_t c, size_t n, bool *error);
+us32_t us32_from_int(intmax_t i);
+us32_t us32_from_int_e(intmax_t i, bool *error);
+us32_t us32_from_int_fmt(intmax_t i, const struct uifmt *fmt);
+us32_t us32_from_int_fmt_e(intmax_t i, const struct uifmt *fmt, bool *error);
+us32_t us32_from_uint(uintmax_t i);
+us32_t us32_from_uint_e(uintmax_t i, bool *error);
+us32_t us32_from_uint_fmt(uintmax_t i, const struct uifmt *fmt);
+us32_t us32_from_uint_fmt_e(uintmax_t i, const struct uifmt *fmt, bool *error);
 
 // Free 
 
 void us32_free(us32_t *str);
+
+// Cross-UTF Len
+
+size_t us32_uz16_len(const us32_t *str);
+size_t us32_uz8_len(const us32_t *str);
 
 // Append
 
@@ -61,6 +76,14 @@ size_t us32_append_uz32(us32_t *str, const uc32_t *cstr);
 size_t us32_append_uz32_e(us32_t *str, const uc32_t *cstr, bool *error);
 size_t us32_append_uz32_n(us32_t *str, const uc32_t *cstr, size_t n);
 size_t us32_append_uz32_n_e(us32_t *str, const uc32_t *cstr, size_t n, bool *error);
+size_t us32_append_int(us32_t *str, intmax_t i);
+size_t us32_append_int_e(us32_t *str, intmax_t i, bool *error);
+size_t us32_append_int_fmt(us32_t *str, intmax_t i, const struct uifmt *fmt);
+size_t us32_append_int_fmt_e(us32_t *str, intmax_t i, const struct uifmt *fmt, bool *error);
+size_t us32_append_uint(us32_t *str, uintmax_t i);
+size_t us32_append_uint_e(us32_t *str, uintmax_t i, bool *error);
+size_t us32_append_uint_fmt(us32_t *str, uintmax_t i, const struct uifmt *fmt);
+size_t us32_append_uint_fmt_e(us32_t *str, uintmax_t i, const struct uifmt *fmt, bool *error);
 
 // Reverse
 
