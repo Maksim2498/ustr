@@ -279,21 +279,21 @@ size_t uz_from_int_fmt_write_(void *cstr, unsigned n, uintmax_t i, bool s, const
 }
 
 size_t uz32_from_bool(uc32_t *cstr, bool b) {
-    return uz32_from_bool_lower(cstr, b);
+    return uz32_from_lower_bool(cstr, b);
 }
 
-size_t uz32_from_bool_case(uc32_t *cstr, bool b, ucase_t c) {
-    return UCASE_UPPER ? uz32_from_bool_upper(cstr, b) : uz32_from_bool_lower(cstr, b);
+size_t uz32_from_case_bool(uc32_t *cstr, bool b, ucase_t c) {
+    return UCASE_UPPER ? uz32_from_upper_bool(cstr, b) : uz32_from_lower_bool(cstr, b);
 }
 
-size_t uz32_from_bool_upper(uc32_t *cstr, bool b) {
+size_t uz32_from_upper_bool(uc32_t *cstr, bool b) {
     if (cstr)
         uz32_copy(cstr, b ? uz32("TRUE") : uz32("FALSE"));
 
     return b ? 4 : 5;
 }
 
-size_t uz32_from_bool_lower(uc32_t *cstr, bool b) {
+size_t uz32_from_lower_bool(uc32_t *cstr, bool b) {
     if (cstr)
         uz32_copy(cstr, b ? uz32("true") : uz32("false"));
 
@@ -301,21 +301,21 @@ size_t uz32_from_bool_lower(uc32_t *cstr, bool b) {
 }
 
 size_t uz16_from_bool(uc16_t *cstr, bool b) {
-    return uz16_from_bool_lower(cstr, b);
+    return uz16_from_lower_bool(cstr, b);
 }
 
-size_t uz16_from_bool_case(uc16_t *cstr, bool b, ucase_t c) {
-    return UCASE_UPPER ? uz16_from_bool_upper(cstr, b) : uz16_from_bool_lower(cstr, b);
+size_t uz16_from_case_bool(uc16_t *cstr, bool b, ucase_t c) {
+    return UCASE_UPPER ? uz16_from_upper_bool(cstr, b) : uz16_from_lower_bool(cstr, b);
 }
 
-size_t uz16_from_bool_upper(uc16_t *cstr, bool b) {
+size_t uz16_from_upper_bool(uc16_t *cstr, bool b) {
     if (cstr)
         uz16_copy(cstr, b ? uz16("TRUE") : uz16("FALSE"));
 
     return b ? 4 : 5;
 }
 
-size_t uz16_from_bool_lower(uc16_t *cstr, bool b) {
+size_t uz16_from_lower_bool(uc16_t *cstr, bool b) {
     if (cstr)
         uz16_copy(cstr, b ? uz16("true") : uz16("false"));
 
@@ -323,21 +323,21 @@ size_t uz16_from_bool_lower(uc16_t *cstr, bool b) {
 }
 
 size_t uz8_from_bool(uc8_t *cstr, bool b) {
-    return uz8_from_bool_lower(cstr, b);
+    return uz8_from_lower_bool(cstr, b);
 }
 
-size_t uz8_from_bool_case(uc8_t *cstr, bool b, ucase_t c) {
-    return UCASE_UPPER ? uz8_from_bool_upper(cstr, b) : uz8_from_bool_lower(cstr, b);
+size_t uz8_from_case_bool(uc8_t *cstr, bool b, ucase_t c) {
+    return UCASE_UPPER ? uz8_from_upper_bool(cstr, b) : uz8_from_lower_bool(cstr, b);
 }
 
-size_t uz8_from_bool_upper(uc8_t *cstr, bool b) {
+size_t uz8_from_upper_bool(uc8_t *cstr, bool b) {
     if (cstr)
         uz8_copy(cstr, b ? uz8("TRUE") : uz8("FALSE"));
 
     return b ? 4 : 5;
 }
 
-size_t uz8_from_bool_lower(uc8_t *cstr, bool b) {
+size_t uz8_from_lower_bool(uc8_t *cstr, bool b) {
     if (cstr)
         uz8_copy(cstr, b ? uz8("true") : uz8("false"));
 

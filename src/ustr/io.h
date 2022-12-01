@@ -23,21 +23,21 @@ void uset_locale(void);
 
 size_t uprintln_bool(bool b);
 size_t uprint_bool(bool b);
-size_t uprintln_bool_case(bool b, ucase_t c);
-size_t uprint_bool_case(bool b, ucase_t c);
-size_t uprintln_bool_upper(bool b);
-size_t uprint_bool_upper(bool b);
-size_t uprintln_bool_lower(bool b);
-size_t uprint_bool_lower(bool b);
+size_t uprintln_case_bool(bool b, ucase_t c);
+size_t uprint_case_bool(bool b, ucase_t c);
+size_t uprintln_upper_bool(bool b);
+size_t uprint_upper_bool(bool b);
+size_t uprintln_lower_bool(bool b);
+size_t uprint_lower_bool(bool b);
 
 size_t ufprintln_bool(FILE *file, bool b);
 size_t ufprint_bool(FILE *file, bool b);
-size_t ufprintln_bool_case(FILE *file, bool b, ucase_t c);
-size_t ufprint_bool_case(FILE *file, bool b, ucase_t c);
-size_t ufprintln_bool_upper(FILE *file, bool b);
-size_t ufprint_bool_upper(FILE *file, bool b);
-size_t ufprintln_bool_lower(FILE *file, bool b);
-size_t ufprint_bool_lower(FILE *file, bool b);
+size_t ufprintln_case_bool(FILE *file, bool b, ucase_t c);
+size_t ufprint_case_bool(FILE *file, bool b, ucase_t c);
+size_t ufprintln_upper_bool(FILE *file, bool b);
+size_t ufprint_upper_bool(FILE *file, bool b);
+size_t ufprintln_lower_bool(FILE *file, bool b);
+size_t ufprint_lower_bool(FILE *file, bool b);
 
 // - Int
 

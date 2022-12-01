@@ -22,28 +22,28 @@ size_t uprint_bool(bool b) {
 	return ufprint_bool(stdout, b);
 }
 
-size_t uprintln_bool_case(bool b, ucase_t c) {
-	return uprint_bool_case(b, c) + uprintln();
+size_t uprintln_case_bool(bool b, ucase_t c) {
+	return uprint_case_bool(b, c) + uprintln();
 }
 
-size_t uprint_bool_case(bool b, ucase_t c) {
-	return ufprint_bool_case(stdout, b, c);
+size_t uprint_case_bool(bool b, ucase_t c) {
+	return ufprint_case_bool(stdout, b, c);
 }
 
-size_t uprintln_bool_upper(bool b) {
-	return uprint_bool_upper(b) + uprintln();
+size_t uprintln_upper_bool(bool b) {
+	return uprint_upper_bool(b) + uprintln();
 }
 
-size_t uprint_bool_upper(bool b) {
-	return ufprint_bool_upper(stdout, b);
+size_t uprint_upper_bool(bool b) {
+	return ufprint_upper_bool(stdout, b);
 }
 
-size_t uprintln_bool_lower(bool b) {
-	return uprint_bool_lower(b) + uprintln();
+size_t uprintln_lower_bool(bool b) {
+	return uprint_lower_bool(b) + uprintln();
 }
 
-size_t uprint_bool_lower(bool b) {
-	return ufprint_bool_lower(stdout, b);
+size_t uprint_lower_bool(bool b) {
+	return ufprint_lower_bool(stdout, b);
 }
 
 size_t ufprintln_bool(FILE *file, bool b) {
@@ -51,30 +51,30 @@ size_t ufprintln_bool(FILE *file, bool b) {
 }
 
 size_t ufprint_bool(FILE *file, bool b) {
-	return ufprint_bool_lower(file, b);
+	return ufprint_lower_bool(file, b);
 }
 
-size_t ufprintln_bool_case(FILE *file, bool b, ucase_t c) {
-	return ufprint_bool_case(file, b, c) + ufprintln(file);
+size_t ufprintln_case_bool(FILE *file, bool b, ucase_t c) {
+	return ufprint_case_bool(file, b, c) + ufprintln(file);
 }
 
-size_t ufprint_bool_case(FILE *file, bool b, ucase_t c) {
-	return UCASE_UPPER == c ? ufprint_bool_upper(file, b) : ufprint_bool_lower(file, b);
+size_t ufprint_case_bool(FILE *file, bool b, ucase_t c) {
+	return UCASE_UPPER == c ? ufprint_upper_bool(file, b) : ufprint_lower_bool(file, b);
 }
 
-size_t ufprintln_bool_upper(FILE *file, bool b) {
-	return ufprint_bool_upper(file, b) + ufprintln(file);
+size_t ufprintln_upper_bool(FILE *file, bool b) {
+	return ufprint_upper_bool(file, b) + ufprintln(file);
 }
 
-size_t ufprint_bool_upper(FILE *file, bool b) {
+size_t ufprint_upper_bool(FILE *file, bool b) {
 	return ufprint_uz8(file, b ? uz8("TRUE") : uz8("FALSE"));
 }
 
-size_t ufprintln_bool_lower(FILE *file, bool b) {
-	return ufprint_bool_lower(file, b) + ufprintln(file);
+size_t ufprintln_lower_bool(FILE *file, bool b) {
+	return ufprint_lower_bool(file, b) + ufprintln(file);
 }
 
-size_t ufprint_bool_lower(FILE *file, bool b) {
+size_t ufprint_lower_bool(FILE *file, bool b) {
 	return ufprint_uz8(file, b ? uz8("true") : uz8("false"));
 }
 
