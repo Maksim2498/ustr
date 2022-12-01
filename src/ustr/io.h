@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#include "type/fmt/case.h"
 #include "type/fmt/int.h"
 #include "type/char.h"
 #include "type/cview.h"
@@ -17,6 +18,26 @@
 void uset_locale(void);
 
 // Output
+
+// - Bool
+
+size_t uprintln_bool(bool b);
+size_t uprint_bool(bool b);
+size_t uprintln_bool_case(bool b, ucase_t c);
+size_t uprint_bool_case(bool b, ucase_t c);
+size_t uprintln_bool_upper(bool b);
+size_t uprint_bool_upper(bool b);
+size_t uprintln_bool_lower(bool b);
+size_t uprint_bool_lower(bool b);
+
+size_t ufprintln_bool(FILE *file, bool b);
+size_t ufprint_bool(FILE *file, bool b);
+size_t ufprintln_bool_case(FILE *file, bool b, ucase_t c);
+size_t ufprint_bool_case(FILE *file, bool b, ucase_t c);
+size_t ufprintln_bool_upper(FILE *file, bool b);
+size_t ufprint_bool_upper(FILE *file, bool b);
+size_t ufprintln_bool_lower(FILE *file, bool b);
+size_t ufprint_bool_lower(FILE *file, bool b);
 
 // - Int
 
