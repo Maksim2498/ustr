@@ -1,6 +1,49 @@
-#include "enum.h"
+#include "type.h"
 
 #include <assert.h>
+
+#include <ustr/cstr.h>
+#include <ustr/str.h>
+#include <ustr/view.h>
+
+utype_t utype_from_ucv32(ucv32_t view) {
+    return utype_from_uz32_n(UCV32_CEXPAND(view));
+}
+
+utype_t utype_from_us32(const us32_t *str) {
+    return utype_from_uz32_n(US32_CEXPAND(str));
+}
+
+utype_t utype_from_uv32(uv32_t view) {
+    return utype_from_uz32_n(UV32_CEXPAND(view));
+}
+
+utype_t utype_from_uz32(const uc32_t *cstr) {
+    return utype_from_uz32_n(cstr, uz32_len(cstr));
+}
+
+utype_t utype_from_uz32_n(const uc32_t *cstr, size_t n) {
+    // TODO
+	return 0;
+}
+
+utype_t utype_from_uz16(const uc16_t *cstr) {
+    return utype_from_uz16_n(cstr, uz16_len(cstr));
+}
+
+utype_t utype_from_uz16_n(const uc16_t *cstr, size_t n) {
+    // TODO
+	return 0;
+}
+
+utype_t utype_from_uz8(const uc8_t *cstr) {
+    return utype_from_uz8_n(cstr, uz8_len(cstr));
+}
+
+utype_t utype_from_uz8_n(const uc8_t *cstr, size_t n) {
+	// TODO
+	return 0;
+}
 
 ucv32_t utype_name(utype_t type) {
     assert(utype_valid(type));
@@ -173,6 +216,12 @@ ucv32_t utype_name(utype_t type) {
  
 		case UTYPE_ENDIAN:
 			return UTYPE_ENDIAN_NAME;
+
+		case UTYPE_CUSTOM:
+			return UTYPE_CUSTOM_NAME;
+
+		case UTYPE_UNKNOWN:
+			return UTYPE_UNKNOWN_NAME;
             
         default:
             assert(false);

@@ -1,14 +1,16 @@
 add_library(ustr
             src/ustr/fmt/all.h
             src/ustr/fmt/case.h       src/ustr/fmt/case.c
-            src/ustr/fmt/enum.h       src/ustr/fmt/enum.c
+            src/ustr/fmt/fmt.h        src/ustr/fmt/fmt.c
             src/ustr/fmt/int.h        src/ustr/fmt/int.c
             src/ustr/fmt/radix.h      src/ustr/fmt/radix.c
+            src/ustr/fmt/type.h       src/ustr/fmt/type.c
             src/ustr/type/fmt/all.h
             src/ustr/type/fmt/case.h
-            src/ustr/type/fmt/enum.h
+            src/ustr/type/fmt/fmt.h
             src/ustr/type/fmt/int.h
             src/ustr/type/fmt/radix.h
+            src/ustr/type/fmt/type.h
             src/ustr/type/all.h
             src/ustr/type/char.h
             src/ustr/type/cview.h
