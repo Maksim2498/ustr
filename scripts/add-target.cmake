@@ -5,6 +5,7 @@ add_library(ustr
             src/ustr/fmt/radix.h      src/ustr/fmt/radix.c
             src/ustr/type/fmt/all.h
             src/ustr/type/fmt/case.h
+            src/ustr/type/fmt/enum.h
             src/ustr/type/fmt/int.h
             src/ustr/type/fmt/radix.h
             src/ustr/type/all.h
