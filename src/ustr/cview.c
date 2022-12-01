@@ -67,6 +67,22 @@ ucv32_t ucv32_from_uz32_n(const uc32_t *cstr, size_t n) {
     };
 }
 
+ucv32_t ucv32_from_bool(bool b) {
+    return ucv32_from_lower_bool(b);
+}
+
+ucv32_t ucv32_from_case_bool(bool b, ucase_t c) {
+    return UCASE_UPPER == c ? ucv32_from_upper_bool(b) : ucv32_from_lower_bool(b);
+}
+
+ucv32_t ucv32_from_upper_bool(bool b) {
+    return b ? ucv32("TRUE") : ucv32("FALSE");
+}
+
+ucv32_t ucv32_from_lower_bool(bool b) {
+    return b ? ucv32("true") : ucv32("false");
+}
+
 size_t ucv32_uz16_len(ucv32_t view) {
     return uz32_n_uz16_len(UCV32_CEXPAND(view));
 }

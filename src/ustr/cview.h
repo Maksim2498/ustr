@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "type/fmt/case.h"
 #include "type/char.h"
 #include "type/cview.h"
 #include "type/str.h"
@@ -28,6 +29,10 @@ ucv32_t ucv32_from_uv32(uv32_t view);
 ucv32_t ucv32_from_uv32_range(uv32_t view, size_t from, size_t len);
 ucv32_t ucv32_from_uz32(const uc32_t *cstr);
 ucv32_t ucv32_from_uz32_n(const uc32_t *cstr, size_t n);
+ucv32_t ucv32_from_bool(bool b);
+ucv32_t ucv32_from_case_bool(bool b, ucase_t c);
+ucv32_t ucv32_from_upper_bool(bool b);
+ucv32_t ucv32_from_lower_bool(bool b);
 
 // Cross-UTF Len
 
