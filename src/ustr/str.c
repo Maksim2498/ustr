@@ -121,9 +121,7 @@ us32_t us32_from_uc32_n_e(uc32_t c, size_t n, bool *error) {
 }
 
 us32_t us32_from_int(intmax_t i) {
-	us32_t res = us32_mk();
-	us32_append_int(&res, i);
-	return res;
+	return us32_from_int_e(i, NULL);
 }
 
 us32_t us32_from_int_e(intmax_t i, bool *error) {
@@ -133,9 +131,7 @@ us32_t us32_from_int_e(intmax_t i, bool *error) {
 }
 
 us32_t us32_from_int_fmt(intmax_t i, const struct uifmt *fmt) {
-	us32_t res = us32_mk();
-	us32_append_int_fmt(&res, i, fmt);
-	return res;
+	return us32_from_int_fmt_e(i, fmt, NULL);
 }
 
 us32_t us32_from_int_fmt_e(intmax_t i, const struct uifmt *fmt, bool *error) {
@@ -145,9 +141,7 @@ us32_t us32_from_int_fmt_e(intmax_t i, const struct uifmt *fmt, bool *error) {
 }
 
 us32_t us32_from_uint(uintmax_t i) {
-	us32_t res = us32_mk();
-	us32_append_uint(&res, i);
-	return res;
+	return us32_from_uint_e(i, NULL);
 }
 
 us32_t us32_from_uint_e(uintmax_t i, bool *error) {
@@ -157,14 +151,52 @@ us32_t us32_from_uint_e(uintmax_t i, bool *error) {
 }
 
 us32_t us32_from_uint_fmt(uintmax_t i, const struct uifmt *fmt) {
-	us32_t res = us32_mk();
-	us32_append_uint_fmt(&res, i, fmt);
-	return res;
+	return us32_from_uint_fmt_e(i, fmt, NULL);
 }
 
 us32_t us32_from_uint_fmt_e(uintmax_t i, const struct uifmt *fmt, bool *error) {
 	us32_t res = us32_mk();
 	us32_append_uint_fmt_e(&res, i, fmt, error);
+	return res;
+}
+
+us32_t us32_from_bool(bool b) {
+	return us32_from_bool_e(b, NULL);
+}
+
+us32_t us32_from_bool_e(bool b, bool *error) {
+	us32_t res = us32_mk();
+	us32_append_bool_e(&res, b, error);
+	return res;
+}
+
+us32_t us32_from_case_bool(bool b, ucase_t c) {
+	return us32_from_case_bool_e(b, c, NULL);
+}
+
+us32_t us32_from_case_bool_e(bool b, ucase_t c, bool *error) {
+	us32_t res = us32_mk();
+	us32_append_case_bool_e(&res, b, c, error);
+	return res;
+}
+
+us32_t us32_from_upper_bool(bool b) {
+	return us32_from_upper_bool_e(b, NULL);
+}
+
+us32_t us32_from_upper_bool_e(bool b, bool *error) {
+	us32_t res = us32_mk();
+	us32_append_upper_bool_e(&res, b, error);
+	return res;
+}
+
+us32_t us32_from_lower_bool(bool b) {
+	return us32_from_lower_bool_e(b, NULL);
+}
+
+us32_t us32_from_lower_bool_e( bool b, bool *error) {
+	us32_t res = us32_mk();
+	us32_append_lower_bool_e(&res, b, error);
 	return res;
 }
 
@@ -338,6 +370,38 @@ size_t us32_append_uint_fmt_e(us32_t *str, uintmax_t i, const struct uifmt *fmt,
 	uz32_from_uint_fmt(str->chars + old_len, i, fmt);
 
 	return str->len;
+}
+
+size_t us32_append_bool(us32_t *str, bool b) {
+	return us32_append_bool_e(str, b, NULL);
+}
+
+size_t us32_append_bool_e(us32_t *str, bool b, bool *error) {
+	return us32_append_lower_bool_e(str, b, error);
+}
+
+size_t us32_append_case_bool(us32_t *str, bool b, ucase_t c) {
+	return us32_append_case_bool_e(str, b, c, NULL);
+}
+
+size_t us32_append_case_bool_e(us32_t *str, bool b, ucase_t c, bool *error) {
+	return UCASE_UPPER == c ? us32_append_upper_bool_e(str, b, error) : us32_append_lower_bool_e(str, b, error);
+}
+
+size_t us32_append_upper_bool(us32_t *str, bool b) {
+	return us32_append_upper_bool_e(str, b, NULL);
+}
+
+size_t us32_append_upper_bool_e(us32_t *str, bool b, bool *error) {
+	return us32_append_uz32_e(str, b ? uz32("TRUE") : uz32("FALSE"), error);
+}
+
+size_t us32_append_lower_bool(us32_t *str, bool b) {
+	return us32_append_lower_bool_e(str, b, NULL);
+}
+
+size_t us32_append_lower_bool_e(us32_t *str, bool b, bool *error) {
+	return us32_append_uz32_e(str, b ? uz32("true") : uz32("false"), error);
 }
 
 void us32_reverse(us32_t *str) {

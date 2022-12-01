@@ -50,6 +50,14 @@ us32_t us32_from_uint(uintmax_t i);
 us32_t us32_from_uint_e(uintmax_t i, bool *error);
 us32_t us32_from_uint_fmt(uintmax_t i, const struct uifmt *fmt);
 us32_t us32_from_uint_fmt_e(uintmax_t i, const struct uifmt *fmt, bool *error);
+us32_t us32_from_bool(bool b);
+us32_t us32_from_bool_e(bool b, bool *error);
+us32_t us32_from_case_bool(bool b, ucase_t c);
+us32_t us32_from_case_bool_e(bool b, ucase_t c, bool *error);
+us32_t us32_from_upper_bool(bool b);
+us32_t us32_from_upper_bool_e(bool b, bool *error);
+us32_t us32_from_lower_bool(bool b);
+us32_t us32_from_lower_bool_e( bool b, bool *error);
 
 // Free 
 
@@ -84,6 +92,14 @@ size_t us32_append_uint(us32_t *str, uintmax_t i);
 size_t us32_append_uint_e(us32_t *str, uintmax_t i, bool *error);
 size_t us32_append_uint_fmt(us32_t *str, uintmax_t i, const struct uifmt *fmt);
 size_t us32_append_uint_fmt_e(us32_t *str, uintmax_t i, const struct uifmt *fmt, bool *error);
+size_t us32_append_bool(us32_t *str, bool b);
+size_t us32_append_bool_e(us32_t *str, bool b, bool *error);
+size_t us32_append_case_bool(us32_t *str, bool b, ucase_t c);
+size_t us32_append_case_bool_e(us32_t *str, bool b, ucase_t c, bool *error);
+size_t us32_append_upper_bool(us32_t *str, bool b);
+size_t us32_append_upper_bool_e(us32_t *str, bool b, bool *error);
+size_t us32_append_lower_bool(us32_t *str, bool b);
+size_t us32_append_lower_bool_e(us32_t *str, bool b, bool *error);
 
 // Reverse
 
