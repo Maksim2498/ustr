@@ -4,10 +4,22 @@
 #include <stdbool.h>
 
 #include <ustr/type/fmt/type.h>
-#include <ustr/type/char.h>
-#include <ustr/type/str.h>
-#include <ustr/type/view.h>
 #include <ustr/cview.h>
+
+static const ucv32_t UTGROUP_INT_NAME     = ucv32("int");
+static const ucv32_t UTGROUP_FLOAT_NAME   = ucv32("float");
+static const ucv32_t UTGROUP_CHAR_NAME    = ucv32("char");
+static const ucv32_t UTGROUP_BOOL_NAME    = ucv32("bool");
+static const ucv32_t UTGROUP_STR_NAME     = ucv32("str");
+static const ucv32_t UTGROUP_CUSTOM_NAME  = ucv32("custom");
+static const ucv32_t UTGROUP_UNKNOWN_NAME = ucv32("unknown");
+
+ucv32_t utgroup_name(utgroup_t group);
+bool utgroup_valid(utgroup_t group);
+
+static const ucv32_t UTYPE_FLOAT_NAME     = ucv32("float");
+static const ucv32_t UTYPE_DOUBLE_NAME    = ucv32("double");
+static const ucv32_t UTYPE_LDOUBLE_NAME   = ucv32("long double");
 
 static const ucv32_t UTYPE_SINT_NAME      = ucv32("short");
 static const ucv32_t UTYPE_USINT_NAME     = ucv32("unsigned short");
@@ -58,6 +70,8 @@ static const ucv32_t UTYPE_CHAR_NAME      = ucv32("char");
 static const ucv32_t UTYPE_SCHAR_NAME     = ucv32("signed char");
 static const ucv32_t UTYPE_UCHAR_NAME     = ucv32("unsigned char");
 
+static const ucv32_t UTYPE_CSTR_NAME     = ucv32("char *");
+
 static const ucv32_t UTYPE_BOOL_NAME      = ucv32("bool");
 
 static const ucv32_t UTYPE_UC8_NAME       = ucv32("uc8_t");
@@ -72,29 +86,11 @@ static const ucv32_t UTYPE_US32_NAME      = ucv32("us32_t");
 static const ucv32_t UTYPE_UV32_NAME      = ucv32("uv32_t");
 static const ucv32_t UTYPE_UCV32_NAME     = ucv32("ucv32_t");
 
-static const ucv32_t UTYPE_UCASE_NAME     = ucv32("ucase_t");
-static const ucv32_t UTYPE_UTYPE_NAME     = ucv32("utype_t");
-static const ucv32_t UTYPE_URADIX_NAME    = ucv32("uradix_t");
-static const ucv32_t UTYPE_ENCODING_NAME  = ucv32("uencoding_t");
-static const ucv32_t UTYPE_ENDIAN_NAME    = ucv32("uendian_t");
-
 static const ucv32_t UTYPE_CUSTOM_NAME    = ucv32("<custom>");
-static const ucv32_t UTYPE_UNKNOWN_NAME    = ucv32("<unknown>");
-
-utype_t utype_from_ucv32(ucv32_t view);
-utype_t utype_from_us32(const us32_t *str);
-utype_t utype_from_uv32(uv32_t view);
-
-utype_t utype_from_uz32(const uc32_t *cstr);
-utype_t utype_from_uz32_n(const uc32_t *cstr, size_t n);
-
-utype_t utype_from_uz16(const uc16_t *cstr);
-utype_t utype_from_uz16_n(const uc16_t *cstr, size_t n);
-
-utype_t utype_from_uz8(const uc8_t *cstr);
-utype_t utype_from_uz8_n(const uc8_t *cstr, size_t n);
+static const ucv32_t UTYPE_UNKNOWN_NAME   = ucv32("<unknown>");
 
 ucv32_t utype_name(utype_t type);
+utgroup_t utype_group(utype_t type);
 bool utype_valid(utype_t type);
 
 #endif

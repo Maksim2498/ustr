@@ -245,6 +245,22 @@ size_t uprint_uz8_n(const uc8_t *cstr, size_t n) {
 	return ufprint_uz8_n(stdout, cstr, n);
 }
 
+size_t uprintln_z(const char *cstr) {
+	return uprintln_uz8((const uc8_t *) cstr);
+}
+
+size_t uprint_z(const char *cstr) {
+	return uprint_uz8((const uc8_t *) cstr);
+}
+
+size_t uprintln_z_n(const char *cstr, size_t n) {
+	return uprintln_uz8_n((const uc8_t *) cstr, n);
+}
+
+size_t uprint_z_n(const char *cstr, size_t n) {
+	return uprint_uz8_n((const uc8_t *) cstr, n);
+}
+
 size_t ufprintln_uz32(FILE *file, const uc32_t *cstr) {
 	return ufprint_uz32(file, cstr) + ufprintln(file);
 }
@@ -349,6 +365,22 @@ size_t ufprint_uz8_n(FILE *file, const uc8_t *cstr, size_t n) {
 	return fwrite(cstr, 1, n, file);
 }
 
+size_t ufprintln_z(FILE *file, const char *cstr) {
+	return ufprintln_uz8(file, (const uc8_t *) cstr);
+}
+
+size_t ufprint_z(FILE *file, const char *cstr) {
+	return ufprint_uz8(file, (const uc8_t *) cstr);
+}
+
+size_t ufprintln_z_n(FILE *file, const char *cstr, size_t n) {
+	return ufprintln_uz8_n(file, (const uc8_t *) cstr, n);
+}
+
+size_t ufprint_z_n(FILE *file, const char *cstr, size_t n) {
+	return ufprint_uz8_n(file, (const uc8_t *) cstr, n);
+}
+
 size_t uprintln_uc32(uc32_t c) {
 	return uprint_uc32(c) + uprintln();
 }
@@ -395,6 +427,22 @@ size_t uprintln_uc8_n(uc8_t c, size_t n) {
 
 size_t uprint_uc8_n(uc8_t c, size_t n) {
 	return ufprint_uc8_n(stdout, c, n);
+}
+
+size_t uprintln_c(char c) {
+	return uprintln_uc8(c);
+}
+
+size_t uprint_c(char c) {
+	return uprint_uc8(c);
+}
+
+size_t uprintln_c_n(char c, size_t n) {
+	return uprintln_uc8_n(c, n);
+}
+
+size_t uprint_c_n(char c, size_t n) {
+	return uprint_uc8_n(c, n);
 }
 
 size_t ufprintln_uc32(FILE *file, uc32_t c) {
@@ -484,6 +532,22 @@ size_t ufprint_uc8_n(FILE *file, uc8_t c, size_t n) {
 		++written; 
 
 	return written;
+}
+
+size_t ufprintln_c(FILE *file, char c) {
+	return ufprintln_uc8(file, c);
+}
+
+size_t ufprint_c(FILE *file, char c) {
+	return ufprint_uc8(file, c);
+}
+
+size_t ufprintln_c_n(FILE *file, char c, size_t n) {
+	return ufprintln_uc8_n(file, c, n);
+}
+
+size_t ufprint_c_n(FILE *file, char c, size_t n) {
+	return ufprint_uc8_n(file, c, n);
 }
 
 size_t uprintln(void) {

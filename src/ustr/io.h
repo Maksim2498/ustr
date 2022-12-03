@@ -100,6 +100,11 @@ size_t uprint_uz8(const uc8_t *cstr);
 size_t uprintln_uz8_n(const uc8_t *cstr, size_t n);
 size_t uprint_uz8_n(const uc8_t *cstr, size_t n);
 
+size_t uprintln_z(const char *cstr);
+size_t uprint_z(const char *cstr);
+size_t uprintln_z_n(const char *cstr, size_t n);
+size_t uprint_z_n(const char *cstr, size_t n);
+
 
 size_t ufprintln_uz32(FILE *file, const uc32_t *cstr);
 size_t ufprint_uz32(FILE *file, const uc32_t *cstr);
@@ -115,6 +120,11 @@ size_t ufprintln_uz8(FILE *file, const uc8_t *cstr);
 size_t ufprint_uz8(FILE *file, const uc8_t *cstr);
 size_t ufprintln_uz8_n(FILE *file, const uc8_t *cstr, size_t n);
 size_t ufprint_uz8_n(FILE *file, const uc8_t *cstr, size_t n);
+
+size_t ufprintln_z(FILE *file, const char *cstr);
+size_t ufprint_z(FILE *file, const char *cstr);
+size_t ufprintln_z_n(FILE *file, const char *cstr, size_t n);
+size_t ufprint_z_n(FILE *file, const char *cstr, size_t n);
 
 // - Char
 
@@ -133,6 +143,12 @@ size_t uprint_uc8(uc8_t c);
 size_t uprintln_uc8_n(uc8_t c, size_t n);
 size_t uprint_uc8_n(uc8_t c, size_t n);
 
+size_t uprintln_c(char c);
+size_t uprint_c(char c);
+size_t uprintln_c_n(char c, size_t n);
+size_t uprint_c_n(char c, size_t n);
+
+
 
 size_t ufprintln_uc32(FILE *file, uc32_t c);
 size_t ufprint_uc32(FILE *file, uc32_t c);
@@ -148,6 +164,11 @@ size_t ufprintln_uc8(FILE *file, uc8_t c);
 size_t ufprint_uc8(FILE *file, uc8_t c);
 size_t ufprintln_uc8_n(FILE *file, uc8_t c, size_t n);
 size_t ufprint_uc8_n(FILE *file, uc8_t c, size_t n);
+
+size_t ufprintln_c(FILE *file, char c);
+size_t ufprint_c(FILE *file, char c);
+size_t ufprintln_c_n(FILE *file, char c, size_t n);
+size_t ufprint_c_n(FILE *file, char c, size_t n);
 
 // Line
 

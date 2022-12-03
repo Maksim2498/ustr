@@ -2,53 +2,50 @@
 
 #include <assert.h>
 
-#include <ustr/cstr.h>
-#include <ustr/str.h>
-#include <ustr/view.h>
+ucv32_t utgroup_name(utgroup_t group) {
+	assert(utgroup_valid(group));
 
-utype_t utype_from_ucv32(ucv32_t view) {
-    return utype_from_uz32_n(UCV32_CEXPAND(view));
+	switch (group) {
+		case UTGROUP_INT:
+			return UTGROUP_INT_NAME;
+
+		case UTGROUP_FLOAT:
+			return UTGROUP_FLOAT_NAME;
+
+		case UTGROUP_CHAR:
+			return UTGROUP_CHAR_NAME;
+
+		case UTGROUP_BOOL:
+			return UTGROUP_BOOL_NAME;
+
+		case UTGROUP_STR:
+			return UTGROUP_STR_NAME;
+
+		case UTGROUP_CUSTOM:
+			return UTGROUP_CUSTOM_NAME;
+
+		default:
+			return UTGROUP_UNKNOWN_NAME;
+	}
 }
 
-utype_t utype_from_us32(const us32_t *str) {
-    return utype_from_uz32_n(US32_CEXPAND(str));
-}
-
-utype_t utype_from_uv32(uv32_t view) {
-    return utype_from_uz32_n(UV32_CEXPAND(view));
-}
-
-utype_t utype_from_uz32(const uc32_t *cstr) {
-    return utype_from_uz32_n(cstr, uz32_len(cstr));
-}
-
-utype_t utype_from_uz32_n(const uc32_t *cstr, size_t n) {
-    // TODO
-	return 0;
-}
-
-utype_t utype_from_uz16(const uc16_t *cstr) {
-    return utype_from_uz16_n(cstr, uz16_len(cstr));
-}
-
-utype_t utype_from_uz16_n(const uc16_t *cstr, size_t n) {
-    // TODO
-	return 0;
-}
-
-utype_t utype_from_uz8(const uc8_t *cstr) {
-    return utype_from_uz8_n(cstr, uz8_len(cstr));
-}
-
-utype_t utype_from_uz8_n(const uc8_t *cstr, size_t n) {
-	// TODO
-	return 0;
+bool utgroup_valid(utgroup_t group) {
+	return group < UTGROUP_COUNT;
 }
 
 ucv32_t utype_name(utype_t type) {
     assert(utype_valid(type));
 
     switch (type) {
+		case UTYPE_FLOAT:
+			return UTYPE_FLOAT_NAME;
+
+		case UTYPE_DOUBLE:
+			return UTYPE_DOUBLE_NAME;
+
+		case UTYPE_LDOUBLE:
+			return UTYPE_LDOUBLE_NAME;
+
 		case UTYPE_SINT:
 			return UTYPE_SINT_NAME;
  
@@ -171,6 +168,9 @@ ucv32_t utype_name(utype_t type) {
  
 		case UTYPE_UCHAR:
 			return UTYPE_UCHAR_NAME;
+
+		case UTYPE_CSTR:
+			return UTYPE_CSTR_NAME;
  
 		case UTYPE_BOOL:
 			return UTYPE_BOOL_NAME;
@@ -202,31 +202,89 @@ ucv32_t utype_name(utype_t type) {
 		case UTYPE_UCV32:
 			return UTYPE_UCV32_NAME;
 
-		case UTYPE_UCASE:
-			return UTYPE_UCASE_NAME;
- 
-		case UTYPE_UTYPE:
-			return UTYPE_UTYPE_NAME;
- 
-		case UTYPE_URADIX:
-			return UTYPE_URADIX_NAME;
- 
-		case UTYPE_ENCODING:
-			return UTYPE_ENCODING_NAME;
- 
-		case UTYPE_ENDIAN:
-			return UTYPE_ENDIAN_NAME;
-
 		case UTYPE_CUSTOM:
 			return UTYPE_CUSTOM_NAME;
 
-		case UTYPE_UNKNOWN:
-			return UTYPE_UNKNOWN_NAME;
-            
         default:
-            assert(false);
-            return ucv32_mk();
+			return UTYPE_UNKNOWN_NAME;
     }
+}
+
+utgroup_t utype_group(utype_t type) {
+	assert(utype_valid(type));
+
+	switch (type) {
+		case UTYPE_FLOAT:
+		case UTYPE_DOUBLE:
+		case UTYPE_LDOUBLE:
+			return UTGROUP_FLOAT;
+
+		case UTYPE_SINT:
+		case UTYPE_USINT:
+		case UTYPE_INT:
+		case UTYPE_UINT:
+		case UTYPE_LINT:
+		case UTYPE_ULINT:
+		case UTYPE_LLINT:
+		case UTYPE_ULLINT:
+		case UTYPE_INT_8:
+		case UTYPE_UINT_8:
+		case UTYPE_INT_16:
+		case UTYPE_UINT_16:
+		case UTYPE_INT_32:
+		case UTYPE_UINT_32:
+		case UTYPE_INT_64:
+		case UTYPE_UINT_64:
+		case UTYPE_FAST_8:
+		case UTYPE_UFAST_8:
+		case UTYPE_FAST_16:
+		case UTYPE_UFAST_16:
+		case UTYPE_FAST_32:
+		case UTYPE_UFAST_32:
+		case UTYPE_FAST_64:
+		case UTYPE_UFAST_64:
+		case UTYPE_LEAST_8:
+		case UTYPE_ULEAST_8:
+		case UTYPE_LEAST_16:
+		case UTYPE_ULEAST_16:
+		case UTYPE_LEAST_32:
+		case UTYPE_ULEAST_32:
+		case UTYPE_LEAST_64:
+		case UTYPE_ULEAST_64:
+		case UTYPE_MAX:
+		case UTYPE_UMAX:
+		case UTYPE_PTR:
+		case UTYPE_UPTR:
+		case UTYPE_SIZE:
+		case UTYPE_PTRDIFF:
+		case UTYPE_SCHAR:
+		case UTYPE_UCHAR:
+			return UTGROUP_INT;
+
+		case UTYPE_CHAR:
+		case UTYPE_UC8:
+		case UTYPE_UC16:
+		case UTYPE_UC32:
+			return UTGROUP_CHAR;
+
+		case UTYPE_BOOL:
+			return UTGROUP_BOOL;
+
+		case UTYPE_CSTR:
+		case UTYPE_UZ8:
+		case UTYPE_UZ16:
+		case UTYPE_UZ32:
+		case UTYPE_US32:
+		case UTYPE_UV32:
+		case UTYPE_UCV32:
+			return UTGROUP_STR;
+
+		case UTYPE_CUSTOM:
+			return UTGROUP_CUSTOM;
+
+        default:
+			return UTGROUP_UNKNOWN;
+	}
 }
 
 bool utype_valid(utype_t type) {
