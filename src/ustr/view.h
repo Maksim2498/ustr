@@ -47,8 +47,8 @@ size_t uv32_trim_right(uv32_t *view);
 
 // Char
 
-uc32_t uv32_uc32(uv32_t view, size_t index);
-void uv32_set_uc32(uv32_t view, uc32_t c, size_t index);
+uc32_t uv32_at(uv32_t view, size_t index);
+void uv32_set_at(uv32_t view, uc32_t c, size_t index);
 
 // Cmp
 
@@ -132,8 +132,8 @@ uc32_t *uv32_begin(uv32_t view);
 const uc32_t *uv32_cbegin(uv32_t view);
 uc32_t *uv32_end(uv32_t view);
 const uc32_t *uv32_cend(uv32_t view);
-uc32_t *uv32_at(uv32_t view, size_t index);
-const uc32_t *uv32_cat(uv32_t view, size_t index);
+uc32_t *uv32_offset(uv32_t view, size_t index);
+const uc32_t *uv32_coffset(uv32_t view, size_t index);
 
 // Len
 

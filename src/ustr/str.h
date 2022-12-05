@@ -113,8 +113,8 @@ size_t us32_trim_right(us32_t *str);
 
 // Char
 
-uc32_t us32_uc32(const us32_t *str, size_t index);
-void us32_set_uc32(us32_t *str, uc32_t c, size_t index);
+uc32_t us32_at(const us32_t *str, size_t index);
+void us32_set_at(us32_t *str, uc32_t c, size_t index);
 
 // Cmp
 
@@ -198,8 +198,8 @@ uc32_t *us32_begin(us32_t *str);
 const uc32_t *us32_cbegin(const us32_t *str);
 uc32_t *us32_end(us32_t *str);
 const uc32_t *us32_cend(const us32_t *str);
-uc32_t *us32_at(us32_t *str, size_t index);
-const uc32_t *us32_cat(const us32_t *str, size_t index);
+uc32_t *us32_offset(us32_t *str, size_t index);
+const uc32_t *us32_coffset(const us32_t *str, size_t index);
 
 // Len
 

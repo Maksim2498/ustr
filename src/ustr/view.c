@@ -85,12 +85,12 @@ size_t uv32_trim_right(uv32_t *view) {
     return view->len = uz32_n_trim_right(UV32_EXPAND(*view));
 }
 
-uc32_t uv32_uc32(uv32_t view, size_t index) {
+uc32_t uv32_at(uv32_t view, size_t index) {
     assert(uv32_bounds(view, index));
     return view.chars[index];
 }
 
-void uv32_set_uc32(uv32_t view, uc32_t c, size_t index) {
+void uv32_set_at(uv32_t view, uc32_t c, size_t index) {
     assert(uv32_bounds(view, index));
     view.chars[index] = c;
 }
@@ -390,12 +390,12 @@ const uc32_t *uv32_cend(uv32_t view) {
     return view.chars + view.len;
 }
 
-uc32_t *uv32_at(uv32_t view, size_t index) {
+uc32_t *uv32_offset(uv32_t view, size_t index) {
     assert(uv32_ebounds(view, index));
     return view.chars + index;
 }
 
-const uc32_t *uv32_cat(uv32_t view, size_t index) {
+const uc32_t *uv32_coffset(uv32_t view, size_t index) {
     assert(uv32_ebounds(view, index));
     return view.chars + index;
 }

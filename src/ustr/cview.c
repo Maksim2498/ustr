@@ -96,7 +96,7 @@ size_t ucv32_trim_right(ucv32_t *view) {
     return view->len = uz32_n_trim_right(UCV32_CEXPAND(*view));
 }
 
-uc32_t ucv32_uc32(ucv32_t view, size_t index) {
+uc32_t ucv32_at(ucv32_t view, size_t index) {
     assert(ucv32_bounds(view, index));
     return view.chars[index];
 }
@@ -260,7 +260,7 @@ const uc32_t *ucv32_cend(ucv32_t view) {
     return view.chars + view.len;
 }
 
-const uc32_t *ucv32_cat(ucv32_t view, size_t index) {
+const uc32_t *ucv32_coffset(ucv32_t view, size_t index) {
     assert(ucv32_ebounds(view, index));
     return view.chars + index;
 }

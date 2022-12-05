@@ -228,7 +228,7 @@ size_t uz_from_int_fmt_write_(void *cstr, unsigned n, uintmax_t i, bool s, const
         ucv32_t prefix = uradix_prefix(fmt->radix, fmt->radix_prefix_case);
 
         for (int i = ucv32_len(prefix) - 1; i >= 0; --i) {
-            uc32_t c32    = ucv32_uc32(prefix, i);
+            uc32_t c32    = ucv32_at(prefix, i);
             uc8_t  c8[4];
             int    c8_len = uc8_from_uc32(c8, c32);
 

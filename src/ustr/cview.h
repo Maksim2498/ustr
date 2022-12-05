@@ -45,7 +45,7 @@ size_t ucv32_trim_right(ucv32_t *view);
 
 // Char
 
-uc32_t ucv32_uc32(ucv32_t view, size_t index);
+uc32_t ucv32_at(ucv32_t view, size_t index);
 
 // Cmp
 
@@ -94,7 +94,7 @@ ptrdiff_t ucv32_us32_pos_from_r(ucv32_t view, const us32_t *str, size_t from);
 
 const uc32_t *ucv32_cbegin(ucv32_t view);
 const uc32_t *ucv32_cend(ucv32_t view);
-const uc32_t *ucv32_cat(ucv32_t view, size_t index);
+const uc32_t *ucv32_coffset(ucv32_t view, size_t index);
 
 // Len
 
