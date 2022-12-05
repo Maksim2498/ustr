@@ -19,6 +19,8 @@
 #define uz16(literal) (uc16_t *)  u##literal
 #define  uz8(literal)  (uc8_t *) u8##literal
 
+// - From float
+
 // - From int
 
 size_t uz32_from_int(uc32_t *cstr, intmax_t i);

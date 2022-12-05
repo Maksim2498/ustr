@@ -6,41 +6,34 @@
 #include "type.h"
 
 struct uigfmt {
-    ucase_t  digit_case;
     uradix_t radix;
-    size_t   precision;
+    ucase_t  digit_case;
+    bool     show_plus;
+    ucase_t  radix_prefix_case;
+    bool     show_radix_prefix;
 };
 
 struct ufgfmt {
     ucase_t exp_case;
     bool    scientific;
-};
-
-struct ucgfmt {
-    size_t count;
-    bool   arg_count;
+    bool    show_plus;
 };
 
 struct ubgfmt {
-    ucase_t c;
-};
-
-struct usgfmt {
-    size_t len;
-    bool   arg_len;
-    bool   type_len;
+    ucase_t char_case;
 };
 
 struct ufmt {
-    size_t  len;
-    utype_t type;
+    size_t   precision;
+    unsigned len;
+    bool     arg_precision;
+    bool     use_precision;
+    utype_t  type;
 
     union {
         struct uigfmt i;
         struct ufgfmt f;
-        struct ucgfmt c;
         struct ubgfmt b;
-        struct usgfmt s;
     };
 };
 
