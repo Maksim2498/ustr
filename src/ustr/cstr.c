@@ -85,10 +85,10 @@ size_t uz_from_int_fmt_len_(unsigned n, uintmax_t i, bool s, const struct uifmt 
 
     // Count digits
 
-    while (i) {
+    do {
         i /= fmt->radix;
         ++len;
-    }
+    } while (i);
 
     // Count leading zeroes
 

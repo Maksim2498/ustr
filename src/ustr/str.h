@@ -68,6 +68,39 @@ void us32_free(us32_t *str);
 size_t us32_uz16_len(const us32_t *str);
 size_t us32_uz8_len(const us32_t *str);
 
+// Prepend
+
+size_t us32_prepend(us32_t *str, const us32_t *another);
+size_t us32_prepend_e(us32_t *str, const us32_t *another, bool *error);
+size_t us32_prepend_uv32(us32_t *str, uv32_t view);
+size_t us32_prepend_uv32_e(us32_t *str, uv32_t view, bool *error);
+size_t us32_prepend_ucv32(us32_t *str, ucv32_t view);
+size_t us32_prepend_ucv32_e(us32_t *str, ucv32_t view, bool *error);
+size_t us32_prepend_uc32(us32_t *str, uc32_t c);
+size_t us32_prepend_uc32_e(us32_t *str, uc32_t c, bool *error);
+size_t us32_prepend_uc32_n(us32_t *str, uc32_t c, size_t n);
+size_t us32_prepend_uc32_n_e(us32_t *str, uc32_t c, size_t n, bool *error);
+size_t us32_prepend_uz32(us32_t *str, const uc32_t *cstr);
+size_t us32_prepend_uz32_e(us32_t *str, const uc32_t *cstr, bool *error);
+size_t us32_prepend_uz32_n(us32_t *str, const uc32_t *cstr, size_t n);
+size_t us32_prepend_uz32_n_e(us32_t *str, const uc32_t *cstr, size_t n, bool *error);
+size_t us32_prepend_int(us32_t *str, intmax_t i);
+size_t us32_prepend_int_e(us32_t *str, intmax_t i, bool *error);
+size_t us32_prepend_int_fmt(us32_t *str, intmax_t i, const struct uifmt *fmt);
+size_t us32_prepend_int_fmt_e(us32_t *str, intmax_t i, const struct uifmt *fmt, bool *error);
+size_t us32_prepend_uint(us32_t *str, uintmax_t i);
+size_t us32_prepend_uint_e(us32_t *str, uintmax_t i, bool *error);
+size_t us32_prepend_uint_fmt(us32_t *str, uintmax_t i, const struct uifmt *fmt);
+size_t us32_prepend_uint_fmt_e(us32_t *str, uintmax_t i, const struct uifmt *fmt, bool *error);
+size_t us32_prepend_bool(us32_t *str, bool b);
+size_t us32_prepend_bool_e(us32_t *str, bool b, bool *error);
+size_t us32_prepend_case_bool(us32_t *str, bool b, ucase_t c);
+size_t us32_prepend_case_bool_e(us32_t *str, bool b, ucase_t c, bool *error);
+size_t us32_prepend_upper_bool(us32_t *str, bool b);
+size_t us32_prepend_upper_bool_e(us32_t *str, bool b, bool *error);
+size_t us32_prepend_lower_bool(us32_t *str, bool b);
+size_t us32_prepend_lower_bool_e(us32_t *str, bool b, bool *error);
+
 // Append
 
 size_t us32_append(us32_t *str, const us32_t *another);
