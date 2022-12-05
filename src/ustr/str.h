@@ -101,6 +101,40 @@ size_t us32_prepend_upper_bool_e(us32_t *str, bool b, bool *error);
 size_t us32_prepend_lower_bool(us32_t *str, bool b);
 size_t us32_prepend_lower_bool_e(us32_t *str, bool b, bool *error);
 
+// Insert
+
+size_t us32_insert(us32_t *str, const us32_t *another, size_t at);
+size_t us32_insert_e(us32_t *str, const us32_t *another, size_t at, bool *error);
+size_t us32_insert_uv32(us32_t *str, uv32_t view, size_t at);
+size_t us32_insert_uv32_e(us32_t *str, uv32_t view, size_t at, bool *error);
+size_t us32_insert_ucv32(us32_t *str, ucv32_t view, size_t at);
+size_t us32_insert_ucv32_e(us32_t *str, ucv32_t view, size_t at, bool *error);
+size_t us32_insert_uc32(us32_t *str, uc32_t c, size_t at);
+size_t us32_insert_uc32_e(us32_t *str, uc32_t c, size_t at, bool *error);
+size_t us32_insert_uc32_n(us32_t *str, uc32_t c, size_t n, size_t at);
+size_t us32_insert_uc32_n_e(us32_t *str, uc32_t c, size_t n, size_t at, bool *error);
+size_t us32_insert_uz32(us32_t *str, const uc32_t *cstr, size_t at);
+size_t us32_insert_uz32_e(us32_t *str, const uc32_t *cstr, size_t at, bool *error);
+size_t us32_insert_uz32_n(us32_t *str, const uc32_t *cstr, size_t n, size_t at);
+size_t us32_insert_uz32_n_e(us32_t *str, const uc32_t *cstr, size_t n, size_t at, bool *error);
+size_t us32_insert_int(us32_t *str, intmax_t i, size_t at);
+size_t us32_insert_int_e(us32_t *str, intmax_t i, size_t at, bool *error);
+size_t us32_insert_int_fmt(us32_t *str, intmax_t i, const struct uifmt *fmt, size_t at);
+size_t us32_insert_int_fmt_e(us32_t *str, intmax_t i, const struct uifmt *fmt, size_t at, bool *error);
+size_t us32_insert_uint(us32_t *str, uintmax_t i, size_t at);
+size_t us32_insert_uint_e(us32_t *str, uintmax_t i, size_t at, bool *error);
+size_t us32_insert_uint_fmt(us32_t *str, uintmax_t i, const struct uifmt *fmt, size_t at);
+size_t us32_insert_uint_fmt_e(us32_t *str, uintmax_t i, const struct uifmt *fmt, size_t at, bool *error);
+size_t us32_insert_bool(us32_t *str, bool b, size_t at);
+size_t us32_insert_bool_e(us32_t *str, bool b, size_t at, bool *error);
+size_t us32_insert_case_bool(us32_t *str, bool b, ucase_t c, size_t at);
+size_t us32_insert_case_bool_e(us32_t *str, bool b, ucase_t c, size_t at, bool *error);
+size_t us32_insert_upper_bool(us32_t *str, bool b, size_t at);
+size_t us32_insert_upper_bool_e(us32_t *str, bool b, size_t at, bool *error);
+size_t us32_insert_lower_bool(us32_t *str, bool b, size_t at);
+size_t us32_insert_lower_bool_e(us32_t *str, bool b, size_t at, bool *error);
+
+
 // Append
 
 size_t us32_append(us32_t *str, const us32_t *another);

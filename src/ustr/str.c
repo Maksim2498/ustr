@@ -406,7 +406,7 @@ size_t us32_prepend_case_bool(us32_t *str, bool b, ucase_t c) {
 }
 
 size_t us32_prepend_case_bool_e(us32_t *str, bool b, ucase_t c, bool *error) {
-	return UCASE_UPPER == c ? us32_prepend_upper_bool_e(str, b, error) : us32_prepend_lower_bool_e(str, b, error);
+	return us32_prepend_ucv32_e(str, ucv32_from_case_bool(b, c), error);
 }
 
 size_t us32_prepend_upper_bool(us32_t *str, bool b) {
@@ -414,7 +414,7 @@ size_t us32_prepend_upper_bool(us32_t *str, bool b) {
 }
 
 size_t us32_prepend_upper_bool_e(us32_t *str, bool b, bool *error) {
-	return us32_prepend_ucv32_e(str, b ? ucv32("TRUE") : ucv32("FALSE"), error);
+	return us32_prepend_ucv32_e(str, ucv32_from_upper_bool(b), error);
 }
 
 size_t us32_prepend_lower_bool(us32_t *str, bool b) {
@@ -422,7 +422,213 @@ size_t us32_prepend_lower_bool(us32_t *str, bool b) {
 }
 
 size_t us32_prepend_lower_bool_e(us32_t *str, bool b, bool *error) {
-	return us32_prepend_ucv32_e(str, b ? ucv32("true") : ucv32("false"), error);
+	return us32_prepend_ucv32_e(str, ucv32_from_lower_bool(b), error);
+}
+
+size_t us32_insert(us32_t *str, const us32_t *another, size_t at) {
+	return us32_insert_e(str, another, at, NULL);
+}
+
+size_t us32_insert_e(us32_t *str, const us32_t *another, size_t at, bool *error) {
+	return us32_insert_uz32_n_e(str, US32_CEXPAND(another), at, error);
+}
+
+size_t us32_insert_uv32(us32_t *str, uv32_t view, size_t at) {
+	return us32_insert_uv32_e(str, view, at, NULL);
+}
+
+size_t us32_insert_uv32_e(us32_t *str, uv32_t view, size_t at, bool *error) {
+	return us32_insert_uz32_n_e(str, UV32_EXPAND(view), at, error);
+}
+
+size_t us32_insert_ucv32(us32_t *str, ucv32_t view, size_t at) {
+	return us32_insert_ucv32_e(str, view, at, NULL);
+}
+
+size_t us32_insert_ucv32_e(us32_t *str, ucv32_t view, size_t at, bool *error) {
+	return us32_insert_uz32_n_e(str, UCV32_CEXPAND(view), at, error);
+}
+
+size_t us32_insert_uc32(us32_t *str, uc32_t c, size_t at) {
+	return us32_insert_uc32_e(str, c, at, NULL);
+}
+
+size_t us32_insert_uc32_e(us32_t *str, uc32_t c, size_t at, bool *error) {
+	assert(us32_ebounds(str, at));
+
+	bool inner_error = false;
+
+	us32_add_len_e(str, 1, &inner_error);
+
+	if (inner_error) {
+		if (error)
+			*error = true;
+
+		return str->len;
+	}
+
+	uz32_move(str->chars + at + 1, str->chars + at, str->len - at - 1);
+	str->chars[at] = c;
+
+	return str->len;
+}
+
+size_t us32_insert_uc32_n(us32_t *str, uc32_t c, size_t n, size_t at) {
+	return us32_insert_uc32_n_e(str, c, n, at, NULL);
+}
+
+size_t us32_insert_uc32_n_e(us32_t *str, uc32_t c, size_t n, size_t at, bool *error) {
+	assert(us32_ebounds(str, at));
+
+	size_t old_len     = str->len;
+	bool   inner_error = false;
+
+	us32_add_len_e(str, n, &inner_error);
+
+	if (inner_error) {
+		if (error)
+			*error = true;
+
+		return str->len;
+	}
+
+	uz32_move(str->chars + at + n, str->chars + at, old_len - at);
+	uz32_n_fill(str->chars + at, n, c);
+
+	return str->len;
+}
+
+size_t us32_insert_uz32(us32_t *str, const uc32_t *cstr, size_t at) {
+	return us32_insert_uz32_e(str, cstr, at, NULL);
+}
+
+size_t us32_insert_uz32_e(us32_t *str, const uc32_t *cstr, size_t at, bool *error) {
+	return us32_insert_uz32_n_e(str, cstr, uz32_len(cstr), at, error);
+}
+
+size_t us32_insert_uz32_n(us32_t *str, const uc32_t *cstr, size_t n, size_t at) {
+	return us32_insert_uz32_n_e(str, cstr, n, at, NULL);
+}
+
+size_t us32_insert_uz32_n_e(us32_t *str, const uc32_t *cstr, size_t n, size_t at, bool *error) {
+	assert(us32_ebounds(str, at));
+
+	size_t old_len     = str->len;
+	bool   inner_error = false;
+
+	us32_add_len_e(str, n, &inner_error);
+
+	if (inner_error) {
+		if (error)
+			*error = true;
+
+		return str->len;
+	}
+
+	uz32_move(str->chars + at + n, str->chars + at, old_len - at);
+	uz32_copy_n(str->chars + at, cstr, n);
+
+	return str->len;
+}
+
+size_t us32_insert_int(us32_t *str, intmax_t i, size_t at) {
+	return us32_insert_int_e(str, i, at, NULL);
+}
+
+size_t us32_insert_int_e(us32_t *str, intmax_t i, size_t at, bool *error) {
+	return us32_insert_int_fmt_e(str, i, &UIFMT_DEC, at, error);
+}
+
+size_t us32_insert_int_fmt(us32_t *str, intmax_t i, const struct uifmt *fmt, size_t at) {
+	return us32_insert_int_fmt_e(str, i, fmt, at, NULL);
+}
+
+size_t us32_insert_int_fmt_e(us32_t *str, intmax_t i, const struct uifmt *fmt, size_t at, bool *error) {
+	assert(us32_ebounds(str, at));
+
+	size_t old_len     = str->len;
+	size_t int_len     = uz32_from_int_fmt(NULL, i, fmt);
+	bool   inner_error = false;
+
+	us32_add_len_e(str, int_len, &inner_error);
+
+	if (inner_error) {
+		if (error)
+			*error = true;
+
+		return str->len;
+	}
+
+	uz32_move(str->chars + at + int_len, str->chars + at, old_len - at);
+	uz32_from_int_fmt(str->chars + at, i, fmt);
+
+	return str->len;
+}
+
+size_t us32_insert_uint(us32_t *str, uintmax_t i, size_t at) {
+	return us32_insert_uint_e(str, i, at, NULL);
+}
+
+size_t us32_insert_uint_e(us32_t *str, uintmax_t i, size_t at, bool *error) {
+	return us32_insert_uint_fmt_e(str, i, &UIFMT_DEC, at, error);
+}
+
+size_t us32_insert_uint_fmt(us32_t *str, uintmax_t i, const struct uifmt *fmt, size_t at) {
+	return us32_insert_uint_fmt_e(str, i, fmt, at, NULL);
+}
+
+size_t us32_insert_uint_fmt_e(us32_t *str, uintmax_t i, const struct uifmt *fmt, size_t at, bool *error) {
+	assert(us32_ebounds(str, at));
+
+	size_t old_len     = str->len;
+	size_t int_len     = uz32_from_uint_fmt(NULL, i, fmt);
+	bool   inner_error = false;
+
+	us32_add_len_e(str, int_len, &inner_error);
+
+	if (inner_error) {
+		if (error)
+			*error = true;
+
+		return str->len;
+	}
+
+	uz32_move(str->chars + at + int_len, str->chars + at, old_len - at);
+	uz32_from_uint_fmt(str->chars + at, i, fmt);
+
+	return str->len;
+}
+
+size_t us32_insert_bool(us32_t *str, bool b, size_t at) {
+	return us32_insert_bool_e(str, b, at, NULL);
+}
+
+size_t us32_insert_bool_e(us32_t *str, bool b, size_t at, bool *error) {
+	return us32_insert_lower_bool_e(str, b, at, error);
+}
+
+size_t us32_insert_case_bool(us32_t *str, bool b, ucase_t c, size_t at) {
+	return us32_insert_case_bool_e(str, b, c, at, NULL);
+}
+
+size_t us32_insert_case_bool_e(us32_t *str, bool b, ucase_t c, size_t at, bool *error) {
+	return us32_insert_ucv32_e(str, ucv32_from_case_bool(b, c), at, error);
+}
+
+size_t us32_insert_upper_bool(us32_t *str, bool b, size_t at) {
+	return us32_insert_upper_bool_e(str, b, at, NULL);
+}
+
+size_t us32_insert_upper_bool_e(us32_t *str, bool b, size_t at, bool *error) {
+	return us32_insert_ucv32_e(str, ucv32_from_upper_bool(b), at, error);
+}
+
+size_t us32_insert_lower_bool(us32_t *str, bool b, size_t at) {
+	return us32_insert_lower_bool_e(str, b, at, NULL);
+}
+
+size_t us32_insert_lower_bool_e(us32_t *str, bool b, size_t at, bool *error) {
+	return us32_insert_ucv32_e(str, ucv32_from_lower_bool(b), at, error);
 }
 
 size_t us32_append(us32_t *str, const us32_t *another) {
@@ -592,7 +798,7 @@ size_t us32_append_case_bool(us32_t *str, bool b, ucase_t c) {
 }
 
 size_t us32_append_case_bool_e(us32_t *str, bool b, ucase_t c, bool *error) {
-	return UCASE_UPPER == c ? us32_append_upper_bool_e(str, b, error) : us32_append_lower_bool_e(str, b, error);
+	return us32_append_ucv32_e(str, ucv32_from_case_bool(b, c), error);
 }
 
 size_t us32_append_upper_bool(us32_t *str, bool b) {
@@ -600,7 +806,7 @@ size_t us32_append_upper_bool(us32_t *str, bool b) {
 }
 
 size_t us32_append_upper_bool_e(us32_t *str, bool b, bool *error) {
-	return us32_append_ucv32_e(str, b ? ucv32("TRUE") : ucv32("FALSE"), error);
+	return us32_append_ucv32_e(str, ucv32_from_upper_bool(b), error);
 }
 
 size_t us32_append_lower_bool(us32_t *str, bool b) {
@@ -608,7 +814,7 @@ size_t us32_append_lower_bool(us32_t *str, bool b) {
 }
 
 size_t us32_append_lower_bool_e(us32_t *str, bool b, bool *error) {
-	return us32_append_ucv32_e(str, b ? ucv32("true") : ucv32("false"), error);
+	return us32_append_ucv32_e(str, ucv32_from_lower_bool(b), error);
 }
 
 void us32_reverse(us32_t *str) {
