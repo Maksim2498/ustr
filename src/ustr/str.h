@@ -65,8 +65,9 @@ void us32_free(us32_t *str);
 
 // Cross-UTF Len
 
-size_t us32_uz16_len(const us32_t *str);
-size_t us32_uz8_len(const us32_t *str);
+size_t us32_32_len(const us32_t *str);
+size_t us32_16_len(const us32_t *str);
+size_t us32_z8_len(const us32_t *str);
 
 // Prepend
 

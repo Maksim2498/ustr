@@ -103,12 +103,12 @@ bool uc8_upper_radix(uc8_t c, uradix_t radix);
 
 // - Case chage
 
-uc8_to_case_len_func_t uc8_to_case_len_func_from_ucase(ucase_t ca);
-int uc8_to_case_len(const uc8_t *c, ucase_t ca);
-int uc8_to_upper_len(const uc8_t *c);
-int uc8_to_lower_len(const uc8_t *c);
+uc8_case_len_func_t uc8_case_len_func_from_ucase(ucase_t ca);
+int uc8_case_len(const uc8_t *c, ucase_t ca);
+int uc8_upper_len(const uc8_t *c);
+int uc8_lower_len(const uc8_t *c);
 
-uc8_to_case_func_t uc8_to_case_func_from_ucase(ucase_t ca);
+uc8_case_func_t uc8_to_case_func_from_ucase(ucase_t ca);
 int uc8_to_case(uc8_t *c, ucase_t ca);
 int uc8_to_upper(uc8_t *c);
 int uc8_to_lower(uc8_t *c);
@@ -142,7 +142,9 @@ bool uc8_trail(uc8_t c);
 // - Len
 
 int uc8_len(uc8_t c);
-int uc8_uc16_len(uc8_t c);
+int uc8_32_len(uc8_t c);
+int uc8_16_len(uc8_t c);
+int uc8_8_len(uc8_t c);
 
 // - Valid
 
@@ -221,7 +223,9 @@ bool uc16_srgt_high(uc16_t c);
 // - Len
 
 int uc16_len(uc16_t c);
-int uc16_uc8_len(uc16_t c);
+int uc16_32_len(uc16_t c);
+int uc16_16_len(uc16_t c);
+int uc16_8_len(uc16_t c);
 
 // - Valid
 
@@ -299,8 +303,10 @@ bool uc32_srgt_high(uc32_t c);
 
 // - Len
 
-int uc32_uc16_len(uc32_t c);
-int uc32_uc8_len(uc32_t c);
+int uc32_len(uc32_t c);
+int uc32_32_len(uc32_t c);
+int uc32_16_len(uc32_t c);
+int uc32_8_len(uc32_t c);
 
 // - Valid
 

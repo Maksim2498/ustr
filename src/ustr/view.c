@@ -58,12 +58,16 @@ uv32_t uv32_from_uz32_n(uc32_t *cstr, size_t n) {
     };
 }
 
-size_t uv32_uz16_len(uv32_t view) {
-    return uz32_n_uz16_len(UV32_CEXPAND(view));
+size_t uv32_32_len(uv32_t view) {
+    return uv32_len(view);
 }
 
-size_t uv32_uz8_len(uv32_t view) {
-    return uz32_n_uz8_len(UV32_CEXPAND(view));
+size_t uv32_16_len(uv32_t view) {
+    return uz32_n_16_len(UV32_CEXPAND(view));
+}
+
+size_t uv32_8_len(uv32_t view) {
+    return uz32_n_8_len(UV32_CEXPAND(view));
 }
 
 void uv32_reverse(uv32_t view) {

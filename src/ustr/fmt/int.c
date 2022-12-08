@@ -1,22 +1,13 @@
 #include "int.h"
 
-#include <stdint.h>
-#include <limits.h>
-
+#include <ustr/fmt/case.h>
 #include <ustr/fmt/radix.h>
-#include <ustr/util/bit.h>
+#include <ustr/cview.h>
 
 bool uifmt_valid(const struct uifmt *fmt) {
-    if (!fmt)
-        return false;
-
-    if (!uradix_valid(fmt->radix))
-        return false;
-
-    if (upower_of_2(fmt->radix) 
-     && fmt->show_leading_zeroes
-     && fmt->leading_zeroes_limit > CHAR_BIT * sizeof(intmax_t))
-        return false;
-
-    return true;
+    return fmt
+        && uradix_valid(fmt->radix)
+        && (!fmt->group_size || ucv32_valid(fmt->group_separator))
+        && (!uradix_has_prefix(fmt->radix) || ucase_valid(fmt->radix_prefix_case))
+        && (fmt->radix <= 10               || ucase_valid(fmt->digit_case));
 }

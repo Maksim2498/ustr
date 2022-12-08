@@ -7,6 +7,7 @@ add_library(ustr
             src/ustr/fmt/type.h       src/ustr/fmt/type.c
             src/ustr/type/fmt/all.h
             src/ustr/type/fmt/case.h
+            src/ustr/type/fmt/float.h
             src/ustr/type/fmt/fmt.h
             src/ustr/type/fmt/int.h
             src/ustr/type/fmt/radix.h
@@ -19,8 +20,8 @@ add_library(ustr
             src/ustr/type/str.h
             src/ustr/type/view.h
             src/ustr/util/all.h
-            src/ustr/util/bit.h       src/ustr/util/bit.c
             src/ustr/util/endian.h    src/ustr/util/endian.c
+            src/ustr/util/math.h
             src/ustr/util/mem.h       src/ustr/util/mem.c
             src/ustr/config.h.in
             src/ustr/all.h

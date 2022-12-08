@@ -4,11 +4,19 @@
 #include <locale.h>
 
 #include "fmt/int.h"
+#include "util/math.h"
 #include "char.h"
+#include "config.h"
 #include "cstr.h"
 #include "cview.h"
 #include "str.h"
 #include "view.h"
+
+static _Thread_local char uio_buffer_[USTR_IO_BUFFER_SIZE];
+
+typedef size_t (*uz8_from_int_t)(uc8_t *, uintmax_t, const struct uifmt *);
+
+static size_t ufprint_int_fmt_(FILE *file, uintmax_t i, const struct uifmt *fmt, uz8_from_int_t func);
 
 void uset_locale(void) {
     setlocale(LC_ALL, "en_US.UTF-8");
@@ -123,9 +131,7 @@ size_t ufprintln_int_fmt(FILE *file, intmax_t i, const struct uifmt *fmt) {
 }
 
 size_t ufprint_int_fmt(FILE *file, intmax_t i, const struct uifmt *fmt) {
-	uc8_t  cstr[UINT_MAX_UC8_LEN];
-	size_t cstr_len = uz8_from_int_fmt(cstr, i, fmt);
-	return ufprint_uz8_n(file, cstr, cstr_len);
+	return ufprint_int_fmt_(file, i, fmt, (uz8_from_int_t) uz8_from_int_fmt);
 }
 
 size_t ufprintln_uint(FILE *file, uintmax_t i) {
@@ -141,9 +147,25 @@ size_t ufprintln_uint_fmt(FILE *file, uintmax_t i, const struct uifmt *fmt) {
 }
 
 size_t ufprint_uint_fmt(FILE *file, uintmax_t i, const struct uifmt *fmt) {
-	uc8_t  cstr[UINT_MAX_UC8_LEN];
-	size_t cstr_len = uz8_from_uint_fmt(cstr, i, fmt);
-	return ufprint_uz8_n(file, cstr, cstr_len);
+	return ufprint_int_fmt_(file, i, fmt, uz8_from_uint_fmt);
+}
+
+size_t ufprint_int_fmt_(FILE *file, uintmax_t i, const struct uifmt *fmt, size_t (*func)(uc8_t *, uintmax_t, const struct uifmt *)) {
+	struct uifmt inner_fmt = *fmt;
+	size_t       written   = 0;
+	size_t 		 to_write  = func(NULL, i, fmt);
+
+	while (to_write) {
+		inner_fmt.max_len = inner_fmt.start_from + UMIN(USTR_IO_BUFFER_SIZE, to_write);
+
+		size_t len = func((uc8_t *) uio_buffer_, i, &inner_fmt);
+
+		inner_fmt.start_from += len;
+		to_write             -= len;
+		written              += ufprint_uz8_n(file, (uc8_t *) uio_buffer_, len);
+	}
+
+	return written;
 }
 
 size_t uprintln_ucv32(ucv32_t view) {
@@ -310,7 +332,7 @@ size_t ufprint_uz16(FILE *file, const uc16_t *cstr) {
 
 	size_t written = 0;
 
-	for (; cstr[written]; written += uc16_len(cstr[written])) {
+	for (; cstr[written]; written += uc16_32_len(cstr[written])) {
 		uc8_t  c8[4];
 		size_t c8_len = uc8_from_uc16(c8, cstr + written);
 
@@ -330,7 +352,7 @@ size_t ufprint_uz16_n(FILE *file, const uc16_t *cstr, size_t n) {
 
 	size_t written = 0;
 
-	for (; written < n; written += uc16_len(cstr[written])) {
+	for (; written < n; written += uc16_32_len(cstr[written])) {
 		uc8_t  c8[4];
 		size_t c8_len = uc8_from_uc16(c8, cstr + written);
 
@@ -673,7 +695,7 @@ size_t ufread_uc32(FILE *file, uc32_t *c32) {
 size_t ufread_uc16(FILE *file, uc16_t *c16) {
 	assert(c16);
 	uc32_t c32;
-	return ufread_uc32(file, &c32) && uc32_uc16_len(c32) == 1 ? uc16_from_uc32(c16, c32) : 0;
+	return ufread_uc32(file, &c32) && uc32_16_len(c32) == 1 ? uc16_from_uc32(c16, c32) : 0;
 }
 
 size_t ufread_uc16_f(FILE *file, uc16_t *c16) {

@@ -1,5 +1,17 @@
 #include "case.h"
 
+#include <assert.h>
+
+bool ucase_upper(ucase_t c) {
+    assert(ucase_valid(c));
+    return UCASE_UPPER == c;
+}
+
+bool ucase_lower(ucase_t c) {
+    assert(ucase_valid(c));
+    return UCASE_LOWER == c;
+}
+
 ucv32_t ucase_name(ucase_t c) {
     switch (c) {
         case UCASE_NONE:

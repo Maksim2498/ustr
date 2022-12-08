@@ -210,12 +210,16 @@ void us32_free(us32_t *str) {
 	str->cap   = 0;
 }
 
-size_t us32_uz16_len(const us32_t *str) {
-	return uz32_n_uz16_len(US32_CEXPAND(str));
+size_t us32_32_len(const us32_t *str) {
+	return us32_len(str);
 }
 
-size_t us32_uz8_len(const us32_t *str) {
-	return uz32_n_uz8_len(US32_CEXPAND(str));
+size_t us32_16_len(const us32_t *str) {
+	return uz32_n_16_len(US32_CEXPAND(str));
+}
+
+size_t us32_z8_len(const us32_t *str) {
+	return uz32_n_8_len(US32_CEXPAND(str));
 }
 
 size_t us32_prepend(us32_t *str, const us32_t *another) {

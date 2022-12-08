@@ -523,7 +523,7 @@ int uc8_from_uc16_e(uc8_t *to, const uc16_t *from, uendian_t from_endian) {
 }
 
 int uc8_from_uc32(uc8_t *to, uc32_t from) {
-	int len = uc32_uc8_len(from);
+	int len = uc32_8_len(from);
 
 	if (!len)
 		return 0;
@@ -739,35 +739,35 @@ bool uc8_upper_radix(uc8_t c, uradix_t radix) {
 	return uc32_upper_radix(c, radix);
 }
 
-uc8_to_case_len_func_t uc8_to_case_len_func_from_ucase(ucase_t ca) {
+uc8_case_len_func_t uc8_case_len_func_from_ucase(ucase_t ca) {
 	switch (ca) {
 		case UCASE_UPPER:
-			return uc8_to_upper_len;
+			return uc8_upper_len;
 
 		case UCASE_LOWER:
-			return uc8_to_lower_len;
+			return uc8_lower_len;
 
 		default:
 			return NULL;
 	}
 }
 
-int uc8_to_case_len(const uc8_t *c, ucase_t ca) {
+int uc8_case_len(const uc8_t *c, ucase_t ca) {
 	assert(c);
 
 	switch (ca) {
 		case UCASE_UPPER:
-			return uc8_to_upper_len(c);
+			return uc8_upper_len(c);
 
 		case UCASE_LOWER:
-			return uc8_to_lower_len(c);
+			return uc8_lower_len(c);
 
 		default:
 			return uc8_len(*c);
 	}
 }
 
-int uc8_to_upper_len(const uc8_t *c) {
+int uc8_upper_len(const uc8_t *c) {
 	assert(c);
 
 	uc32_t c32;
@@ -777,10 +777,10 @@ int uc8_to_upper_len(const uc8_t *c) {
 
 	c32 = uc32_to_upper(c32);
 
-	return uc32_uc8_len(c32);
+	return uc32_8_len(c32);
 }
 
-int uc8_to_lower_len(const uc8_t *c) {
+int uc8_lower_len(const uc8_t *c) {
 	assert(c);
 
 	uc32_t c32;
@@ -790,10 +790,10 @@ int uc8_to_lower_len(const uc8_t *c) {
 
 	c32 = uc32_to_lower(c32);
 
-	return uc32_uc8_len(c32);
+	return uc32_8_len(c32);
 }
 
-uc8_to_case_func_t uc8_to_case_func_from_ucase(ucase_t ca) {
+uc8_case_func_t uc8_to_case_func_from_ucase(ucase_t ca) {
 	switch (ca) {
 		case UCASE_UPPER:
 			return uc8_to_upper;
@@ -949,6 +949,10 @@ bool uc8_trail(uc8_t c) {
 }
 
 int uc8_len(uc8_t c) {
+	return uc8_32_len(c);
+}
+
+int uc8_32_len(uc8_t c) {
 	// 0xxx xxxx
 	if ((c & 0x80) == 0)
 		return 1;
@@ -968,8 +972,12 @@ int uc8_len(uc8_t c) {
 	return 1;
 }
 
-int uc8_uc16_len(uc8_t c) {
+int uc8_16_len(uc8_t c) {
 	return uc8_len(c) == 4 ? 2 : 1;
+}
+
+int uc8_8_len(uc8_t c) {
+	return 1;
 }
 
 int uc8_valid(const uc8_t *c) {
@@ -1133,7 +1141,7 @@ int uc16_to_case(uc16_t *c, ucase_t ca) {
 			return uc16_to_lower(c);
 
 		default:
-			return uc16_len(*c);
+			return uc16_32_len(*c);
 	}
 }
 
@@ -1248,10 +1256,18 @@ bool uc16_srgt_high(uc16_t c) {
 }
 
 int uc16_len(uc16_t c) {
+	return uc16_32_len(c);
+}
+
+int uc16_32_len(uc16_t c) {
 	return uc16_srgt_low(c) ? 2 : 1;
 }
 
-int uc16_uc8_len(uc16_t c) {
+int uc16_16_len(uc16_t c) {
+	return 1;
+}
+
+int uc16_8_len(uc16_t c) {
 	if (c <= 0x7F)
 		return 1;
 
@@ -34509,14 +34525,22 @@ bool uc32_srgt_high(uc32_t c) {
 	return 0xDC00 <= c && c <= 0xDFFF;
 }
 
-int uc32_uc16_len(uc32_t c) {
+int uc32_len(uc32_t c) {
+	return 1;
+}
+
+int uc32_32_len(uc32_t c) {
+	return 1;
+}
+
+int uc32_16_len(uc32_t c) {
 	if (c > UMAX_CP)
 		return 0;
 
 	return c >= 0x10000 ? 2 : 1;
 }
 
-int uc32_uc8_len(uc32_t c) {
+int uc32_8_len(uc32_t c) {
 	if (c <= 0x7F)
 		return 1;
 
