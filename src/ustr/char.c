@@ -949,10 +949,6 @@ bool uc8_trail(uc8_t c) {
 }
 
 int uc8_len(uc8_t c) {
-	return uc8_32_len(c);
-}
-
-int uc8_32_len(uc8_t c) {
 	// 0xxx xxxx
 	if ((c & 0x80) == 0)
 		return 1;
@@ -969,6 +965,10 @@ int uc8_32_len(uc8_t c) {
 	if ((c & 0xF7) == 0xF0)
 		return 4;
 
+	return 1;
+}
+
+int uc8_32_len(uc8_t c) {
 	return 1;
 }
 
@@ -1256,11 +1256,11 @@ bool uc16_srgt_high(uc16_t c) {
 }
 
 int uc16_len(uc16_t c) {
-	return uc16_32_len(c);
+	return uc16_srgt_low(c) ? 2 : 1;
 }
 
 int uc16_32_len(uc16_t c) {
-	return uc16_srgt_low(c) ? 2 : 1;
+	return 1;
 }
 
 int uc16_16_len(uc16_t c) {

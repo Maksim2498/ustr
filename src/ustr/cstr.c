@@ -646,44 +646,6 @@ size_t uz8_from_uz32_n(uc8_t *to, const uc32_t *from, size_t n) {
 	return len;
 }
 
-#define USTR_RETURN_UZ32_LEN_(N, cstr) \
-    {                              \
-        assert(cstr);              \
-                                   \
-        size_t len = 0;            \
-                                   \
-        for (size_t i = 0;;) {     \
-            uc##N##_t c = cstr[i]; \
-                                   \
-            if (!c)                \
-                return len;        \
-                                   \
-            i += uc##N##_len(c);   \
-            ++len;                 \
-        }                          \
-                                   \
-        return len;                \
-    }
-
-#define USTR_RETURN_N_UZ32_LEN_(N, cstr, n) \
-    {                                   \
-        assert(cstr);                   \
-                                        \
-        size_t len = 0;                 \
-                                        \
-        for (size_t i = 0; i < n;) {    \
-            uc##N##_t c = cstr[i];      \
-                                        \
-            if (!c)                     \
-                return len;             \
-                                        \
-            i += uc##N##_len(c);        \
-            ++len;                      \
-        }                               \
-                                        \
-        return len;                     \
-    }
-
 size_t uz32_8_len(const uc32_t *cstr) {
     assert(cstr);
 
@@ -742,8 +704,10 @@ size_t uz16_8_len(const uc16_t *cstr) {
 
     size_t len = 0;
 
-    for (; *cstr; cstr += uc16_32_len(*cstr)) 
-        len += uc16_8_len(*cstr);
+    while (*cstr) {
+        len  += uc16_8_len(*cstr);
+        cstr += uc16_len(*cstr);
+    }
 
     return len;
 }
@@ -753,8 +717,10 @@ size_t uz16_n_8_len(const uc16_t *cstr, size_t n) {
 
     size_t len = 0;
 
-    for (; n--; cstr += uc16_32_len(*cstr)) 
-        len += uc16_8_len(*cstr);
+    while (n--) {
+        len  += uc16_8_len(*cstr);
+        cstr += uc16_len(*cstr);
+    }
 
     return len;
 }
@@ -769,11 +735,29 @@ size_t uz16_n_16_len(const uc16_t *cstr, size_t n) {
 }
 
 size_t uz16_32_len(const uc16_t *cstr) {
-    USTR_RETURN_UZ32_LEN_(16, cstr);
+    assert(cstr);
+
+    size_t len = 0;
+
+    while (*cstr) {
+        cstr += uc16_len(*cstr);
+        ++len;
+    }
+
+    return len;
 }
 
 size_t uz16_n_32_len(const uc16_t *cstr, size_t n) {
-    USTR_RETURN_N_UZ32_LEN_(16, cstr, n);
+    assert(cstr);
+
+    size_t len = 0;
+
+    while (n--) {
+        cstr +=  uc16_len(*cstr);
+        ++len;
+    }
+
+    return len;
 }
 
 size_t uz8_8_len(const uc8_t *cstr) {
@@ -790,8 +774,10 @@ size_t uz8_16_len(const uc8_t *cstr) {
 
     size_t len = 0;
 
-    for (; *cstr; cstr += uc8_len(*cstr))
-        len += uc8_16_len(*cstr);
+    while (*cstr) {
+        len  += uc8_16_len(*cstr);
+        cstr += uc8_len(*cstr);
+    }
 
     return len;
 }
@@ -801,18 +787,38 @@ size_t uz8_n_16_len(const uc8_t *cstr, size_t n) {
 
     size_t len = 0;
 
-    for (; n--; cstr += uc8_len(*cstr))
-        len += uc8_16_len(*cstr);
+    while (n--) {
+        len  += uc8_16_len(*cstr);
+        cstr += uc8_len(*cstr);
+    }
 
     return len;
 }
 
 size_t uz8_32_len(const uc8_t *cstr) {
-    USTR_RETURN_UZ32_LEN_(8, cstr);
+    assert(cstr);
+
+    size_t len = 0;
+
+    while (*cstr) {
+        cstr += uc8_len(*cstr);
+        ++len;
+    }
+
+    return len;
 }
 
 size_t uz8_n_32_len(const uc8_t *cstr, size_t n) {
-    USTR_RETURN_N_UZ32_LEN_(8, cstr, n);
+    assert(cstr);
+
+    size_t len = 0;
+
+    while (n--) {
+        cstr +=  uc8_len(*cstr);
+        ++len;
+    }
+
+    return len;
 }
 
 #define USTR_RETURN_LEN_(cstr) \
@@ -821,7 +827,7 @@ size_t uz8_n_32_len(const uc8_t *cstr, size_t n) {
                                \
         size_t len = 0;        \
                                \
-        while (cstr[len])      \
+        while (*cstr++)        \
             ++len;             \
                                \
         return len;            \
