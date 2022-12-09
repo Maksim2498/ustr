@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 #include "type/fmt/case.h"
+#include "type/fmt/float.h"
 #include "type/fmt/int.h"
 #include "type/char.h"
 #include "type/cview.h"
@@ -20,6 +21,15 @@
 #define  uz8(literal)  (uc8_t *) u8##literal
 
 // - From float
+
+size_t uz32_from_float(uc32_t *cstr, long double f);
+size_t uz32_from_float_fmt(uc32_t *cstr, long double f, const struct uffmt *fmt);
+
+size_t uz16_from_float(uc16_t *cstr, long double f);
+size_t uz16_from_float_fmt(uc16_t *cstr, long double f, const struct uffmt *fmt);
+
+size_t uz8_from_float(uc8_t *cstr, long double f);
+size_t uz8_from_float_fmt(uc8_t *cstr, long double f, const struct uffmt *fmt);
 
 // - From int
 
