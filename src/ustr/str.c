@@ -2,6 +2,7 @@
 
 #include <assert.h>
 
+#include "fmt/float.h"
 #include "fmt/int.h"
 #include "util/mem.h"
 #include "config.h"
@@ -197,6 +198,24 @@ us32_t us32_from_lower_bool(bool b) {
 us32_t us32_from_lower_bool_e( bool b, bool *error) {
 	us32_t res = us32_mk();
 	us32_append_lower_bool_e(&res, b, error);
+	return res;
+}
+
+us32_t us32_from_float(double f) {
+	return us32_from_float_e(f, NULL);
+}
+
+us32_t us32_from_float_e(double f, bool *error) {
+	return us32_from_float_fmt_e(f, &UFFMT, error);
+}
+
+us32_t us32_from_float_fmt(double f, const struct uffmt *fmt) {
+	return us32_from_float_fmt_e(f, fmt, NULL);
+}
+
+us32_t us32_from_float_fmt_e(double f, const struct uffmt *fmt, bool *error) {
+	us32_t res = us32_mk();
+	us32_append_float_fmt_e(&res, f, fmt, error);
 	return res;
 }
 
@@ -429,6 +448,40 @@ size_t us32_prepend_lower_bool_e(us32_t *str, bool b, bool *error) {
 	return us32_prepend_ucv32_e(str, ucv32_from_lower_bool(b), error);
 }
 
+size_t us32_prepend_float(us32_t *str, double f) {
+	return us32_prepend_float_e(str, f, NULL);
+}
+
+size_t us32_prepend_float_e(us32_t *str, double f, bool *error) {
+	return us32_prepend_float_fmt_e(str, f, &UFFMT, error);
+}
+
+size_t us32_prepend_float_fmt(us32_t *str, double f, const struct uffmt *fmt) {
+	return us32_prepend_float_fmt_e(str, f, fmt, NULL);
+}
+
+size_t us32_prepend_float_fmt_e(us32_t *str, double f, const struct uffmt *fmt, bool *error) {
+	assert(us32_valid(str));
+
+	size_t old_len     = str->len;
+	size_t float_len   = uz32_from_float_fmt(NULL, f, fmt);
+	bool   inner_error = false;
+
+	us32_add_len_e(str, float_len, &inner_error);
+
+	if (inner_error) {
+		if (error)
+			*error = true;
+
+		return str->len;
+	}
+
+	uz32_move(str->chars + float_len, str->chars, old_len);
+	uz32_from_float_fmt(str->chars, f, fmt);
+
+	return str->len;
+}
+
 size_t us32_insert(us32_t *str, const us32_t *another, size_t at) {
 	return us32_insert_e(str, another, at, NULL);
 }
@@ -635,6 +688,40 @@ size_t us32_insert_lower_bool_e(us32_t *str, bool b, size_t at, bool *error) {
 	return us32_insert_ucv32_e(str, ucv32_from_lower_bool(b), at, error);
 }
 
+size_t us32_insert_float(us32_t *str, double f, size_t at) {
+	return us32_insert_float_e(str, f, at, NULL);
+}
+
+size_t us32_insert_float_e(us32_t *str, double f, size_t at, bool *error) {
+	return us32_insert_float_fmt_e(str, f, &UFFMT, at, error);
+}
+
+size_t us32_insert_float_fmt(us32_t *str, double f, const struct uffmt *fmt, size_t at) {
+	return us32_insert_float_fmt_e(str, f, fmt, at, NULL);
+}
+
+size_t us32_insert_float_fmt_e(us32_t *str, double f, const struct uffmt *fmt, size_t at, bool *error) {
+	assert(us32_ebounds(str, at));
+
+	size_t old_len     = str->len;
+	size_t float_len   = uz32_from_float_fmt(NULL, f, fmt);
+	bool   inner_error = false;
+
+	us32_add_len_e(str, float_len, &inner_error);
+
+	if (inner_error) {
+		if (error)
+			*error = true;
+
+		return str->len;
+	}
+
+	uz32_move(str->chars + at + float_len, str->chars + at, old_len - at);
+	uz32_from_float_fmt(str->chars + at, f, fmt);
+
+	return str->len;
+}
+
 size_t us32_append(us32_t *str, const us32_t *another) {
 	return us32_append_e(str, another, NULL);
 }
@@ -819,6 +906,38 @@ size_t us32_append_lower_bool(us32_t *str, bool b) {
 
 size_t us32_append_lower_bool_e(us32_t *str, bool b, bool *error) {
 	return us32_append_ucv32_e(str, ucv32_from_lower_bool(b), error);
+}
+
+size_t us32_append_float(us32_t *str, double f) {
+	return us32_append_float_e(str, f, NULL);
+}
+
+size_t us32_append_float_e(us32_t *str, double f, bool *error) {
+	return us32_append_float_fmt_e(str, f, &UFFMT, error);
+}
+
+size_t us32_append_float_fmt(us32_t *str, double f, const struct uffmt *fmt) {
+	return us32_append_float_fmt_e(str, f, fmt, NULL);
+}
+
+size_t us32_append_float_fmt_e(us32_t *str, double f, const struct uffmt *fmt, bool *error) {
+	assert(us32_valid(str));
+
+	size_t old_len     = str->len;
+	bool   inner_error = false;
+
+	us32_add_len_e(str, uz32_from_float_fmt(NULL, f, fmt), &inner_error);
+
+	if (inner_error) {
+		if (error)
+			*error = true;
+
+		return str->len;
+	}
+
+	uz32_from_float_fmt(str->chars + old_len, f, fmt);
+
+	return str->len;
 }
 
 void us32_reverse(us32_t *str) {

@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 #include "type/fmt/case.h"
+#include "type/fmt/float.h"
 #include "type/fmt/int.h"
 #include "type/char.h"
 #include "type/cview.h"
@@ -57,7 +58,11 @@ us32_t us32_from_case_bool_e(bool b, ucase_t c, bool *error);
 us32_t us32_from_upper_bool(bool b);
 us32_t us32_from_upper_bool_e(bool b, bool *error);
 us32_t us32_from_lower_bool(bool b);
-us32_t us32_from_lower_bool_e( bool b, bool *error);
+us32_t us32_from_lower_bool_e(bool b, bool *error);
+us32_t us32_from_float(double f);
+us32_t us32_from_float_e(double f, bool *error);
+us32_t us32_from_float_fmt(double f, const struct uffmt *fmt);
+us32_t us32_from_float_fmt_e(double f, const struct uffmt *fmt, bool *error);
 
 // Free 
 
@@ -101,6 +106,10 @@ size_t us32_prepend_upper_bool(us32_t *str, bool b);
 size_t us32_prepend_upper_bool_e(us32_t *str, bool b, bool *error);
 size_t us32_prepend_lower_bool(us32_t *str, bool b);
 size_t us32_prepend_lower_bool_e(us32_t *str, bool b, bool *error);
+size_t us32_prepend_float(us32_t *str, double f);
+size_t us32_prepend_float_e(us32_t *str, double f, bool *error);
+size_t us32_prepend_float_fmt(us32_t *str, double f, const struct uffmt *fmt);
+size_t us32_prepend_float_fmt_e(us32_t *str, double f, const struct uffmt *fmt, bool *error);
 
 // Insert
 
@@ -134,7 +143,10 @@ size_t us32_insert_upper_bool(us32_t *str, bool b, size_t at);
 size_t us32_insert_upper_bool_e(us32_t *str, bool b, size_t at, bool *error);
 size_t us32_insert_lower_bool(us32_t *str, bool b, size_t at);
 size_t us32_insert_lower_bool_e(us32_t *str, bool b, size_t at, bool *error);
-
+size_t us32_insert_float(us32_t *str, double f, size_t at);
+size_t us32_insert_float_e(us32_t *str, double f, size_t at, bool *error);
+size_t us32_insert_float_fmt(us32_t *str, double f, const struct uffmt *fmt, size_t at);
+size_t us32_insert_float_fmt_e(us32_t *str, double f, const struct uffmt *fmt, size_t at, bool *error);
 
 // Append
 
@@ -168,6 +180,10 @@ size_t us32_append_upper_bool(us32_t *str, bool b);
 size_t us32_append_upper_bool_e(us32_t *str, bool b, bool *error);
 size_t us32_append_lower_bool(us32_t *str, bool b);
 size_t us32_append_lower_bool_e(us32_t *str, bool b, bool *error);
+size_t us32_append_float(us32_t *str, double f);
+size_t us32_append_float_e(us32_t *str, double f, bool *error);
+size_t us32_append_float_fmt(us32_t *str, double f, const struct uffmt *fmt);
+size_t us32_append_float_fmt_e(us32_t *str, double f, const struct uffmt *fmt, bool *error);
 
 // Reverse
 

@@ -14,34 +14,33 @@
 #include "cview.h"
 #include "view.h"
 
-static size_t uz_from_float_fmt_(void *cstr, unsigned n, long double f, const struct uffmt *fmt);
+static size_t uz_from_float_fmt_(void *cstr, unsigned n, double f, const struct uffmt *fmt);
 
-size_t uz32_from_float(uc32_t *cstr, long double f) {
+size_t uz32_from_float(uc32_t *cstr, double f) {
     return uz32_from_float_fmt(cstr, f, &UFFMT);
 }
 
-size_t uz32_from_float_fmt(uc32_t *cstr, long double f, const struct uffmt *fmt) {
+size_t uz32_from_float_fmt(uc32_t *cstr, double f, const struct uffmt *fmt) {
     return uz_from_float_fmt_(cstr, 4, f, fmt);
 }
 
-size_t uz16_from_float(uc16_t *cstr, long double f) {
+size_t uz16_from_float(uc16_t *cstr, double f) {
     return uz16_from_float_fmt(cstr, f, &UFFMT);
 }
 
-size_t uz16_from_float_fmt(uc16_t *cstr, long double f, const struct uffmt *fmt) {
+size_t uz16_from_float_fmt(uc16_t *cstr, double f, const struct uffmt *fmt) {
     return uz_from_float_fmt_(cstr, 2, f, fmt);
 }
 
-size_t uz8_from_float(uc8_t *cstr, long double f) {
+size_t uz8_from_float(uc8_t *cstr, double f) {
     return uz8_from_float_fmt(cstr, f, &UFFMT);
 }
 
-size_t uz8_from_float_fmt(uc8_t *cstr, long double f, const struct uffmt *fmt) {
+size_t uz8_from_float_fmt(uc8_t *cstr, double f, const struct uffmt *fmt) {
     return uz_from_float_fmt_(cstr, 1, f, fmt);
 }
 
-size_t uz_from_float_fmt_(void *cstr, unsigned n, long double f, const struct uffmt *fmt) {
-    assert(uffmt_valid(fmt));
+size_t uz_from_float_fmt_(void *cstr, unsigned n, double f, const struct uffmt *fmt) {
     // TODO
     return 0;
 }

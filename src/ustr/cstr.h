@@ -22,14 +22,14 @@
 
 // - From float
 
-size_t uz32_from_float(uc32_t *cstr, long double f);
-size_t uz32_from_float_fmt(uc32_t *cstr, long double f, const struct uffmt *fmt);
+size_t uz32_from_float(uc32_t *cstr, double f);
+size_t uz32_from_float_fmt(uc32_t *cstr, double f, const struct uffmt *fmt);
 
-size_t uz16_from_float(uc16_t *cstr, long double f);
-size_t uz16_from_float_fmt(uc16_t *cstr, long double f, const struct uffmt *fmt);
+size_t uz16_from_float(uc16_t *cstr, double f);
+size_t uz16_from_float_fmt(uc16_t *cstr, double f, const struct uffmt *fmt);
 
-size_t uz8_from_float(uc8_t *cstr, long double f);
-size_t uz8_from_float_fmt(uc8_t *cstr, long double f, const struct uffmt *fmt);
+size_t uz8_from_float(uc8_t *cstr, double f);
+size_t uz8_from_float_fmt(uc8_t *cstr, double f, const struct uffmt *fmt);
 
 // - From int
 
