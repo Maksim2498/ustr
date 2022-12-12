@@ -7,6 +7,7 @@
 #include <stdint.h>
 
 #include "type/fmt/case.h"
+#include "type/fmt/float.h"
 #include "type/fmt/int.h"
 #include "type/char.h"
 #include "type/cview.h"
@@ -38,6 +39,18 @@ size_t ufprintln_upper_bool(FILE *file, bool b);
 size_t ufprint_upper_bool(FILE *file, bool b);
 size_t ufprintln_lower_bool(FILE *file, bool b);
 size_t ufprint_lower_bool(FILE *file, bool b);
+
+// - Float
+
+size_t uprintln_float(double f);
+size_t uprint_float(double f);
+size_t uprintln_float_fmt(double f, const struct uffmt *fmt);
+size_t uprint_float_fmt(double f, const struct uffmt *fmt);
+
+size_t ufprintln_float(FILE *file, double f);
+size_t ufprint_float(FILE *file, double f);
+size_t ufprintln_float_fmt(FILE *file, double f, const struct uffmt *fmt);
+size_t ufprint_float_fmt(FILE *file, double f, const struct uffmt *fmt);
 
 // - Int
 

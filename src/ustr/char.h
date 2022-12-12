@@ -5,8 +5,8 @@
 
 #include "type/fmt/case.h"
 #include "type/fmt/radix.h"
+#include "type/util/endian.h"
 #include "type/char.h"
-#include "type/endian.h"
 
 #define uc32(literal) U##literal
 #define uc16(literal) u##literal
@@ -33,31 +33,31 @@ bool uc32be_from_uc8(uc32_t *to, const uc8_t *from);
 
 // - To uc16_t
 
-int uc16_from_uc32_e(uc16_t *to, uendian_t to_endian, uc32_t from, uendian_t from_endian);
-int uc16_from_uc8_e(uc16_t *to, uendian_t to_endian, const uc8_t *from);
-int uc16_from_uc32(uc16_t *to, uc32_t from);
-int uc16_from_uc32le(uc16_t *to, uc32_t from);
-int uc16_from_uc32be(uc16_t *to, uc32_t from);
-int uc16_from_uc8(uc16_t *to, const uc8_t *from);
-int uc16le_from_uc32(uc16_t *to, uc32_t from);
-int uc16le_from_uc32le(uc16_t *to, uc32_t from);
-int uc16le_from_uc32be(uc16_t *to, uc32_t from);
-int uc16le_from_uc8(uc16_t *to, const uc8_t *from);
-int uc16be_from_uc32(uc16_t *to, uc32_t from);
-int uc16be_from_uc32le(uc16_t *to, uc32_t from);
-int uc16be_from_uc32be(uc16_t *to, uc32_t from);
-int uc16be_from_uc8(uc16_t *to, const uc8_t *from);
+unsigned uc16_from_uc32_e(uc16_t *to, uendian_t to_endian, uc32_t from, uendian_t from_endian);
+unsigned uc16_from_uc8_e(uc16_t *to, uendian_t to_endian, const uc8_t *from);
+unsigned uc16_from_uc32(uc16_t *to, uc32_t from);
+unsigned uc16_from_uc32le(uc16_t *to, uc32_t from);
+unsigned uc16_from_uc32be(uc16_t *to, uc32_t from);
+unsigned uc16_from_uc8(uc16_t *to, const uc8_t *from);
+unsigned uc16le_from_uc32(uc16_t *to, uc32_t from);
+unsigned uc16le_from_uc32le(uc16_t *to, uc32_t from);
+unsigned uc16le_from_uc32be(uc16_t *to, uc32_t from);
+unsigned uc16le_from_uc8(uc16_t *to, const uc8_t *from);
+unsigned uc16be_from_uc32(uc16_t *to, uc32_t from);
+unsigned uc16be_from_uc32le(uc16_t *to, uc32_t from);
+unsigned uc16be_from_uc32be(uc16_t *to, uc32_t from);
+unsigned uc16be_from_uc8(uc16_t *to, const uc8_t *from);
 
 // - To uc8_t
 
-int uc8_from_uc32_e(uc8_t *to, uc32_t from, uendian_t from_endian);
-int uc8_from_uc16_e(uc8_t *to, const uc16_t *from, uendian_t from_endian);
-int uc8_from_uc32(uc8_t *to, uc32_t from);
-int uc8_from_uc32le(uc8_t *to, uc32_t from);
-int uc8_from_uc32be(uc8_t *to, uc32_t from);
-int uc8_from_uc16(uc8_t *to, const uc16_t *from);
-int uc8_from_uc16le(uc8_t *to, const uc16_t *from);
-int uc8_from_uc16be(uc8_t *to, const uc16_t *from);
+unsigned uc8_from_uc32_e(uc8_t *to, uc32_t from, uendian_t from_endian);
+unsigned uc8_from_uc16_e(uc8_t *to, const uc16_t *from, uendian_t from_endian);
+unsigned uc8_from_uc32(uc8_t *to, uc32_t from);
+unsigned uc8_from_uc32le(uc8_t *to, uc32_t from);
+unsigned uc8_from_uc32be(uc8_t *to, uc32_t from);
+unsigned uc8_from_uc16(uc8_t *to, const uc16_t *from);
+unsigned uc8_from_uc16le(uc8_t *to, const uc16_t *from);
+unsigned uc8_from_uc16be(uc8_t *to, const uc16_t *from);
 
 // uc8_t Traits
 
@@ -104,14 +104,14 @@ bool uc8_upper_radix(uc8_t c, uradix_t radix);
 // - Case chage
 
 uc8_case_len_func_t uc8_case_len_func_from_ucase(ucase_t ca);
-int uc8_case_len(const uc8_t *c, ucase_t ca);
-int uc8_upper_len(const uc8_t *c);
-int uc8_lower_len(const uc8_t *c);
+unsigned uc8_case_len(const uc8_t *c, ucase_t ca);
+unsigned uc8_upper_len(const uc8_t *c);
+unsigned uc8_lower_len(const uc8_t *c);
 
-uc8_case_func_t uc8_to_case_func_from_ucase(ucase_t ca);
-int uc8_to_case(uc8_t *c, ucase_t ca);
-int uc8_to_upper(uc8_t *c);
-int uc8_to_lower(uc8_t *c);
+uc8_to_case_func_t uc8_to_case_func_from_ucase(ucase_t ca);
+unsigned uc8_to_case(uc8_t *c, ucase_t ca);
+unsigned uc8_to_upper(uc8_t *c);
+unsigned uc8_to_lower(uc8_t *c);
 
 // - Letter categories
 
@@ -141,14 +141,15 @@ bool uc8_trail(uc8_t c);
 
 // - Len
 
-int uc8_len(uc8_t c);
-int uc8_32_len(uc8_t c);
-int uc8_16_len(uc8_t c);
-int uc8_8_len(uc8_t c);
+unsigned uc8_len(uc8_t c);
+unsigned uc8_n_len(uc8_t c, unsigned n);
+unsigned uc8_32_len(uc8_t c);
+unsigned uc8_16_len(uc8_t c);
+unsigned uc8_8_len(uc8_t c);
 
 // - Valid
 
-int uc8_valid(const uc8_t *c);
+unsigned uc8_valid(const uc8_t *c);
 
 // uc16_t Traits
 
@@ -195,9 +196,9 @@ bool uc16_upper_radix(uc16_t c, uradix_t radix);
 // - Case chage
 
 uc16_to_case_func_t uc16_to_case_func_from_ucase(ucase_t ca);
-int uc16_to_case(uc16_t *c, ucase_t ca);
-int uc16_to_upper(uc16_t *c);
-int uc16_to_lower(uc16_t *c);
+unsigned uc16_to_case(uc16_t *c, ucase_t ca);
+unsigned uc16_to_upper(uc16_t *c);
+unsigned uc16_to_lower(uc16_t *c);
 
 // - Letter categories
 
@@ -222,14 +223,15 @@ bool uc16_srgt_high(uc16_t c);
 
 // - Len
 
-int uc16_len(uc16_t c);
-int uc16_32_len(uc16_t c);
-int uc16_16_len(uc16_t c);
-int uc16_8_len(uc16_t c);
+unsigned uc16_len(uc16_t c);
+unsigned uc16_n_len(uc16_t c, unsigned n);
+unsigned uc16_32_len(uc16_t c);
+unsigned uc16_16_len(uc16_t c);
+unsigned uc16_8_len(uc16_t c);
 
 // - Valid
 
-bool uc16_valid(const uc16_t *c);
+unsigned uc16_valid(const uc16_t *c);
 
 // uc32_t Traits
 
@@ -303,10 +305,11 @@ bool uc32_srgt_high(uc32_t c);
 
 // - Len
 
-int uc32_len(uc32_t c);
-int uc32_32_len(uc32_t c);
-int uc32_16_len(uc32_t c);
-int uc32_8_len(uc32_t c);
+unsigned uc32_len(uc32_t c);
+unsigned uc32_n_len(uc32_t c, unsigned n);
+unsigned uc32_32_len(uc32_t c);
+unsigned uc32_16_len(uc32_t c);
+unsigned uc32_8_len(uc32_t c);
 
 // - Valid
 

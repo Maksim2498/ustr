@@ -84,6 +84,10 @@ ucv32_t ucv32_from_lower_bool(bool b) {
     return b ? ucv32("true") : ucv32("false");
 }
 
+size_t ucv32_n_len(ucv32_t view, unsigned n) {
+    return uz32_n_n_len(UCV32_CEXPAND(view), n);
+}
+
 size_t ucv32_32_len(ucv32_t view) {
     return ucv32_len(view);
 }

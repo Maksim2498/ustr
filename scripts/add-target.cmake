@@ -13,11 +13,11 @@ add_library(ustr
             src/ustr/type/fmt/int.h
             src/ustr/type/fmt/radix.h
             src/ustr/type/fmt/type.h
+            src/ustr/type/util/endian.h
             src/ustr/type/all.h
             src/ustr/type/char.h
             src/ustr/type/cview.h
             src/ustr/type/encoding.h
-            src/ustr/type/endian.h
             src/ustr/type/str.h
             src/ustr/type/view.h
             src/ustr/util/all.h

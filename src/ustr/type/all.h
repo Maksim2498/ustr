@@ -5,7 +5,6 @@
 #include "char.h"
 #include "cview.h"
 #include "encoding.h"
-#include "endian.h"
 #include "str.h"
 #include "view.h"
 

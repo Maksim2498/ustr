@@ -1,19 +1,21 @@
-#ifndef USTR_TYPE_ENDIAN_H
-#define USTR_TYPE_ENDIAN_H
+#ifndef USTR_TYPE_UTIL_ENDIAN_H
+#define USTR_TYPE_UTIL_ENDIAN_H
 
 #include <ustr/config.h>
 
-typedef enum {
+enum {
     UENDIAN_BIG,
     UENDIAN_LITTLE,
     UENDIAN_COUNT,
 
-    UENDIAN_SYS = 
+    UENDIAN_HOST = 
         #ifdef USTR_BIG_ENDIAN
             UENDIAN_BIG
         #else
             UENDIAN_LITTLE
         #endif
-} uendian_t;
+};
+
+typedef unsigned char uendian_t;
 
 #endif

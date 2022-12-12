@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <stdbool.h>
+#include <math.h>
 #include <limits.h>
 
 #include "fmt/case.h"
@@ -15,6 +16,15 @@
 #include "view.h"
 
 static size_t uz_from_float_fmt_(void *cstr, unsigned n, double f, const struct uffmt *fmt);
+static size_t uz_from_float_fmt_len_(unsigned n, double f, const struct uffmt *fmt);
+static size_t uz_from_float_fmt_write_(void *cstr, unsigned n, double f, const struct uffmt *fmt);
+
+static size_t uz_from_int_fmt_(void *cstr, unsigned n, uintmax_t i, bool s, const struct uifmt *fmt);
+static size_t uz_from_int_fmt_len_(unsigned n, uintmax_t i, bool s, const struct uifmt *fmt);
+static size_t uz_from_int_fmt_write_(void *cstr, unsigned n, uintmax_t i, bool s, const struct uifmt *fmt);
+
+static void uz_write_uc8_(void **cstr, unsigned n, uc8_t c, size_t *len, size_t start_from, size_t max_len);
+static void uz_write_ucv32_(void **cstr, unsigned n, ucv32_t view, size_t *len, size_t start_from, size_t max_len);
 
 size_t uz32_from_float(uc32_t *cstr, double f) {
     return uz32_from_float_fmt(cstr, f, &UFFMT);
@@ -41,15 +51,73 @@ size_t uz8_from_float_fmt(uc8_t *cstr, double f, const struct uffmt *fmt) {
 }
 
 size_t uz_from_float_fmt_(void *cstr, unsigned n, double f, const struct uffmt *fmt) {
-    // TODO
-    return 0;
+    assert(uffmt_valid(fmt));
+    return cstr ? uz_from_float_fmt_write_(cstr, n, f, fmt) : uz_from_float_fmt_len_(n, f, fmt);
 }
 
-static size_t uz_from_int_fmt_(void *cstr, unsigned n, uintmax_t i, bool s, const struct uifmt *fmt);
-static size_t uz_from_int_fmt_len_(unsigned n, uintmax_t i, bool s, const struct uifmt *fmt);
-static size_t uz_from_int_fmt_write_(void *cstr, unsigned n, uintmax_t i, bool s, const struct uifmt *fmt);
-static void uz_from_int_fmt_write_uc8_(void **cstr, unsigned n, uc8_t c, size_t *len, size_t start_from, size_t max_len);
-static void uz_from_int_fmt_write_ucv32_(void **cstr, unsigned n, ucv32_t view, size_t *len, size_t start_from, size_t max_len);
+size_t uz_from_float_fmt_len_(unsigned n, double f, const struct uffmt *fmt) {
+    size_t len = 0;
+
+    // NaN
+
+    if (isnan(f)) {
+        len += ucv32_n_len(fmt->nan, n);
+        goto exit;
+    } 
+    
+    // Sign
+    
+    if (f < 0 && fmt->show_minus || f >= 0 && fmt->show_plus)
+        ++len;
+    
+    // Inf
+
+    if (isinf(f)) {
+        len += ucv32_n_len(fmt->inf, n);
+        goto exit;
+    }
+
+    // Finite
+
+    len += 3; // 0.0
+
+exit:
+    return len > fmt->start_from ? len - fmt->start_from : 0;
+}
+
+size_t uz_from_float_fmt_write_(void *cstr, unsigned n, double f, const struct uffmt *fmt) {
+    void  *init_cstr = cstr;
+    size_t len       = 0;
+
+    // NaN
+
+    if (isnan(f)) {
+        uz_write_ucv32_(&cstr, n, fmt->nan, &len, fmt->start_from, fmt->max_len);
+        goto exit;
+    }
+
+    // Sign
+
+    if (f < 0) {
+        if (fmt->show_minus)
+            uz_write_uc8_(&cstr, n, '-', &len, fmt->start_from, fmt->max_len);
+    } else if (fmt->show_plus)
+        uz_write_uc8_(&cstr, n, '+', &len, fmt->start_from, fmt->max_len);
+
+    // Inf
+
+    if (isinf(f)) {
+        uz_write_ucv32_(&cstr, n, fmt->inf, &len, fmt->start_from, fmt->max_len);
+        goto exit;
+    }
+
+    // Finite
+
+    uz_write_ucv32_(&cstr, n, ucv32("0.0"), &len, fmt->start_from, fmt->max_len);
+
+exit:
+    return cstr - init_cstr;
+}
 
 size_t uz32_from_int(uc32_t *cstr, intmax_t i) {
 	return uz32_from_int_fmt(cstr, i, &UIFMT_DEC);
@@ -129,56 +197,19 @@ size_t uz_from_int_fmt_len_(unsigned n, uintmax_t i, bool s, const struct uifmt 
 
     if (fmt->group_size && fmt->group_size < len) {
         int sep_count = (len - 1) / fmt->group_size;
-
-        switch (n) {
-            case 1:
-                len += sep_count * ucv32_8_len(fmt->group_separator);
-                break;
-
-            case 2:
-                len += sep_count * ucv32_16_len(fmt->group_separator);
-                break;
-
-            case 4:
-                len += sep_count * ucv32_len(fmt->group_separator);
-                break;
-
-            default:
-                assert(false);
-                break;
-        }
+        len += sep_count * ucv32_n_len(fmt->group_separator, n);
     }
 
     // Count sign
 
-    if (neg) {
-        if (fmt->show_minus)
-            ++len;
-    } else if (fmt->show_plus)
+    if (neg && fmt->show_minus || !neg && fmt->show_plus)
         ++len;
 
     // Count radix prefix
 
     if (fmt->show_radix_prefix && uradix_has_prefix(fmt->radix)) {
         ucv32_t prefix = uradix_prefix(fmt->radix, fmt->radix_prefix_case);
-
-        switch (n) {
-            case 1:
-                len += ucv32_8_len(prefix);
-                break;
-
-            case 2:
-                len += ucv32_16_len(prefix);
-                break;
-
-            case 4:
-                len += ucv32_len(prefix);
-                break;
-
-            default:
-                assert(false);
-                break;
-        }
+        len += ucv32_n_len(prefix, n);
     }
 
     // Take in account start_from
@@ -223,15 +254,15 @@ size_t uz_from_int_fmt_write_(void *cstr, unsigned n, uintmax_t i, bool s, const
 
     if (neg) {
         if (fmt->show_minus)
-            uz_from_int_fmt_write_uc8_(&cstr, n, '-', &len, fmt->start_from, fmt->max_len);
+            uz_write_uc8_(&cstr, n, '-', &len, fmt->start_from, fmt->max_len);
     } else if (fmt->show_plus) 
-        uz_from_int_fmt_write_uc8_(&cstr, n, '+', &len, fmt->start_from, fmt->max_len);
+        uz_write_uc8_(&cstr, n, '+', &len, fmt->start_from, fmt->max_len);
 
     // Write radix prefix
 
     if (fmt->show_radix_prefix && uradix_has_prefix(fmt->radix)) {
         ucv32_t prefix = uradix_prefix(fmt->radix, fmt->radix_prefix_case);
-        uz_from_int_fmt_write_ucv32_(&cstr, n, prefix, &len, fmt->start_from, fmt->max_len);
+        uz_write_ucv32_(&cstr, n, prefix, &len, fmt->start_from, fmt->max_len);
     }
 
     // Write leading zeroes
@@ -244,29 +275,29 @@ size_t uz_from_int_fmt_write_(void *cstr, unsigned n, uintmax_t i, bool s, const
         digit_num += zero_count;
 
         for (; zero_count--; --digit_num) {
-            uz_from_int_fmt_write_uc8_(&cstr, n, '0', &len, fmt->start_from, fmt->max_len);
+            uz_write_uc8_(&cstr, n, '0', &len, fmt->start_from, fmt->max_len);
 
             if (fmt->group_size && digit_num % fmt->group_size == 0)
-                uz_from_int_fmt_write_ucv32_(&cstr, n, fmt->group_separator, &len, fmt->start_from, fmt->max_len);
+                uz_write_ucv32_(&cstr, n, fmt->group_separator, &len, fmt->start_from, fmt->max_len);
         }
     }
 
     // Write digits with separators
 
     for (size_t i = digit_count - 1;; --i, --digit_num) {
-        uz_from_int_fmt_write_uc8_(&cstr, n, digits[i], &len, fmt->start_from, fmt->max_len);
+        uz_write_uc8_(&cstr, n, digits[i], &len, fmt->start_from, fmt->max_len);
 
         if (!i)
             break;
 
         if (fmt->group_size && digit_num % fmt->group_size == 0)
-            uz_from_int_fmt_write_ucv32_(&cstr, n, fmt->group_separator, &len, fmt->start_from, fmt->max_len);
+            uz_write_ucv32_(&cstr, n, fmt->group_separator, &len, fmt->start_from, fmt->max_len);
     }
 
     return cstr - init_cstr;
 }
 
-void uz_from_int_fmt_write_uc8_(void **cstr, unsigned n, uc8_t c, size_t *len, size_t start_from, size_t max_len) {
+void uz_write_uc8_(void **cstr, unsigned n, uc8_t c, size_t *len, size_t start_from, size_t max_len) {
     if (start_from <= *len && *len < max_len)
         switch (n) {
             case 1:
@@ -292,12 +323,12 @@ void uz_from_int_fmt_write_uc8_(void **cstr, unsigned n, uc8_t c, size_t *len, s
     ++*len;
 }
 
-void uz_from_int_fmt_write_ucv32_(void **cstr, unsigned n, ucv32_t view, size_t *len, size_t start_from, size_t max_len) {
+void uz_write_ucv32_(void **cstr, unsigned n, ucv32_t view, size_t *len, size_t start_from, size_t max_len) {
     switch (n) {
         case 1:
             for (const uc32_t *it = ucv32_cbegin(view), *end = ucv32_cend(view); it != end; ++it) {
                 if (start_from <= *len && *len < max_len) {
-                    int c8_len = uc8_from_uc32(*cstr, *it);
+                    unsigned c8_len = uc8_from_uc32(*cstr, *it);
 
                     *cstr += c8_len;
                     *len  += c8_len;
@@ -310,7 +341,7 @@ void uz_from_int_fmt_write_ucv32_(void **cstr, unsigned n, ucv32_t view, size_t 
         case 2:
             for (const uc32_t *it = ucv32_cbegin(view), *end = ucv32_cend(view); it != end; ++it) 
                 if (start_from <= *len && *len < max_len) {
-                    int c16_len = uc16_from_uc32(*cstr, *it);
+                    unsigned c16_len = uc16_from_uc32(*cstr, *it);
 
                     *cstr += c16_len;
                     *len  += c16_len;
@@ -511,7 +542,7 @@ size_t uz32_from_uz8_n(uc32_t *to, const uc8_t *from, size_t n) {
     while (n) {
         len += uc32_from_uc8(to + len, from);
 
-        int c8_len = uc8_len(*from);
+        unsigned c8_len = uc8_len(*from);
 
         n    -= c8_len;
         from += c8_len;
@@ -545,7 +576,7 @@ size_t uz32_from_uz16_n(uc32_t *to, const uc16_t *from, size_t n) {
     while (n) {
         len += uc32_from_uc16(to + len, from);
 
-        int c16_len = uc16_32_len(*from);
+        unsigned c16_len = uc16_32_len(*from);
 
         n    -= c16_len;
         from += c16_len;
@@ -579,7 +610,7 @@ size_t uz16_from_uz8_n(uc16_t *to, const uc8_t *from, size_t n) {
     while (n) {
         len += uc16_from_uc8(to + len, from);
 
-        int c8_len = uc8_len(*from);
+        unsigned c8_len = uc8_len(*from);
 
         n    -= c8_len;
         from += c8_len;
@@ -641,7 +672,7 @@ size_t uz8_from_uz16_n(uc8_t *to, const uc16_t *from, size_t n) {
     while (n) {
         len += uc8_from_uc16(to + len, from);
 
-        int c16_len = uc16_32_len(*from);
+        unsigned c16_len = uc16_32_len(*from);
 
         n    -= c16_len;
         from += c16_len;
@@ -676,6 +707,44 @@ size_t uz8_from_uz32_n(uc8_t *to, const uc32_t *from, size_t n) {
         len += uc8_from_uc32(to + len, *from++);
 
 	return len;
+}
+
+size_t uz32_n_len(const uc32_t *cstr, unsigned n) {
+    assert(cstr);
+
+    switch (n) {
+        case 1:
+            return uz32_8_len(cstr);
+
+        case 2:
+            return uz32_16_len(cstr);
+
+        case 4:
+            return uz32_32_len(cstr);
+
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
+size_t uz32_n_n_len(const uc32_t *cstr, size_t cstr_len, unsigned n) {
+    assert(cstr);
+
+    switch (n) {
+        case 1:
+            return uz32_n_8_len(cstr, cstr_len);
+
+        case 2:
+            return uz32_n_16_len(cstr, cstr_len);
+
+        case 4:
+            return uz32_n_32_len(cstr, cstr_len);
+
+        default:
+            assert(false);
+            return 0;
+    }
 }
 
 size_t uz32_8_len(const uc32_t *cstr) {
@@ -729,6 +798,44 @@ size_t uz32_32_len(const uc32_t *cstr) {
 size_t uz32_n_32_len(const uc32_t *cstr, size_t n) {
     assert(cstr);
     return n;
+}
+
+size_t uz16_n_len(const uc16_t *cstr, unsigned n) {
+    assert(cstr);
+
+    switch (n) {
+        case 1:
+            return uz16_8_len(cstr);
+
+        case 2:
+            return uz16_16_len(cstr);
+
+        case 4:
+            return uz16_32_len(cstr);
+
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
+size_t uz16_n_n_len(const uc16_t *cstr, size_t cstr_len, unsigned n) {
+    assert(cstr);
+
+    switch (n) {
+        case 1:
+            return uz16_n_8_len(cstr, cstr_len);
+
+        case 2:
+            return uz16_n_16_len(cstr, cstr_len);
+
+        case 4:
+            return uz16_n_32_len(cstr, cstr_len);
+
+        default:
+            assert(false);
+            return 0;
+    }
 }
 
 size_t uz16_8_len(const uc16_t *cstr) {
@@ -790,6 +897,44 @@ size_t uz16_n_32_len(const uc16_t *cstr, size_t n) {
     }
 
     return len;
+}
+
+size_t uz8_n_len(const uc8_t *cstr, unsigned n) {
+    assert(cstr);
+
+    switch (n) {
+        case 1:
+            return uz8_8_len(cstr);
+
+        case 2:
+            return uz8_16_len(cstr);
+
+        case 4:
+            return uz8_32_len(cstr);
+
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
+size_t uz8_n_n_len(const uc8_t *cstr, size_t cstr_len, unsigned n) {
+    assert(cstr);
+
+    switch (n) {
+        case 1:
+            return uz8_n_8_len(cstr, cstr_len);
+
+        case 2:
+            return uz8_n_16_len(cstr, cstr_len);
+
+        case 4:
+            return uz8_n_32_len(cstr, cstr_len);
+
+        default:
+            assert(false);
+            return 0;
+    }
 }
 
 size_t uz8_8_len(const uc8_t *cstr) {
@@ -1612,32 +1757,32 @@ void uz16_n_to_case(uc16_t *cstr, size_t n, ucase_t ca) {
         cstr += func(cstr);
 }
 
-#define USTR_UZ8_TO_CASE_(case, from, to)   \
-    assert(from && to);                     \
-                                            \
-    for (size_t i = 0, j = 0; from[i];) {   \
-        int len = uc8_len(from[i]);         \
-                                            \
-        uz8_copy_n(to + j, from + i, len);  \
-                                            \
-        int to_len = uc8_to_##case(to + j); \
-                                            \
-        i += len;                           \
-        j += to_len;                        \
+#define USTR_UZ8_TO_CASE_(case, from, to)        \
+    assert(from && to);                          \
+                                                 \
+    for (size_t i = 0, j = 0; from[i];) {        \
+        unsigned len = uc8_len(from[i]);         \
+                                                 \
+        uz8_copy_n(to + j, from + i, len);       \
+                                                 \
+        unsigned to_len = uc8_to_##case(to + j); \
+                                                 \
+        i += len;                                \
+        j += to_len;                             \
     }
 
-#define USTR_UZ8_TO_CASE_N_(case, from, n, to) \
-    assert(from && to);                        \
-                                               \
-    for (size_t i = 0, j = 0; i < n;) {        \
-        int len = uc8_len(from[i]);            \
-                                               \
-        uz8_copy_n(to + j, from + i, len);     \
-                                               \
-        int to_len = uc8_to_##case(to + j);    \
-                                               \
-        i += len;                              \
-        j += to_len;                           \
+#define USTR_UZ8_TO_CASE_N_(case, from, n, to)   \
+    assert(from && to);                          \
+                                                 \
+    for (size_t i = 0, j = 0; i < n;) {          \
+        unsigned len = uc8_len(from[i]);         \
+                                                 \
+        uz8_copy_n(to + j, from + i, len);       \
+                                                 \
+        unsigned to_len = uc8_to_##case(to + j); \
+                                                 \
+        i += len;                                \
+        j += to_len;                             \
     }
 
 void uz8_to_upper(const uc8_t *from, uc8_t *to) {
@@ -1659,17 +1804,17 @@ void uz8_n_to_lower(const uc8_t *from, size_t n, uc8_t *to) {
 void uz8_to_case(const uc8_t *from, uc8_t *to, ucase_t ca) {
     assert(from && to);
 
-    uc8_case_func_t func = uc8_to_case_func_from_ucase(ca);
+    uc8_to_case_func_t func = uc8_to_case_func_from_ucase(ca);
 
     if (!func)
         return;
 
     for (size_t i = 0, j = 0; from[i];) {
-        int len = uc8_len(from[i]);
+        unsigned len = uc8_len(from[i]);
 
         uz8_copy_n(to + j, from + i, len);
 
-        int to_len = func(to + j);
+        unsigned to_len = func(to + j);
 
         i += len;
         j += to_len;
@@ -1679,66 +1824,66 @@ void uz8_to_case(const uc8_t *from, uc8_t *to, ucase_t ca) {
 void uz8_n_to_case(const uc8_t *from, size_t n, uc8_t *to, ucase_t ca) {
     assert(from && to);
 
-    uc8_case_func_t func = uc8_to_case_func_from_ucase(ca);
+    uc8_to_case_func_t func = uc8_to_case_func_from_ucase(ca);
 
     if (!func)
         return;
 
     for (size_t i = 0, j = 0; i < n;) {
-        int len = uc8_len(from[i]);
+        unsigned len = uc8_len(from[i]);
 
         uz8_copy_n(to + j, from + i, len);
 
-        int to_len = func(to + j);
+        unsigned to_len = func(to + j);
 
         i += len;
         j += to_len;
     }
 }
 
-#define USTR_RETURN_Z_N_TRIM_LEFT_(N, src, n) \
-    {                                         \
-        assert(cstr);                         \
-                                              \
-        size_t wspace_len = 0;                \
-                                              \
-        for (size_t i = 0; i < n;) {          \
-            int len = uc##N##_len(cstr[i]);   \
-                                              \
-            if (uc##N##_wspace(cstr + i))     \
-                wspace_len += len;            \
-            else                              \
-                break;                        \
-                                              \
-            i += len;                         \
-        }                                     \
-                                              \
-        size_t new_len = n - wspace_len;      \
-                                              \
-        for (size_t i = 0; i < new_len; ++i)  \
-            cstr[i] = cstr[i + wspace_len];   \
-                                              \
-        return new_len;                       \
+#define USTR_RETURN_Z_N_TRIM_LEFT_(N, src, n)    \
+    {                                            \
+        assert(cstr);                            \
+                                                 \
+        size_t wspace_len = 0;                   \
+                                                 \
+        for (size_t i = 0; i < n;) {             \
+            unsigned len = uc##N##_len(cstr[i]); \
+                                                 \
+            if (uc##N##_wspace(cstr + i))        \
+                wspace_len += len;               \
+            else                                 \
+                break;                           \
+                                                 \
+            i += len;                            \
+        }                                        \
+                                                 \
+        size_t new_len = n - wspace_len;         \
+                                                 \
+        for (size_t i = 0; i < new_len; ++i)     \
+            cstr[i] = cstr[i + wspace_len];      \
+                                                 \
+        return new_len;                          \
     }
 
-#define USTR_RETURN_Z_N_TRIM_RIGHT_(N, src, n) \
-    {                                          \
-        assert(cstr);                          \
-                                               \
-        size_t wspace_len = 0;                 \
-                                               \
-        for (ptrdiff_t i = n - 1; i >= 0;) {   \
-            int len = uc##N##_len(cstr[i]);    \
-                                               \
-            if (uc##N##_wspace(cstr + i))      \
-                ++wspace_len;                  \
-            else                               \
-                break;                         \
-                                               \
-            i -= len;                          \
-        }                                      \
-                                               \
-        return n - wspace_len;                 \
+#define USTR_RETURN_Z_N_TRIM_RIGHT_(N, src, n)   \
+    {                                            \
+        assert(cstr);                            \
+                                                 \
+        size_t wspace_len = 0;                   \
+                                                 \
+        for (ptrdiff_t i = n - 1; i >= 0;) {     \
+            unsigned len = uc##N##_len(cstr[i]); \
+                                                 \
+            if (uc##N##_wspace(cstr + i))        \
+                ++wspace_len;                    \
+            else                                 \
+                break;                           \
+                                                 \
+            i -= len;                            \
+        }                                        \
+                                                 \
+        return n - wspace_len;                   \
     }
 
 size_t uz32_trim(uc32_t *cstr) {

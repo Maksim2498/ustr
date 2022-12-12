@@ -229,6 +229,10 @@ void us32_free(us32_t *str) {
 	str->cap   = 0;
 }
 
+size_t us32_n_len(const us32_t *str, unsigned n) {
+	return uz32_n_n_len(US32_CEXPAND(str), n);
+}
+
 size_t us32_32_len(const us32_t *str) {
 	return us32_len(str);
 }

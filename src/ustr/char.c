@@ -7,6 +7,8 @@
 #include "config.h"
 
 bool uc32_from_uc16_e(uc32_t *to, uendian_t to_endian, const uc16_t *from, uendian_t from_endian) {
+	assert(uendian_valid(to_endian) && uendian_valid(from_endian));
+
 	switch (to_endian) {
 		case UENDIAN_BIG:
 			switch (from_endian) {
@@ -38,6 +40,8 @@ bool uc32_from_uc16_e(uc32_t *to, uendian_t to_endian, const uc16_t *from, uendi
 }
 
 bool uc32_from_uc8_e(uc32_t *to, uendian_t to_endian, const uc8_t *from) {
+	assert(uendian_valid(to_endian));
+
 	switch (to_endian) {
 		case UENDIAN_BIG:
 			return uc32be_from_uc8(to, from);
@@ -120,7 +124,7 @@ bool uc32_from_uc16le(uc32_t *to, const uc16_t *from) {
 bool uc32_from_uc8(uc32_t *to, const uc8_t *from) {
 	assert(from);
 
-	int len = uc8_len(*from);
+	unsigned len = uc8_len(*from);
 
 	if (!len)
 		return false;
@@ -295,7 +299,9 @@ bool uc32be_from_uc8(uc32_t *to, const uc8_t *from) {
 	return res;
 }
 
-int uc16_from_uc32_e(uc16_t *to, uendian_t to_endian, uc32_t from, uendian_t from_endian) {
+unsigned uc16_from_uc32_e(uc16_t *to, uendian_t to_endian, uc32_t from, uendian_t from_endian) {
+	assert(uendian_valid(to_endian) && uendian_valid(from_endian));
+
 	switch (to_endian) {
 		case UENDIAN_BIG:
 			switch (from_endian) {
@@ -326,7 +332,9 @@ int uc16_from_uc32_e(uc16_t *to, uendian_t to_endian, uc32_t from, uendian_t fro
 	}
 }
 
-int uc16_from_uc8_e(uc16_t *to, uendian_t to_endian, const uc8_t *from) {
+unsigned uc16_from_uc8_e(uc16_t *to, uendian_t to_endian, const uc8_t *from) {
+	assert(uendian_valid(to_endian));
+
 	switch (to_endian) {
 		case UENDIAN_BIG:
 			return uc16be_from_uc8(to, from);
@@ -339,7 +347,7 @@ int uc16_from_uc8_e(uc16_t *to, uendian_t to_endian, const uc8_t *from) {
 	}
 }
 
-int uc16_from_uc32(uc16_t *to, uc32_t from) {
+unsigned uc16_from_uc32(uc16_t *to, uc32_t from) {
 	if (from < 0x10000) {
 		*to = from;
 		return 1;
@@ -364,7 +372,7 @@ int uc16_from_uc32(uc16_t *to, uc32_t from) {
 	return 0;
 }
 
-int uc16_from_uc32le(uc16_t *to, uc32_t from) {
+unsigned uc16_from_uc32le(uc16_t *to, uc32_t from) {
 	#ifdef USTR_BIG_ENDIAN
 		if (to)
 			uendian_toggle(&from, sizeof from);
@@ -373,7 +381,7 @@ int uc16_from_uc32le(uc16_t *to, uc32_t from) {
 	return uc16_from_uc32(to, from);
 }
 
-int uc16_from_uc32be(uc16_t *to, uc32_t from) {
+unsigned uc16_from_uc32be(uc16_t *to, uc32_t from) {
 	#ifndef USTR_BIG_ENDIAN
 		if (to)
 			uendian_toggle(&from, sizeof from);
@@ -382,14 +390,14 @@ int uc16_from_uc32be(uc16_t *to, uc32_t from) {
 	return uc16_from_uc32(to, from);
 }
 
-int uc16_from_uc8(uc16_t *to, const uc8_t *from) {
+unsigned uc16_from_uc8(uc16_t *to, const uc8_t *from) {
 	uc32_t from32;
 	uc32_from_uc8(&from32, from);
 	return uc16_from_uc32(to, from32);
 }
 
-int uc16le_from_uc32(uc16_t *to, uc32_t from) {
-	int res = uc16_from_uc32(to, from);
+unsigned uc16le_from_uc32(uc16_t *to, uc32_t from) {
+	unsigned res = uc16_from_uc32(to, from);
 	
 	#ifdef USTR_BIG_ENDIAN
 		if (to && res)
@@ -399,69 +407,15 @@ int uc16le_from_uc32(uc16_t *to, uc32_t from) {
 	return res;
 }
 
-int uc16le_from_uc32le(uc16_t *to, uc32_t from) {
-	#ifdef USTR_BIG_ENDIAN
-		if (to)
-			uendian_toggle(&from, sizeof from);
-	#endif
-
-	int res = uc16_from_uc32(to, from);
-	
-	#ifdef USTR_BIG_ENDIAN
-		if (to && res)
-			uendian_toggle_arr(to, res, sizeof(uc16_t));
-	#endif
-
-	return res;
-}
-
-int uc16le_from_uc32be(uc16_t *to, uc32_t from) {
-	#ifndef USTR_BIG_ENDIAN
-		if (to)
-			uendian_toggle(&from, sizeof from);
-	#endif
-
-	int res = uc16_from_uc32(to, from);
-	
-	#ifdef USTR_BIG_ENDIAN
-		if (to && res)
-			uendian_toggle_arr(to, res, sizeof(uc16_t));
-	#endif
-
-	return res;
-}
-
-int uc16le_from_uc8(uc16_t *to, const uc8_t *from) {
-	int res = uc16_from_uc8(to, from);
-
-	#ifdef USTR_BIG_ENDIAN
-		if (to && res)
-			uendian_toggle_arr(to, res, sizeof(uc16_t));
-	#endif
-
-	return res;
-}
-
-int uc16be_from_uc32(uc16_t *to, uc32_t from) {
-	int res = uc16_from_uc32(to, from);
-	
-	#ifndef USTR_BIG_ENDIAN
-		if (to && res)
-			uendian_toggle_arr(to, res, sizeof(uc16_t));
-	#endif
-
-	return res;
-}
-
-int uc16be_from_uc32le(uc16_t *to, uc32_t from) {
+unsigned uc16le_from_uc32le(uc16_t *to, uc32_t from) {
 	#ifdef USTR_BIG_ENDIAN
 		if (to)
 			uendian_toggle(&from, sizeof from);
 	#endif
 
-	int res = uc16_from_uc32(to, from);
+	unsigned res = uc16_from_uc32(to, from);
 	
-	#ifndef USTR_BIG_ENDIAN
+	#ifdef USTR_BIG_ENDIAN
 		if (to && res)
 			uendian_toggle_arr(to, res, sizeof(uc16_t));
 	#endif
@@ -469,13 +423,35 @@ int uc16be_from_uc32le(uc16_t *to, uc32_t from) {
 	return res;
 }
 
-int uc16be_from_uc32be(uc16_t *to, uc32_t from) {
+unsigned uc16le_from_uc32be(uc16_t *to, uc32_t from) {
 	#ifndef USTR_BIG_ENDIAN
 		if (to)
 			uendian_toggle(&from, sizeof from);
 	#endif
 
-	int res = uc16_from_uc32(to, from);
+	unsigned res = uc16_from_uc32(to, from);
+	
+	#ifdef USTR_BIG_ENDIAN
+		if (to && res)
+			uendian_toggle_arr(to, res, sizeof(uc16_t));
+	#endif
+
+	return res;
+}
+
+unsigned uc16le_from_uc8(uc16_t *to, const uc8_t *from) {
+	unsigned res = uc16_from_uc8(to, from);
+
+	#ifdef USTR_BIG_ENDIAN
+		if (to && res)
+			uendian_toggle_arr(to, res, sizeof(uc16_t));
+	#endif
+
+	return res;
+}
+
+unsigned uc16be_from_uc32(uc16_t *to, uc32_t from) {
+	unsigned res = uc16_from_uc32(to, from);
 	
 	#ifndef USTR_BIG_ENDIAN
 		if (to && res)
@@ -485,8 +461,40 @@ int uc16be_from_uc32be(uc16_t *to, uc32_t from) {
 	return res;
 }
 
-int uc16be_from_uc8(uc16_t *to, const uc8_t *from) {
-	int res = uc16_from_uc8(to, from);
+unsigned uc16be_from_uc32le(uc16_t *to, uc32_t from) {
+	#ifdef USTR_BIG_ENDIAN
+		if (to)
+			uendian_toggle(&from, sizeof from);
+	#endif
+
+	unsigned res = uc16_from_uc32(to, from);
+	
+	#ifndef USTR_BIG_ENDIAN
+		if (to && res)
+			uendian_toggle_arr(to, res, sizeof(uc16_t));
+	#endif
+
+	return res;
+}
+
+unsigned uc16be_from_uc32be(uc16_t *to, uc32_t from) {
+	#ifndef USTR_BIG_ENDIAN
+		if (to)
+			uendian_toggle(&from, sizeof from);
+	#endif
+
+	unsigned res = uc16_from_uc32(to, from);
+	
+	#ifndef USTR_BIG_ENDIAN
+		if (to && res)
+			uendian_toggle_arr(to, res, sizeof(uc16_t));
+	#endif
+
+	return res;
+}
+
+unsigned uc16be_from_uc8(uc16_t *to, const uc8_t *from) {
+	unsigned res = uc16_from_uc8(to, from);
 
 	#ifndef USTR_BIG_ENDIAN
 		if (to && res)
@@ -496,7 +504,9 @@ int uc16be_from_uc8(uc16_t *to, const uc8_t *from) {
 	return res;
 }
 
-int uc8_from_uc32_e(uc8_t *to, uc32_t from, uendian_t from_endian) {
+unsigned uc8_from_uc32_e(uc8_t *to, uc32_t from, uendian_t from_endian) {
+	assert(uendian_valid(from_endian));
+
 	switch (from_endian) {
 		case UENDIAN_BIG:
 			return uc8_from_uc32be(to, from);
@@ -509,7 +519,9 @@ int uc8_from_uc32_e(uc8_t *to, uc32_t from, uendian_t from_endian) {
 	}
 }
 
-int uc8_from_uc16_e(uc8_t *to, const uc16_t *from, uendian_t from_endian) {
+unsigned uc8_from_uc16_e(uc8_t *to, const uc16_t *from, uendian_t from_endian) {
+	assert(uendian_valid(from_endian));
+
 	switch (from_endian) {
 		case UENDIAN_BIG:
 			return uc8_from_uc16be(to, from);
@@ -522,8 +534,8 @@ int uc8_from_uc16_e(uc8_t *to, const uc16_t *from, uendian_t from_endian) {
 	}
 }
 
-int uc8_from_uc32(uc8_t *to, uc32_t from) {
-	int len = uc32_8_len(from);
+unsigned uc8_from_uc32(uc8_t *to, uc32_t from) {
+	unsigned len = uc32_8_len(from);
 
 	if (!len)
 		return 0;
@@ -555,7 +567,7 @@ int uc8_from_uc32(uc8_t *to, uc32_t from) {
 	return len;
 }
 
-int uc8_from_uc32le(uc8_t *to, uc32_t from) {
+unsigned uc8_from_uc32le(uc8_t *to, uc32_t from) {
 	#ifdef USTR_BIG_ENDIAN
 		uendian_toggle(&from, sizeof from);
 	#endif
@@ -563,7 +575,7 @@ int uc8_from_uc32le(uc8_t *to, uc32_t from) {
 	return uc8_from_uc32(to, from);
 }
 
-int uc8_from_uc32be(uc8_t *to, uc32_t from) {
+unsigned uc8_from_uc32be(uc8_t *to, uc32_t from) {
 	#ifndef USTR_BIG_ENDIAN
 		uendian_toggle(&from, sizeof from);
 	#endif
@@ -571,13 +583,13 @@ int uc8_from_uc32be(uc8_t *to, uc32_t from) {
 	return uc8_from_uc32(to, from);
 }
 
-int uc8_from_uc16(uc8_t *to, const uc16_t *from) {
+unsigned uc8_from_uc16(uc8_t *to, const uc16_t *from) {
 	uc32_t from32;
 	uc32_from_uc16(&from32, from);
 	return uc8_from_uc32(to, from32);
 }
 
-int uc8_from_uc16le(uc8_t *to, const uc16_t *from) {
+unsigned uc8_from_uc16le(uc8_t *to, const uc16_t *from) {
 	#ifdef USTR_BIG_ENDIAN
 		assert(from);
 
@@ -596,7 +608,7 @@ int uc8_from_uc16le(uc8_t *to, const uc16_t *from) {
 	#endif
 }
 
-int uc8_from_uc16be(uc8_t *to, const uc16_t *from) {
+unsigned uc8_from_uc16be(uc8_t *to, const uc16_t *from) {
 	#ifndef USTR_BIG_ENDIAN
 		assert(from);
 
@@ -740,6 +752,8 @@ bool uc8_upper_radix(uc8_t c, uradix_t radix) {
 }
 
 uc8_case_len_func_t uc8_case_len_func_from_ucase(ucase_t ca) {
+	assert(ucase_valid(ca));
+
 	switch (ca) {
 		case UCASE_UPPER:
 			return uc8_upper_len;
@@ -752,8 +766,8 @@ uc8_case_len_func_t uc8_case_len_func_from_ucase(ucase_t ca) {
 	}
 }
 
-int uc8_case_len(const uc8_t *c, ucase_t ca) {
-	assert(c);
+unsigned uc8_case_len(const uc8_t *c, ucase_t ca) {
+	assert(ucase_valid(ca));
 
 	switch (ca) {
 		case UCASE_UPPER:
@@ -767,33 +781,19 @@ int uc8_case_len(const uc8_t *c, ucase_t ca) {
 	}
 }
 
-int uc8_upper_len(const uc8_t *c) {
-	assert(c);
-
+unsigned uc8_upper_len(const uc8_t *c) {
 	uc32_t c32;
-
-	if (!uc32_from_uc8(&c32, c))
-		return 0;
-
-	c32 = uc32_to_upper(c32);
-
-	return uc32_8_len(c32);
+	return uc32_from_uc8(&c32, c) ? uc32_8_len(uc32_to_upper(c32)) : 0;
 }
 
-int uc8_lower_len(const uc8_t *c) {
-	assert(c);
-
+unsigned uc8_lower_len(const uc8_t *c) {
 	uc32_t c32;
-
-	if (!uc32_from_uc8(&c32, c))
-		return 0;
-
-	c32 = uc32_to_lower(c32);
-
-	return uc32_8_len(c32);
+	return uc32_from_uc8(&c32, c) ? uc32_8_len(uc32_to_lower(c32)) : 0;
 }
 
-uc8_case_func_t uc8_to_case_func_from_ucase(ucase_t ca) {
+uc8_to_case_func_t uc8_to_case_func_from_ucase(ucase_t ca) {
+	assert(ucase_valid(ca));
+
 	switch (ca) {
 		case UCASE_UPPER:
 			return uc8_to_upper;
@@ -806,8 +806,8 @@ uc8_case_func_t uc8_to_case_func_from_ucase(ucase_t ca) {
 	}
 }
 
-int uc8_to_case(uc8_t *c, ucase_t ca) {
-	assert(c);
+unsigned uc8_to_case(uc8_t *c, ucase_t ca) {
+	assert(c && ucase_valid(ca));
 
 	switch (ca) {
 		case UCASE_UPPER:
@@ -821,118 +821,87 @@ int uc8_to_case(uc8_t *c, ucase_t ca) {
 	}
 }
 
-int uc8_to_upper(uc8_t *c) {
-	assert(c);
-
+unsigned uc8_to_upper(uc8_t *c) {
 	uc32_t c32;
-
-	if (!uc32_from_uc8(&c32, c))
-		return 0;
-
-	c32 = uc32_to_upper(c32);
-
-	return uc8_from_uc32(c, c32);
+	return uc32_from_uc8(&c32, c) ? uc8_from_uc32(c, uc32_to_upper(c32)) : 0;
 }
 
-int uc8_to_lower(uc8_t *c) {
-	assert(c);
-
+unsigned uc8_to_lower(uc8_t *c) {
 	uc32_t c32;
-
-	if (!uc32_from_uc8(&c32, c))
-		return 0;
-
-	c32 = uc32_to_lower(c32);
-
-	return uc8_from_uc32(c, c32);
+	return uc32_from_uc8(&c32, c) ? uc8_from_uc32(c, uc32_to_lower(c32)) : 0;
 }
 
 bool uc8_letter(const uc8_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(&c32, c) && uc32_letter(c32);
 }
 
 bool uc8_upper(const uc8_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(&c32, c) && uc32_upper(c32);
 }
 
 bool uc8_lower(const uc8_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(&c32, c) && uc32_lower(c32);
 }
 
 bool uc8_title(const uc8_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(&c32, c) && uc32_title(c32);
 }
 
 bool uc8_mod(const uc8_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(&c32, c) && uc32_mod(c32);
 }
 
 bool uc8_oletter(const uc8_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(&c32, c) && uc32_oletter(c32);
 }
 
 bool uc8_number(const uc8_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(&c32, c) && uc32_number(c32);
 }
 
 bool uc8_cntrl(const uc8_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(&c32, c) && uc32_cntrl(c32);
 }
 
 bool uc8_space(const uc8_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(&c32, c) && uc32_space(c32);
 }
 
 bool uc8_wspace(const uc8_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(&c32, c) && uc32_wspace(c32);
 }
 
 bool uc8_punct(const uc8_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(&c32, c) && uc32_punct(c32);
 }
 
 bool uc8_priv(const uc8_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(&c32, c) && uc32_priv(c32);
 }
 
 bool uc8_srgt(const uc8_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(&c32, c) && uc32_srgt(c32);
 }
 
 bool uc8_srgt_low(const uc8_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(&c32, c) && uc32_srgt_low(c32);
 }
 
 bool uc8_srgt_high(const uc8_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc8(&c32, c) && uc32_srgt_high(c32);
 }
@@ -948,7 +917,7 @@ bool uc8_trail(uc8_t c) {
 	return (c & 0xC0) == 0x80; // 10xx xxxx
 }
 
-int uc8_len(uc8_t c) {
+unsigned uc8_len(uc8_t c) {
 	// 0xxx xxxx
 	if ((c & 0x80) == 0)
 		return 1;
@@ -968,25 +937,42 @@ int uc8_len(uc8_t c) {
 	return 1;
 }
 
-int uc8_32_len(uc8_t c) {
+unsigned uc8_n_len(uc8_t c, unsigned n) {
+	switch (n) {
+		case 1:
+			return uc8_8_len(c);
+
+		case 2:
+			return uc8_16_len(c);
+
+		case 4:
+			return uc8_32_len(c);
+
+		default:
+			assert(false);
+			return 0;
+	}
+}
+
+unsigned uc8_32_len(uc8_t c) {
 	return 1;
 }
 
-int uc8_16_len(uc8_t c) {
+unsigned uc8_16_len(uc8_t c) {
 	return uc8_len(c) == 4 ? 2 : 1;
 }
 
-int uc8_8_len(uc8_t c) {
-	return 1;
+unsigned uc8_8_len(uc8_t c) {
+	return uc8_len(c);
 }
 
-int uc8_valid(const uc8_t *c) {
+unsigned uc8_valid(const uc8_t *c) {
 	assert(c);
 
-	uc8_t lead = c[0];
-	int   len  = uc8_len(lead);
+	uc8_t    lead = c[0];
+	unsigned len  = uc8_len(lead);
 
-	for (int i = 1; i <= len; ++i) 
+	for (unsigned i = 1; i <= len; ++i) 
 		if (!uc8_trail(c[i]))
 			return 0;
 
@@ -1118,6 +1104,8 @@ bool uc16_upper_radix(uc16_t c, uradix_t radix) {
 }
 
 uc16_to_case_func_t uc16_to_case_func_from_ucase(ucase_t ca) {
+	assert(ucase_valid(ca));
+
 	switch (ca) {
 		case UCASE_UPPER:
 			return uc16_to_upper;
@@ -1130,8 +1118,8 @@ uc16_to_case_func_t uc16_to_case_func_from_ucase(ucase_t ca) {
 	}
 }
 
-int uc16_to_case(uc16_t *c, ucase_t ca) {
-	assert(c);
+unsigned uc16_to_case(uc16_t *c, ucase_t ca) {
+	assert(c && ucase_valid(ca));
 
 	switch (ca) {
 		case UCASE_UPPER:
@@ -1145,100 +1133,72 @@ int uc16_to_case(uc16_t *c, ucase_t ca) {
 	}
 }
 
-int uc16_to_upper(uc16_t *c) {
-	assert(c);
-
+unsigned uc16_to_upper(uc16_t *c) {
 	uc32_t c32;
-
-	if (!uc32_from_uc16(&c32, c))
-		return 0;
-
-	c32 = uc32_to_upper(c32);
-
-	return uc16_from_uc32(c, c32);
+	return uc32_from_uc16(&c32, c) ? uc16_from_uc32(c, uc32_to_upper(c32)) : 0;
 }
 
-int uc16_to_lower(uc16_t *c) {
-	assert(c);
-
+unsigned uc16_to_lower(uc16_t *c) {
 	uc32_t c32;
-
-	if (!uc32_from_uc16(&c32, c))
-		return 0;
-
-	c32 = uc32_to_lower(c32);
-
-	return uc16_from_uc32(c, c32);
+	return uc32_from_uc16(&c32, c) ? uc16_from_uc32(c, uc32_to_lower(c32)) : 0;
 }
 
 bool uc16_letter(const uc16_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(&c32, c) && uc32_letter(c32);
 }
 
 bool uc16_upper(const uc16_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(&c32, c) && uc32_upper(c32);
 }
 
 bool uc16_lower(const uc16_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(&c32, c) && uc32_lower(c32);
 }
 
 bool uc16_title(const uc16_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(&c32, c) && uc32_title(c32);
 }
 
 bool uc16_mod(const uc16_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(&c32, c) && uc32_mod(c32);
 }
 
 bool uc16_oletter(const uc16_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(&c32, c) && uc32_oletter(c32);
 }
 
 bool uc16_number(const uc16_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(&c32, c) && uc32_number(c32);
 }
 
 bool uc16_cntrl(const uc16_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(&c32, c) && uc32_cntrl(c32);
 }
 
 bool uc16_space(const uc16_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(&c32, c) && uc32_space(c32);
 }
 
 bool uc16_wspace(const uc16_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(&c32, c) && uc32_wspace(c32);
 }
 
 bool uc16_punct(const uc16_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(&c32, c) && uc32_punct(c32);
 }
 
 bool uc16_priv(const uc16_t *c) {
-	assert(c);
 	uc32_t c32;
 	return uc32_from_uc16(&c32, c) && uc32_priv(c32);
 }
@@ -1255,19 +1215,36 @@ bool uc16_srgt_high(uc16_t c) {
 	return uc32_srgt_high(c);
 }
 
-int uc16_len(uc16_t c) {
+unsigned uc16_len(uc16_t c) {
 	return uc16_srgt_low(c) ? 2 : 1;
 }
 
-int uc16_32_len(uc16_t c) {
+unsigned uc16_n_len(uc16_t c, unsigned n) {
+	switch (n) {
+		case 1:
+			return uc16_8_len(c);
+
+		case 2:
+			return uc16_16_len(c);
+
+		case 4:
+			return uc16_32_len(c);
+
+		default:
+			assert(false);
+			return 0;
+	}
+}
+
+unsigned uc16_32_len(uc16_t c) {
 	return 1;
 }
 
-int uc16_16_len(uc16_t c) {
-	return 1;
+unsigned uc16_16_len(uc16_t c) {
+	return uc16_len(c);
 }
 
-int uc16_8_len(uc16_t c) {
+unsigned uc16_8_len(uc16_t c) {
 	if (c <= 0x7F)
 		return 1;
 
@@ -1280,20 +1257,20 @@ int uc16_8_len(uc16_t c) {
 	return 4;
 }
 
-bool uc16_valid(const uc16_t *c) {
+unsigned uc16_valid(const uc16_t *c) {
 	assert(c);
 
 	uc16_t low = c[0];
 
 	if (!uc16_srgt(low))
-		return true;
+		return 1;
 
 	if (uc16_srgt_high(low))
-		return false;
+		return 0;
 
 	uc16_t high = c[1];
 
-	return uc16_srgt_high(high);
+	return uc16_srgt_high(high) ? 2 : 0;
 }
 
 uc32_t uc32_dec_from_val(unsigned char val) {
@@ -1301,7 +1278,7 @@ uc32_t uc32_dec_from_val(unsigned char val) {
 }
 
 uc32_t uc32_case_hex_from_val(unsigned char val, ucase_t ca) {
-	return UCASE_LOWER == ca ? uc32_lower_hex_from_val(val) : uc32_upper_hex_from_val(val);
+	return ucase_lower(ca) ? uc32_lower_hex_from_val(val) : uc32_upper_hex_from_val(val);
 }
 
 uc32_t uc32_upper_hex_from_val(unsigned char val) {
@@ -1342,7 +1319,7 @@ uc32_t uc32_bin_from_val(unsigned char val) {
 }
 
 uc32_t uc32_case_radix_from_val(unsigned char val, uradix_t radix, ucase_t ca) {
-	return UCASE_LOWER == ca ? uc32_lower_radix_from_val(val, radix) : uc32_upper_radix_from_val(val, radix);
+	return ucase_lower(ca) ? uc32_lower_radix_from_val(val, radix) : uc32_upper_radix_from_val(val, radix);
 }
 
 uc32_t uc32_upper_radix_from_val(unsigned char val, uradix_t radix) {
@@ -1387,6 +1364,8 @@ int uc32_hex_val(uc32_t c) {
 }
 
 int uc32_case_hex_val(uc32_t c, ucase_t ca) {
+	assert(ucase_valid(ca));
+
 	switch (ca) {
 		case UCASE_UPPER:
 			return uc32_upper_hex_val(c);
@@ -1445,6 +1424,8 @@ int uc32_radix_val(uc32_t c, uradix_t radix) {
 }
 
 int uc32_case_radix_val(uc32_t c, uradix_t radix, ucase_t ca) {
+	assert(ucase_valid(ca));
+
 	switch (ca) {
 		case UCASE_UPPER:
 			return uc32_radix_upper_val(c, radix);
@@ -1490,6 +1471,8 @@ bool uc32_dec(uc32_t c) {
 }
 
 bool uc32_case_hex(uc32_t c, ucase_t ca) {
+	assert(ucase_valid(ca));
+
 	switch (ca) {
 		case UCASE_UPPER:
 			return uc32_upper_hex(c);
@@ -1527,7 +1510,7 @@ bool uc32_bin(uc32_t c) {
 }
 
 bool uc32_radix(uc32_t c, uradix_t radix) {
-    assert(radix <= URADIX_MAX);
+	assert(uradix_valid(radix));
 
     if (uc32_dec(c))
         c -= U'0';
@@ -1544,6 +1527,8 @@ bool uc32_radix(uc32_t c, uradix_t radix) {
 }
 
 bool uc32_case_radix(uc32_t c, uradix_t radix, ucase_t ca) {
+	assert(ucase_valid(ca));
+
 	switch (ca) {
 		case UCASE_UPPER:
 			return uc32_upper_radix(c, radix);
@@ -1557,7 +1542,7 @@ bool uc32_case_radix(uc32_t c, uradix_t radix, ucase_t ca) {
 }
 
 bool uc32_lower_radix(uc32_t c, uradix_t radix) {
-    assert(radix <= URADIX_MAX);
+	assert(uradix_valid(radix));
 
     if (uc32_dec(c))
         c -= U'0';
@@ -1571,7 +1556,7 @@ bool uc32_lower_radix(uc32_t c, uradix_t radix) {
 }
 
 bool uc32_upper_radix(uc32_t c, uradix_t radix) {
-    assert(radix <= URADIX_MAX);
+	assert(uradix_valid(radix));
 
     if (uc32_dec(c))
         c -= U'0';
@@ -1585,6 +1570,8 @@ bool uc32_upper_radix(uc32_t c, uradix_t radix) {
 }
 
 uc32_to_case_func_t uc32_to_case_func_from_ucase(ucase_t ca) {
+	assert(ucase_valid(ca));
+
 	switch (ca) {
 		case UCASE_UPPER:
 			return uc32_to_upper;
@@ -1598,6 +1585,8 @@ uc32_to_case_func_t uc32_to_case_func_from_ucase(ucase_t ca) {
 }
 
 uc32_t uc32_to_case(uc32_t c, ucase_t ca) {
+	assert(ucase_valid(ca));
+
 	switch (ca) {
 		case UCASE_UPPER:
 			return uc32_to_upper(c);
@@ -34525,22 +34514,39 @@ bool uc32_srgt_high(uc32_t c) {
 	return 0xDC00 <= c && c <= 0xDFFF;
 }
 
-int uc32_len(uc32_t c) {
+unsigned uc32_len(uc32_t c) {
 	return 1;
 }
 
-int uc32_32_len(uc32_t c) {
+unsigned uc32_n_len(uc32_t c, unsigned n) {
+	switch (n) {
+		case 1:
+			return uc32_8_len(c);
+
+		case 2:
+			return uc32_16_len(c);
+
+		case 4:
+			return uc32_32_len(c);
+
+		default:
+			assert(false);
+			return 0;
+	}
+}
+
+unsigned uc32_32_len(uc32_t c) {
 	return 1;
 }
 
-int uc32_16_len(uc32_t c) {
+unsigned uc32_16_len(uc32_t c) {
 	if (c > UMAX_CP)
 		return 0;
 
 	return c >= 0x10000 ? 2 : 1;
 }
 
-int uc32_8_len(uc32_t c) {
+unsigned uc32_8_len(uc32_t c) {
 	if (c <= 0x7F)
 		return 1;
 

@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <locale.h>
 
+#include "fmt/float.h"
 #include "fmt/int.h"
 #include "util/math.h"
 #include "char.h"
@@ -84,6 +85,52 @@ size_t ufprintln_lower_bool(FILE *file, bool b) {
 
 size_t ufprint_lower_bool(FILE *file, bool b) {
 	return ufprint_uz8(file, b ? uz8("true") : uz8("false"));
+}
+
+size_t uprintln_float(double f) {
+	return uprint_float(f) + uprintln();
+}
+
+size_t uprint_float(double f) {
+	return ufprint_float(stdout, f);
+}
+
+size_t uprintln_float_fmt(double f, const struct uffmt *fmt) {
+	return uprint_float_fmt(f, fmt) + uprintln();
+}
+
+size_t uprint_float_fmt(double f, const struct uffmt *fmt) {
+	return ufprint_float_fmt(stdout, f, fmt);
+}
+
+size_t ufprintln_float(FILE *file, double f) {
+	return ufprint_float(file, f) + ufprintln(file);
+}
+
+size_t ufprint_float(FILE *file, double f) {
+	return ufprint_float_fmt(file, f, &UFFMT);
+}
+
+size_t ufprintln_float_fmt(FILE *file, double f, const struct uffmt *fmt) {
+	return ufprint_float_fmt(file, f, fmt) + ufprintln(file);
+}
+
+size_t ufprint_float_fmt(FILE *file, double f, const struct uffmt *fmt) {
+	struct uffmt inner_fmt = *fmt;
+	size_t       written   = 0;
+	size_t 		 to_write  = uz8_from_float_fmt(NULL, f, fmt);
+
+	while (to_write) {
+		inner_fmt.max_len = inner_fmt.start_from + UMIN(USTR_IO_BUFFER_SIZE, to_write);
+
+		size_t len = uz8_from_float_fmt((uc8_t *) uio_buffer_, f, &inner_fmt);
+
+		inner_fmt.start_from += len;
+		to_write             -= len;
+		written              += ufprint_uz8_n(file, (uc8_t *) uio_buffer_, len);
+	}
+
+	return written;
 }
 
 size_t uprintln_int(intmax_t i) {
@@ -293,8 +340,8 @@ size_t ufprint_uz32(FILE *file, const uc32_t *cstr) {
 	size_t written = 0;
 
 	for (; cstr[written]; ++written) {
-		uc8_t  c8[4];
-		size_t c8_len = uc8_from_uc32(c8, cstr[written]);
+		uc8_t    c8[4];
+		unsigned c8_len = uc8_from_uc32(c8, cstr[written]);
 
 		if (!fwrite(c8, c8_len, 1, file))
 			break;
@@ -313,8 +360,8 @@ size_t ufprint_uz32_n(FILE *file, const uc32_t *cstr, size_t n) {
 	size_t written = 0;
 
 	for (; written < n; ++written) {
-		uc8_t  c8[4];
-		size_t c8_len = uc8_from_uc32(c8, cstr[written]);
+		uc8_t    c8[4];
+		unsigned c8_len = uc8_from_uc32(c8, cstr[written]);
 
 		if (!fwrite(c8, c8_len, 1, file))
 			break;
@@ -333,8 +380,8 @@ size_t ufprint_uz16(FILE *file, const uc16_t *cstr) {
 	size_t written = 0;
 
 	for (; cstr[written]; written += uc16_32_len(cstr[written])) {
-		uc8_t  c8[4];
-		size_t c8_len = uc8_from_uc16(c8, cstr + written);
+		uc8_t    c8[4];
+		unsigned c8_len = uc8_from_uc16(c8, cstr + written);
 
 		if (!fwrite(c8, c8_len, 1, file))
 			break;
@@ -353,8 +400,8 @@ size_t ufprint_uz16_n(FILE *file, const uc16_t *cstr, size_t n) {
 	size_t written = 0;
 
 	for (; written < n; written += uc16_32_len(cstr[written])) {
-		uc8_t  c8[4];
-		size_t c8_len = uc8_from_uc16(c8, cstr + written);
+		uc8_t    c8[4];
+		unsigned c8_len = uc8_from_uc16(c8, cstr + written);
 
 		if (!fwrite(c8, c8_len, 1, file))
 			break;
@@ -472,8 +519,8 @@ size_t ufprintln_uc32(FILE *file, uc32_t c) {
 }
 
 size_t ufprint_uc32(FILE *file, uc32_t c) {
-	uc8_t  c8[4];
-	size_t n = uc8_from_uc32(c8, c);
+	uc8_t    c8[4];
+	unsigned n = uc8_from_uc32(c8, c);
 
 	return fwrite(c8, n, 1, file);
 }
@@ -486,8 +533,8 @@ size_t ufprint_uc32_n(FILE *file, uc32_t c, size_t n) {
 	size_t written = 0;
 
 	while (n--) {
-		uc8_t  c8[4];
-		size_t c8_len = uc8_from_uc32(c8, c);
+		uc8_t    c8[4];
+		unsigned c8_len = uc8_from_uc32(c8, c);
 
 		if (!fwrite(c8, c8_len, 1, file))
 			break;
@@ -506,8 +553,8 @@ size_t ufprint_uc16(FILE *file, uc16_t c) {
 	if (uc16_srgt(c))
 		return 0;
 
-	uc8_t  c8[4];
-	size_t n = uc8_from_uc16(c8, &c);
+	uc8_t    c8[4];
+	unsigned n = uc8_from_uc16(c8, &c);
 
 	return fwrite(c8, n, 1, file);
 }
@@ -523,8 +570,8 @@ size_t ufprint_uc16_n(FILE *file, uc16_t c, size_t n) {
 	size_t written = 0;
 
 	while (n--) {
-		uc8_t  c8[4];
-		size_t c8_len = uc8_from_uc16(c8, &c);
+		uc8_t    c8[4];
+		unsigned c8_len = uc8_from_uc16(c8, &c);
 		
 		if (!fwrite(c8, c8_len, 1, file))
 			break;
@@ -627,9 +674,9 @@ size_t ufreadln_us32_sep_e(FILE *file, us32_t *s, uc32_t sep, bool *error) {
 
 		c8[0] = c;
 
-		int len = uc8_len(c8[0]);
+		unsigned len = uc8_len(c8[0]);
 
-		for (int i = 1; i < len; ++i) {
+		for (unsigned i = 1; i < len; ++i) {
 			c = fgetc(file);
 
 			if (EOF == c)
@@ -717,9 +764,9 @@ size_t ufread_uc8_f(FILE *file, uc8_t *c8) {
 
 	uc8_t inner_c8[4] = { c };
 
-	int len = uc8_len(c);
+	unsigned len = uc8_len(c);
 
-	for (int i = 1; i < len; ++i) {
+	for (unsigned i = 1; i < len; ++i) {
 		int c = fgetc(file);
 
 		if (EOF == c)
@@ -728,7 +775,7 @@ size_t ufread_uc8_f(FILE *file, uc8_t *c8) {
 		inner_c8[i] = c;
 	}
 
-	for (int i = 0; i < len; ++i)
+	for (unsigned i = 0; i < len; ++i)
 		c8[i] = inner_c8[i];
 
 	return len;

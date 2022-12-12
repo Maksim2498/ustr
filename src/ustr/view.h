@@ -32,6 +32,7 @@ uv32_t uv32_from_uz32_n(uc32_t *cstr, size_t n);
 
 // Cross-UTF Len
 
+size_t uv32_n_len(uv32_t view, unsigned n);
 size_t uv32_32_len(uv32_t view);
 size_t uv32_16_len(uv32_t view);
 size_t uv32_8_len(uv32_t view);

@@ -1,6 +1,8 @@
 #ifndef USTR_ENCODING_H
 #define USTR_ENCODING_H
 
+#include <stdbool.h>
+
 #include "type/encoding.h"
 #include "cview.h"
 
@@ -11,5 +13,6 @@ static const ucv32_t UENCODING_UTF32_LE_NAME = ucv32("UTF-32LE");
 static const ucv32_t UENCODING_UTF32_BE_NAME = ucv32("UTF-32BE");
 
 ucv32_t uencoding_name(uencoding_t encoding);
+bool uencoding_valid(uencoding_t encoding);
 
 #endif

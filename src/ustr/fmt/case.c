@@ -13,6 +13,8 @@ bool ucase_lower(ucase_t c) {
 }
 
 ucv32_t ucase_name(ucase_t c) {
+    assert(ucase_valid(c));
+
     switch (c) {
         case UCASE_NONE:
             return UCASE_NONE_NAME;

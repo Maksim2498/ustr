@@ -1,6 +1,10 @@
 #include "encoding.h"
 
+#include <assert.h>
+
 ucv32_t uencoding_name(uencoding_t encoding) {
+    assert(uencoding_valid(encoding));
+    
     switch (encoding) {
         case UENCODING_UTF8:
 			return UENCODING_UTF8_NAME;
@@ -20,4 +24,8 @@ ucv32_t uencoding_name(uencoding_t encoding) {
         default:
             return ucv32("unknown encoding");
     }
+}
+
+bool uencoding_valid(uencoding_t encoding) {
+    return encoding <= UENCODING_COUNT;
 }

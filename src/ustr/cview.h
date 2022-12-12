@@ -36,6 +36,7 @@ ucv32_t ucv32_from_lower_bool(bool b);
 
 // Cross-UTF Len
 
+size_t ucv32_n_len(ucv32_t view, unsigned n);
 size_t ucv32_32_len(ucv32_t view);
 size_t ucv32_16_len(ucv32_t view);
 size_t ucv32_8_len(ucv32_t view);

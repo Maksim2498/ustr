@@ -58,6 +58,10 @@ uv32_t uv32_from_uz32_n(uc32_t *cstr, size_t n) {
     };
 }
 
+size_t uv32_n_len(uv32_t view, unsigned n) {
+    return uz32_n_n_len(UV32_EXPAND(view), n);
+}
+
 size_t uv32_32_len(uv32_t view) {
     return uv32_len(view);
 }
