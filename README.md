@@ -12,7 +12,7 @@
 
 ## About
 
-This is a small unicode code points and strings handling C library.
+This is a small unicode code point and string handling C library.
 It provides three character types for UTF-8, UTF-16 and UTF-32 encodings,
 three string types: view, constant view and dynamic, encoding coneversion
 functions, I/O functions, character properties checking functions, string
