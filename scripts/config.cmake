@@ -1,5 +1,7 @@
 include(TestBigEndian)
 
+include (scripts/arg-type.cmake)
+
 test_big_endian(USTR_BIG_ENDIAN)
 
 configure_file(

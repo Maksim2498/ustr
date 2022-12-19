@@ -1,12 +1,14 @@
 #ifndef USTR_CSTR_H
 #define USTR_CSTR_H
 
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
 #include "type/fmt/case.h"
 #include "type/fmt/float.h"
+#include "type/fmt/fmt.h"
 #include "type/fmt/int.h"
 #include "type/char.h"
 #include "type/cview.h"
@@ -19,6 +21,23 @@
 #define uz32(literal) (uc32_t *)  U##literal
 #define uz16(literal) (uc16_t *)  u##literal
 #define  uz8(literal)  (uc8_t *) u8##literal
+
+// - From fmt
+
+size_t uz32_from_fmt(uc32_t *cstr, const uc32_t *fmt, ...);
+size_t uz32_from_fmt_v(uc32_t *cstr, const uc32_t *fmt, va_list *args); 
+size_t uz32_from_fmt_n(uc32_t *cstr, const uc32_t *fmt, size_t n, ...);
+size_t uz32_from_fmt_n_v(uc32_t *cstr, const uc32_t *fmt, size_t n, va_list *args); 
+
+size_t uz16_from_fmt(uc16_t *cstr, const uc16_t *fmt, ...);
+size_t uz16_from_fmt_v(uc16_t *cstr, const uc16_t *fmt, va_list *args); 
+size_t uz16_from_fmt_n(uc16_t *cstr, const uc16_t *fmt, size_t n, ...);
+size_t uz16_from_fmt_n_v(uc16_t *cstr, const uc16_t *fmt, size_t n, va_list *args); 
+
+size_t uz8_from_fmt(uc8_t *cstr, const uc8_t *fmt, ...);
+size_t uz8_from_fmt_v(uc8_t *cstr, const uc8_t *fmt, va_list *args); 
+size_t uz8_from_fmt_n(uc8_t *cstr, const uc8_t *fmt, size_t n, ...);
+size_t uz8_from_fmt_n_v(uc8_t *cstr, const uc8_t *fmt, size_t n, va_list *args); 
 
 // - From float
 
@@ -283,17 +302,17 @@ size_t uz8_n_trim_right(const uc8_t *cstr, size_t n);
 
 // Copy
 
-void uz32_copy(uc32_t *dst, const uc32_t *src);
-void uz32_copy_n(uc32_t *dst, const uc32_t *src, size_t n);
-void uz32_n_copy_n(uc32_t *dst, size_t dst_len, const uc32_t *src, size_t src_len);
+size_t uz32_copy(uc32_t *dst, const uc32_t *src);
+size_t uz32_copy_n(uc32_t *dst, const uc32_t *src, size_t n);
+size_t uz32_n_copy_n(uc32_t *dst, size_t dst_len, const uc32_t *src, size_t src_len);
 
-void uz16_copy(uc16_t *dst, const uc16_t *src);
-void uz16_copy_n(uc16_t *dst, const uc16_t *src, size_t n);
-void uz16_n_copy_n(uc16_t *dst, size_t dst_len, const uc16_t *src, size_t src_len);
+size_t uz16_copy(uc16_t *dst, const uc16_t *src);
+size_t uz16_copy_n(uc16_t *dst, const uc16_t *src, size_t n);
+size_t uz16_n_copy_n(uc16_t *dst, size_t dst_len, const uc16_t *src, size_t src_len);
 
-void uz8_copy(uc8_t *dst, const uc8_t *src);
-void uz8_copy_n(uc8_t *dst, const uc8_t *src, size_t n);
-void uz8_n_copy_n(uc8_t *dst, size_t dst_len, const uc8_t *src, size_t src_len);
+size_t uz8_copy(uc8_t *dst, const uc8_t *src);
+size_t uz8_copy_n(uc8_t *dst, const uc8_t *src, size_t n);
+size_t uz8_n_copy_n(uc8_t *dst, size_t dst_len, const uc8_t *src, size_t src_len);
 
 // Move
 

@@ -9,6 +9,33 @@
 #define USTR_INIT_CAP       @USTR_INIT_CAP@
 #define USTR_IO_BUFFER_SIZE @USTR_IO_BUFFER_SIZE@
 
+#define uarg_int8_t   @INT_8_ARG_TYPE@
+#define uarg_uint8_t  @UINT_8_ARG_TYPE@
+#define uarg_int16_t  @INT_16_ARG_TYPE@
+#define uarg_uint16_t @UINT_16_ARG_TYPE@
+#define uarg_int32_t  @INT_32_ARG_TYPE@
+#define uarg_uint32_t @UINT_32_ARG_TYPE@
+#define uarg_int64_t  @INT_64_ARG_TYPE@
+#define uarg_uint64_t @UINT_64_ARG_TYPE@
+
+#define uarg_int_fast8_t   @INT_FAST_8_ARG_TYPE@
+#define uarg_uint_fast8_t  @UINT_FAST_8_ARG_TYPE@
+#define uarg_int_fast16_t  @INT_FAST_16_ARG_TYPE@
+#define uarg_uint_fast16_t @UINT_FAST_16_ARG_TYPE@
+#define uarg_int_fast32_t  @INT_FAST_32_ARG_TYPE@
+#define uarg_uint_fast32_t @UINT_FAST_32_ARG_TYPE@
+#define uarg_int_fast64_t  @INT_FAST_64_ARG_TYPE@
+#define uarg_uint_fast64_t @UINT_FAST_64_ARG_TYPE@
+
+#define uarg_int_least8_t   @INT_LEAST_8_ARG_TYPE@
+#define uarg_uint_least8_t  @UINT_LEAST_8_ARG_TYPE@
+#define uarg_int_least16_t  @INT_LEAST_16_ARG_TYPE@
+#define uarg_uint_least16_t @UINT_LEAST_16_ARG_TYPE@
+#define uarg_int_least32_t  @INT_LEAST_32_ARG_TYPE@
+#define uarg_uint_least32_t @UINT_LEAST_32_ARG_TYPE@
+#define uarg_int_least64_t  @INT_LEAST_64_ARG_TYPE@
+#define uarg_uint_least64_t @UINT_LEAST_64_ARG_TYPE@
+
 #cmakedefine USTR_BIG_ENDIAN
 
 #endif

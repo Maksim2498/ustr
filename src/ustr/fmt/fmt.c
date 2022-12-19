@@ -69,13 +69,13 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
     struct ubgfmt bfmt = UBGFMT;
     struct ufmt   fmt  = UFMT;
  
-    size_t end = n * len;
-    size_t i   = 0;
+    size_t prefix_len = 0;
+    size_t i          = 0;
     uc32_t c;
 
     // Plus
 
-    if (i >= end)
+    if (i >= len)
         goto exit;
 
     c = uget_c_(cstr, n, i);
@@ -83,13 +83,14 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
     if ('+' == c) {
         ifmt.show_plus = true;
         ffmt.show_plus = true;
-        ++fmt.len;
+        
+        ++prefix_len;
         ++i;
     }
 
     // Prefix
 
-    if (i >= end)
+    if (i >= len)
         goto exit;
 
     c = uget_c_(cstr, n, i);
@@ -103,14 +104,15 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
             ifmt.radix_prefix_case = UCASE_LOWER;
 
         prefix:
-            ++fmt.len;
             ifmt.show_radix_prefix = true;
+
+            ++prefix_len;
             ++i;
     }
 
     // Precision
 
-    if (i >= end)
+    if (i >= len)
         goto exit;
 
     c = uget_c_(cstr, n, i);
@@ -118,15 +120,18 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
     if ('*' == c) {
         fmt.arg_precision = true;
         fmt.use_precision = true;
-        ++fmt.len;
+
+        ++prefix_len;
         ++i;
     } else if (uc32_dec(c)) {
         do {
             fmt.precision *= 10;
             fmt.precision += uc32_dec_val(c);
-            ++fmt.len;
 
-            c = uget_c_(cstr, n, ++i); 
+            ++prefix_len;
+            ++i;
+
+            c = uget_c_(cstr, n, i); 
         } while (i < len && uc32_dec(c));
 
         fmt.use_precision = true;
@@ -134,15 +139,15 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
     
     // FSA
     
-	for (size_t s = 0; i < end; i += n) {
+	for (size_t s = 0; i < len; ++i) {
         c = uget_c_(cstr, n, i);
 
 		switch (s) {
 			case 0:
                 switch (c) {
                     case 'e':
-                        fmt.type  = UTYPE_FLOAT;
-                        fmt.len  += 1;
+                        fmt.type = UTYPE_FLOAT;
+                        fmt.len  = 1;
 
                         ffmt.scientific = true;
                         ffmt.exp_case   = UCASE_LOWER; 
@@ -152,8 +157,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
                         continue;
 
                     case 'E':
-                        fmt.type  = UTYPE_FLOAT;
-                        fmt.len  += 1;
+                        fmt.type = UTYPE_FLOAT;
+                        fmt.len  = 1;
 
                         ffmt.scientific = true;
                         ffmt.exp_case   = UCASE_UPPER;
@@ -163,34 +168,34 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
                         continue;
 
                     case 'f':
-                        fmt.type  = UTYPE_FLOAT;
-                        fmt.len  += 1;
+                        fmt.type = UTYPE_FLOAT;
+                        fmt.len  = 1;
 
                         s = 5;
 
                         continue;
 
                     case 'd':
-                        fmt.type  = UTYPE_DOUBLE;
-                        fmt.len  += 1;
+                        fmt.type = UTYPE_DOUBLE;
+                        fmt.len  = 1;
 
                         s = 9;
 
                         continue;
 
                     case 'l':
-                        fmt.type  = UTYPE_LINT;
-                        fmt.len  += 1;
+                        fmt.type = UTYPE_LINT;
+                        fmt.len  = 1;
                     
                         s = 35;
                         
                         continue;
 
                     case 'b':
-                        fmt.type  = UTYPE_BOOL;
-                        fmt.len  += 1;
+                        fmt.type = UTYPE_BOOL;
+                        fmt.len  = 1;
 
-                        bfmt.char_case = UCASE_UPPER;
+                        bfmt.char_case = UCASE_LOWER;
 
                         ifmt.radix = 2;
 
@@ -221,72 +226,72 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
                         continue;
 
                     case 's':
-                        fmt.type  = UTYPE_SINT;
-                        fmt.len  += 1;
+                        fmt.type = UTYPE_SINT;
+                        fmt.len  = 1;
 
                         s = 39;
 
                         continue;
 
                     case 'i':
-                        fmt.type  = UTYPE_INT;
-                        fmt.len  += 1;
+                        fmt.type = UTYPE_INT;
+                        fmt.len  = 1;
 
                         s = 44;
 
                         continue;
 
                     case 'u':
-                        fmt.type  = UTYPE_UINT;
-                        fmt.len  += 1;
+                        fmt.type = UTYPE_UINT;
+                        fmt.len  = 1;
 
                         s = 48;
 
                         continue;
 
                     case 'm':
-                        fmt.type  = UTYPE_MAX;
-                        fmt.len  += 1;
+                        fmt.type = UTYPE_MAX;
+                        fmt.len  = 1;
 
                         goto exit;
 
                     case 'p':
-                        fmt.type  = UTYPE_PTR;
-                        fmt.len  += 1;
+                        fmt.type = UTYPE_PTR;
+                        fmt.len  = 1;
 
                         goto exit;
 
                     case 'Z':
-                        fmt.type  = UTYPE_SIZE;
-                        fmt.len  += 1;
+                        fmt.type = UTYPE_SIZE;
+                        fmt.len  = 1;
 
                         goto exit;
 
                     case 'D':
-                        fmt.type  = UTYPE_PTRDIFF;
-                        fmt.len  += 1;
+                        fmt.type = UTYPE_PTRDIFF;
+                        fmt.len  = 1;
 
                         goto exit;
 
                     case 'z':
-                        fmt.type  = UTYPE_CSTR;
-                        fmt.len  += 1;
+                        fmt.type = UTYPE_CSTR;
+                        fmt.len  = 1;
 
                         s = 41;
 
                         continue;
 
                     case 'c':
-                        fmt.type  = UTYPE_CHAR;
-                        fmt.len  += 1;
+                        fmt.type = UTYPE_CHAR;
+                        fmt.len  = 1;
 
                         s = 60;
 
                         continue;
 
                     case 'B':
-                        fmt.type  = UTYPE_BOOL;
-                        fmt.len  += 1;
+                        fmt.type = UTYPE_BOOL;
+                        fmt.len  = 1;
 
                         bfmt.char_case = UCASE_UPPER;
 
@@ -297,8 +302,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
                         continue;
 
                     case '!':
-                        fmt.type  = UTYPE_CUSTOM;
-                        fmt.len  += 1;
+                        fmt.type = UTYPE_CUSTOM;
+                        fmt.len  = 1;
 
                     default:
                         goto exit;
@@ -320,8 +325,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
                         continue;
 
                     case 'd':
-                        fmt.type  = UTYPE_DOUBLE;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_DOUBLE;
+                        fmt.len  = 2;
 
                     default:
                         goto exit;
@@ -333,8 +338,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 2:
                 if ('d' == c) {
-                    fmt.type  = UTYPE_LDOUBLE;
-                    fmt.len  += 3;
+                    fmt.type = UTYPE_LDOUBLE;
+                    fmt.len  = 3;
                 }
 
                 goto exit;
@@ -355,8 +360,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
                         continue;
 
                     case 'd':
-                        fmt.type  = UTYPE_DOUBLE;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_DOUBLE;
+                        fmt.len  = 2;
 
                     default:
                         goto exit;
@@ -368,8 +373,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 4:
                 if ('d' == c) {
-                    fmt.type  = UTYPE_LDOUBLE;
-                    fmt.len  += 3;
+                    fmt.type = UTYPE_LDOUBLE;
+                    fmt.len  = 3;
                 }
 
                 goto exit;
@@ -381,8 +386,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
             case 5:
                 switch (c) {
                     case '8':
-                        fmt.type  = UTYPE_FAST_8;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_FAST_8;
+                        fmt.len  = 2;
 
                         goto exit;
 
@@ -408,8 +413,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 6:
                 if ('6' == c) {
-                    fmt.type  = UTYPE_FAST_16;
-                    fmt.len  += 3;
+                    fmt.type = UTYPE_FAST_16;
+                    fmt.len  = 3;
                 }
 
                 goto exit;
@@ -420,8 +425,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 7:
                 if ('2' == c) {
-                    fmt.type  = UTYPE_FAST_32;
-                    fmt.len  += 3;
+                    fmt.type = UTYPE_FAST_32;
+                    fmt.len  = 3;
                 }
 
                 goto exit;
@@ -432,8 +437,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 8:
                 if ('4' == c) {
-                    fmt.type  = UTYPE_FAST_64;
-                    fmt.len  += 3;
+                    fmt.type = UTYPE_FAST_64;
+                    fmt.len  = 3;
                 }
 
                 goto exit;
@@ -451,32 +456,32 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
             case 9:
                 switch (c) {
                     case 's':
-                        fmt.type  = UTYPE_SINT;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_SINT;
+                        fmt.len  = 2;
 
                         s = 10;
 
                         continue;
 
                     case 'u':
-                        fmt.type  = UTYPE_UINT;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_UINT;
+                        fmt.len  = 2;
 
                         s = 11;
 
                         continue;
 
                     case 'i':
-                        fmt.type  = UTYPE_INT;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_INT;
+                        fmt.len  = 2;
 
                         s = 23;
 
                         continue;
 
                     case 'l':
-                        fmt.type  = UTYPE_LINT;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_LINT;
+                        fmt.len  = 2;
 
                         s = 27;
 
@@ -487,26 +492,26 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
                         continue;
 
                     case 'm':
-                        fmt.type  = UTYPE_MAX;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_MAX;
+                        fmt.len  = 2;
 
                         goto exit;
 
                     case 'p':
-                        fmt.type  = UTYPE_PTR;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_PTR;
+                        fmt.len  = 2;
 
                         goto exit;
 
                     case 'Z':
-                        fmt.type  = UTYPE_SIZE;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_SIZE;
+                        fmt.len  = 2;
 
                         goto exit;
 
                     case 'D':
-                        fmt.type  = UTYPE_PTRDIFF;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_PTRDIFF;
+                        fmt.len  = 2;
 
                         goto exit;
 
@@ -520,8 +525,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 10:
                 if ('c' == c) {
-                    fmt.type  = UTYPE_SCHAR;
-                    fmt.len  += 3;
+                    fmt.type = UTYPE_SCHAR;
+                    fmt.len  = 3;
                 }
 
                 goto exit;
@@ -533,22 +538,22 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
             case 11:
                 switch (c) {
                     case 's':
-                        fmt.type  = UTYPE_USINT;
-                        fmt.len  += 3;
+                        fmt.type = UTYPE_USINT;
+                        fmt.len  = 3;
 
                         goto exit;
 
                     case 'l':
-                        fmt.type  = UTYPE_ULINT;
-                        fmt.len  += 3;
+                        fmt.type = UTYPE_ULINT;
+                        fmt.len  = 3;
 
                         s = 12;
 
                         continue;
 
                     case '8':
-                        fmt.type  = UTYPE_UINT_8;
-                        fmt.len  += 3;
+                        fmt.type = UTYPE_UINT_8;
+                        fmt.len  = 3;
 
                         goto exit;
 
@@ -569,20 +574,20 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
                         continue;
 
                     case 'm':
-                        fmt.type  = UTYPE_UMAX;
-                        fmt.len  += 3;
+                        fmt.type = UTYPE_UMAX;
+                        fmt.len  = 3;
 
                         goto exit;
 
                     case 'p':
-                        fmt.type  = UTYPE_UPTR;
-                        fmt.len  += 3;
+                        fmt.type = UTYPE_UPTR;
+                        fmt.len  = 3;
 
                         goto exit;
 
                     case 'c':
-                        fmt.type  = UTYPE_UCHAR;
-                        fmt.len  += 3;
+                        fmt.type = UTYPE_UCHAR;
+                        fmt.len  = 3;
 
                         goto exit;
 
@@ -597,14 +602,14 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
             case 12:
                 switch (c) {
                     case 'l':
-                        fmt.type  = UTYPE_ULLINT;
-                        fmt.len  += 4;
+                        fmt.type = UTYPE_ULLINT;
+                        fmt.len  = 4;
 
                         goto exit;
 
                     case '8':
-                        fmt.type  = UTYPE_ULEAST_8;
-                        fmt.len  += 4;
+                        fmt.type = UTYPE_ULEAST_8;
+                        fmt.len  = 4;
 
                         goto exit;
 
@@ -630,8 +635,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 13:
                 if ('6' == c) {
-                    fmt.type  = UTYPE_ULEAST_16;
-                    fmt.len  += 5;
+                    fmt.type = UTYPE_ULEAST_16;
+                    fmt.len  = 5;
                 }
 
                 goto exit;
@@ -642,8 +647,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 14:
                 if ('2' == c) {
-                    fmt.type  = UTYPE_ULEAST_32;
-                    fmt.len  += 5;
+                    fmt.type = UTYPE_ULEAST_32;
+                    fmt.len  = 5;
                 }
 
 
@@ -655,8 +660,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 15:
                 if ('4' == c) {
-                    fmt.type  = UTYPE_ULEAST_64;
-                    fmt.len  += 5;
+                    fmt.type = UTYPE_ULEAST_64;
+                    fmt.len  = 5;
                 }
 
                 goto exit;
@@ -667,8 +672,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
             
             case 16:
                 if ('6' == c) {
-                    fmt.type  = UTYPE_UINT_16;
-                    fmt.len  += 4;
+                    fmt.type = UTYPE_UINT_16;
+                    fmt.len  = 4;
                 }
 
                 goto exit;
@@ -679,8 +684,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 17:
                 if ('2' == c) {
-                    fmt.type  = UTYPE_UINT_32;
-                    fmt.len  += 4;
+                    fmt.type = UTYPE_UINT_32;
+                    fmt.len  = 4;
                 }
 
 
@@ -692,8 +697,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
             
             case 18:
                 if ('4' == c) {
-                    fmt.type  = UTYPE_UINT_64;
-                    fmt.len  += 4;
+                    fmt.type = UTYPE_UINT_64;
+                    fmt.len  = 4;
                 }
 
                 goto exit;
@@ -705,8 +710,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
             case 19:
                 switch (c) {
                     case '8':
-                        fmt.type  = UTYPE_UFAST_8;
-                        fmt.len  += 4;
+                        fmt.type = UTYPE_UFAST_8;
+                        fmt.len  = 4;
 
                         goto exit;
 
@@ -732,8 +737,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 20:
                 if ('6' == c) {
-                    fmt.type  = UTYPE_UFAST_16;
-                    fmt.len  += 5;
+                    fmt.type = UTYPE_UFAST_16;
+                    fmt.len  = 5;
                 }
 
                 goto exit;
@@ -744,8 +749,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 21:
                 if ('2' == c) {
-                    fmt.type  = UTYPE_UFAST_32;
-                    fmt.len  += 5;
+                    fmt.type = UTYPE_UFAST_32;
+                    fmt.len  = 5;
                 }
 
                 goto exit;
@@ -756,8 +761,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 22:
                 if ('4' == c) {
-                    fmt.type  = UTYPE_UFAST_64;
-                    fmt.len  += 5;
+                    fmt.type = UTYPE_UFAST_64;
+                    fmt.len  = 5;
                 }
 
                 goto exit;
@@ -769,8 +774,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
             case 23:
                 switch (c) {
                     case '8':
-                        fmt.type  = UTYPE_INT_8;
-                        fmt.len  += 3;
+                        fmt.type = UTYPE_INT_8;
+                        fmt.len  = 3;
 
                         goto exit;
 
@@ -796,8 +801,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 24:
                 if ('6' == c) {
-                    fmt.type  = UTYPE_INT_16;
-                    fmt.len  += 4;
+                    fmt.type = UTYPE_INT_16;
+                    fmt.len  = 4;
                 }
 
                 goto exit;
@@ -808,8 +813,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 25:
                 if ('2' == c) {
-                    fmt.type  = UTYPE_INT_32;
-                    fmt.len  += 4;
+                    fmt.type = UTYPE_INT_32;
+                    fmt.len  = 4;
                 }
 
                 goto exit;
@@ -820,8 +825,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 26:
                 if ('4' == c) {
-                    fmt.type  = UTYPE_INT_64;
-                    fmt.len  += 4;
+                    fmt.type = UTYPE_INT_64;
+                    fmt.len  = 4;
                 }
 
                 goto exit;
@@ -838,14 +843,14 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
             case 27:
                 switch (c) {
                     case 'l':
-                        fmt.type  = UTYPE_LLINT;
-                        fmt.len  += 3;
+                        fmt.type = UTYPE_LLINT;
+                        fmt.len  = 3;
 
                         goto exit;
 
                     case '8':
-                        fmt.type  = UTYPE_LEAST_8;
-                        fmt.len  += 3;
+                        fmt.type = UTYPE_LEAST_8;
+                        fmt.len  = 3;
 
                         goto exit;
 
@@ -871,8 +876,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 28:
                 if ('6' == c) {
-                    fmt.type  = UTYPE_LEAST_16;
-                    fmt.len  += 4;
+                    fmt.type = UTYPE_LEAST_16;
+                    fmt.len  = 4;
                 }
 
                 goto exit;
@@ -883,8 +888,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 29:
                 if ('2' == c) {
-                    fmt.type  = UTYPE_LEAST_32;
-                    fmt.len  += 4;
+                    fmt.type = UTYPE_LEAST_32;
+                    fmt.len  = 4;
                 }
 
                 goto exit;
@@ -895,8 +900,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 30:
                 if ('4' == c) {
-                    fmt.type  = UTYPE_LEAST_64;
-                    fmt.len  += 4;
+                    fmt.type = UTYPE_LEAST_64;
+                    fmt.len  = 4;
                 }
 
                 goto exit;
@@ -914,8 +919,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
             case 31:
                 switch (c) {
                     case '8':
-                        fmt.type  = UTYPE_FAST_8;
-                        fmt.len  += 3;
+                        fmt.type = UTYPE_FAST_8;
+                        fmt.len  = 3;
 
                         goto exit;
 
@@ -947,8 +952,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 32:
                 if ('6' == c) {
-                    fmt.type  = UTYPE_FAST_16;
-                    fmt.len  += 4;
+                    fmt.type = UTYPE_FAST_16;
+                    fmt.len  = 4;
                 }
 
                 goto exit;
@@ -965,8 +970,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 33:
                 if ('2' == c) {
-                    fmt.type  = UTYPE_FAST_32;
-                    fmt.len  += 4;
+                    fmt.type = UTYPE_FAST_32;
+                    fmt.len  = 4;
                 }
 
                 goto exit;
@@ -983,8 +988,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 34:
                 if ('4' == c) {
-                    fmt.type  = UTYPE_FAST_64;
-                    fmt.len  += 4;
+                    fmt.type = UTYPE_FAST_64;
+                    fmt.len  = 4;
                 }
 
                 goto exit;
@@ -996,20 +1001,20 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
             case 35:
                 switch (c) {
                     case 'l':
-                        fmt.type  = UTYPE_LLINT;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_LLINT;
+                        fmt.len  = 2;
 
                         goto exit;
 
                     case 'd':
-                        fmt.type  = UTYPE_LDOUBLE;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_LDOUBLE;
+                        fmt.len  = 2;
 
                         goto exit;
 
                     case '8':
-                        fmt.type  = UTYPE_LEAST_8;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_LEAST_8;
+                        fmt.len  = 2;
 
                         goto exit;
 
@@ -1035,8 +1040,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 36:
                 if ('6' == c) {
-                    fmt.type  = UTYPE_LEAST_16;
-                    fmt.len  += 3;
+                    fmt.type = UTYPE_LEAST_16;
+                    fmt.len  = 3;
                 }
 
                 goto exit;
@@ -1047,8 +1052,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 37:
                 if ('2' == c) {
-                    fmt.type  = UTYPE_LEAST_32;
-                    fmt.len  += 3;
+                    fmt.type = UTYPE_LEAST_32;
+                    fmt.len  = 3;
                 }
 
                 goto exit;
@@ -1059,8 +1064,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 38:
                 if ('4' == c) {
-                    fmt.type  = UTYPE_LEAST_64;
-                    fmt.len  += 3;
+                    fmt.type = UTYPE_LEAST_64;
+                    fmt.len  = 3;
                 }
 
                 goto exit;
@@ -1072,8 +1077,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
             case 39:
                 switch (c) {
                     case 'c':
-                        fmt.type  = UTYPE_SCHAR;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_SCHAR;
+                        fmt.len  = 2;
 
                         goto exit;
 
@@ -1091,8 +1096,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 40:
                 if ('2' == c) {
-                    fmt.type  = UTYPE_US32;
-                    fmt.len  += 3;
+                    fmt.type = UTYPE_US32;
+                    fmt.len  = 3;
                 }
 
                 goto exit;
@@ -1104,8 +1109,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
             case 41:
                 switch (c) {
                     case '8':
-                        fmt.type  = UTYPE_UZ8;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_UZ8;
+                        fmt.len  = 2;
 
                         goto exit;
 
@@ -1127,8 +1132,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 42:
                 if ('6' == c) {
-                    fmt.type  = UTYPE_UZ16;
-                    fmt.len  += 3;
+                    fmt.type = UTYPE_UZ16;
+                    fmt.len  = 3;
                 }
 
                 goto exit;
@@ -1139,8 +1144,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 43:
                 if ('2' == c) {
-                    fmt.type  = UTYPE_UZ32;
-                    fmt.len  += 3;
+                    fmt.type = UTYPE_UZ32;
+                    fmt.len  = 3;
                 }
 
                 goto exit;
@@ -1152,8 +1157,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
             case 44:
                 switch (c) {
                     case '8':
-                        fmt.type  = UTYPE_INT_8;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_INT_8;
+                        fmt.len  = 2;
 
                         goto exit;
 
@@ -1179,8 +1184,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 45:
                 if ('6' == c) {
-                    fmt.type  = UTYPE_INT_16;
-                    fmt.len  += 3;
+                    fmt.type = UTYPE_INT_16;
+                    fmt.len  = 3;
                 }
 
                 goto exit;
@@ -1191,8 +1196,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 46:
                 if ('2' == c) {
-                    fmt.type  = UTYPE_INT_32;
-                    fmt.len  += 3;
+                    fmt.type = UTYPE_INT_32;
+                    fmt.len  = 3;
                 }
 
                 goto exit;
@@ -1203,8 +1208,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 47:
                 if ('4' == c) {
-                    fmt.type  = UTYPE_INT_64;
-                    fmt.len  += 3;
+                    fmt.type = UTYPE_INT_64;
+                    fmt.len  = 3;
                 }
 
                 goto exit;
@@ -1216,22 +1221,22 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
             case 48:
                 switch (c) {
                     case 's':
-                        fmt.type  = UTYPE_USINT;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_USINT;
+                        fmt.len  = 2;
 
                         goto exit;
 
                     case 'l':
-                        fmt.type  = UTYPE_ULINT;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_ULINT;
+                        fmt.len  = 2;
 
                         s = 49;
 
                         continue;
 
                     case '8':
-                        fmt.type  = UTYPE_UINT_8;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_UINT_8;
+                        fmt.len  = 2;
 
                         goto exit;
 
@@ -1252,20 +1257,20 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
                         continue;
 
                     case 'm':
-                        fmt.type  = UTYPE_UMAX;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_UMAX;
+                        fmt.len  = 2;
 
                         goto exit;
 
                     case 'p':
-                        fmt.type  = UTYPE_UPTR;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_UPTR;
+                        fmt.len  = 2;
 
                         goto exit;
 
                     case 'c':
-                        fmt.type  = UTYPE_UCHAR;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_UCHAR;
+                        fmt.len  = 2;
 
                     default:
                         goto exit;
@@ -1278,14 +1283,14 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
             case 49:
                 switch (c) {
                     case 'l':
-                        fmt.type  = UTYPE_ULLINT;
-                        fmt.len  += 3;
+                        fmt.type = UTYPE_ULLINT;
+                        fmt.len  = 3;
 
                         goto exit;
 
                     case '8':
-                        fmt.type  = UTYPE_ULEAST_8;
-                        fmt.len  += 3;
+                        fmt.type = UTYPE_ULEAST_8;
+                        fmt.len  = 3;
 
                         goto exit;
 
@@ -1311,8 +1316,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 50:
                 if ('6' == c) {
-                    fmt.type  = UTYPE_ULEAST_16;
-                    fmt.len  += 4;
+                    fmt.type = UTYPE_ULEAST_16;
+                    fmt.len  = 4;
                 }
 
                 goto exit;
@@ -1323,8 +1328,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 51:
                 if ('2' == c) {
-                    fmt.type  = UTYPE_ULEAST_32;
-                    fmt.len  += 4;
+                    fmt.type = UTYPE_ULEAST_32;
+                    fmt.len  = 4;
                 }
 
                 goto exit;
@@ -1335,8 +1340,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 52:
                 if ('4' == c) {
-                    fmt.type  = UTYPE_ULEAST_64;
-                    fmt.len  += 4;
+                    fmt.type = UTYPE_ULEAST_64;
+                    fmt.len  = 4;
                 }
 
                 goto exit;
@@ -1351,8 +1356,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 53:
                 if ('6' == c) {
-                    fmt.type  = UTYPE_UINT_16;
-                    fmt.len  += 3;
+                    fmt.type = UTYPE_UINT_16;
+                    fmt.len  = 3;
                 }
 
                 goto exit;
@@ -1363,8 +1368,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 54:
                 if ('2' == c) {
-                    fmt.type  = UTYPE_UINT_32;
-                    fmt.len  += 3;
+                    fmt.type = UTYPE_UINT_32;
+                    fmt.len  = 3;
                 }
 
                 goto exit;
@@ -1375,8 +1380,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 55:
                 if ('4' == c) {
-                    fmt.type  = UTYPE_UINT_64;
-                    fmt.len  += 3;
+                    fmt.type = UTYPE_UINT_64;
+                    fmt.len  = 3;
                 }
 
                 goto exit;
@@ -1389,8 +1394,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
             case 56:
                 switch (c) {
                     case '8':
-                        fmt.type  = UTYPE_UFAST_8;
-                        fmt.len  += 3;
+                        fmt.type = UTYPE_UFAST_8;
+                        fmt.len  = 3;
 
                         goto exit;
 
@@ -1416,8 +1421,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 57:
                 if ('6' == c) {
-                    fmt.type  = UTYPE_UFAST_16;
-                    fmt.len  += 4;
+                    fmt.type = UTYPE_UFAST_16;
+                    fmt.len  = 4;
                 }
 
                 goto exit;
@@ -1428,8 +1433,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 58:
                 if ('2' == c) {
-                    fmt.type  = UTYPE_UFAST_32;
-                    fmt.len  += 4;
+                    fmt.type = UTYPE_UFAST_32;
+                    fmt.len  = 4;
                 }
 
 
@@ -1441,8 +1446,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 59:
                 if ('4' == c) {
-                    fmt.type  = UTYPE_UFAST_64;
-                    fmt.len  += 4;
+                    fmt.type = UTYPE_UFAST_64;
+                    fmt.len  = 4;
                 }
 
                 goto exit;
@@ -1454,8 +1459,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
             case 60:
                 switch (c) {
                     case '8':
-                        fmt.type  = UTYPE_UC8;
-                        fmt.len  += 2;
+                        fmt.type = UTYPE_UC8;
+                        fmt.len  = 2;
 
                         goto exit;
 
@@ -1481,8 +1486,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 61:
                 if ('6' == c) {
-                    fmt.type  = UTYPE_UC16;
-                    fmt.len  += 3;
+                    fmt.type = UTYPE_UC16;
+                    fmt.len  = 3;
                 }
 
                 goto exit;
@@ -1493,8 +1498,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 62:
                 if ('2' == c) {
-                    fmt.type  = UTYPE_UC32;
-                    fmt.len  += 3;
+                    fmt.type = UTYPE_UC32;
+                    fmt.len  = 3;
                 }
 
                 goto exit;
@@ -1517,8 +1522,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 64:
                 if ('2' == c) {
-                    fmt.type  = UTYPE_UCV32;
-                    fmt.len  += 4;
+                    fmt.type = UTYPE_UCV32;
+                    fmt.len  = 4;
                 }
 
                 goto exit;
@@ -1541,8 +1546,8 @@ struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {
 
             case 66:
                 if ('2' == c) {
-                    fmt.type  = UTYPE_UV32;
-                    fmt.len  += 3;
+                    fmt.type = UTYPE_UV32;
+                    fmt.len  = 3;
                 }
 
             goto exit;
@@ -1567,6 +1572,9 @@ exit:
         case UTGROUP_BOOL:
             fmt.b = bfmt;
     }
+
+    if (fmt.type != UTYPE_UNKNOWN)
+        fmt.len += prefix_len;
 
     return fmt;
 }

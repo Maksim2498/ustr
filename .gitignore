@@ -1,5 +1,6 @@
 .vscode
 /install
 /build
+/CMakeFiles
 /test/manual
 .DS_Store

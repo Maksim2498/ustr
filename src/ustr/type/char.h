@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include <ustr/config.h>
+
 enum {
     UBOM_LITTLE_ENDIAN = 0xFFFE,
     UBOM_BIG_ENDIAN    = 0xFEFF,
@@ -14,6 +16,10 @@ enum {
 typedef uint32_t uc32_t;
 typedef uint16_t uc16_t;
 typedef uint8_t  uc8_t;
+
+typedef uarg_uint32_t uarg_uc32_t;
+typedef uarg_uint16_t uarg_uc16_t;
+typedef uarg_uint8_t  uarg_uc8_t;
 
 typedef unsigned (*uc8_case_len_func_t)(const uc8_t *);
 

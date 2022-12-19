@@ -23,6 +23,11 @@
 //            |
 //            +- show plus
 
+enum {
+    UIFMT_GROUP_SIZE_UNUSED = 0,
+    UIFMT_PRECISON_UNUSED   = 0
+};
+
 struct uifmt {
     ucv32_t        group_separator;
     size_t         leading_zeroes_limit;

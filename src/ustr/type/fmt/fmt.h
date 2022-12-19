@@ -1,6 +1,9 @@
 #ifndef USTR_TYPE_FMT_FMT_H
 #define USTR_TYPE_FMT_FMT_H
 
+#include <stdarg.h>
+#include <stddef.h>
+
 #include "case.h"
 #include "radix.h"
 #include "type.h"
@@ -36,5 +39,7 @@ struct ufmt {
         struct ubgfmt b;
     };
 };
+
+typedef size_t (*uz_from_t)(void *, unsigned n, const struct ufmt *fmt, va_list *args);
 
 #endif
