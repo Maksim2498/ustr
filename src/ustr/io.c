@@ -375,19 +375,7 @@ size_t ufprintln_uz16(FILE *file, const uc16_t *cstr) {
 }
 
 size_t ufprint_uz16(FILE *file, const uc16_t *cstr) {
-	assert(cstr);
-
-	size_t written = 0;
-
-	for (; cstr[written]; written += uc16_32_len(cstr[written])) {
-		uc8_t    c8[4];
-		unsigned c8_len = uc8_from_uc16(c8, cstr + written);
-
-		if (!fwrite(c8, c8_len, 1, file))
-			break;
-	}
-
-	return written;
+	return ufprint_uz16_n(file, cstr, uz16_len(cstr));
 }
 
 size_t ufprintln_uz16_n(FILE *file, const uc16_t *cstr, size_t n) {
@@ -415,14 +403,7 @@ size_t ufprintln_uz8(FILE *file, const uc8_t *cstr) {
 }
 
 size_t ufprint_uz8(FILE *file, const uc8_t *cstr) {
-	assert(cstr);
-
-	size_t written = 0;
-
-	while (*cstr && fputc(*cstr++, file) != EOF) 
-		++written;
-
-	return written;
+	return ufprint_uz8_n(file, cstr, uz8_len(cstr));
 }
 
 size_t ufprintln_uz8_n(FILE *file, const uc8_t *cstr, size_t n) {
