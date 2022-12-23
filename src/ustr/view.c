@@ -535,7 +535,7 @@ size_t uv32_add_len(uv32_t *view, ptrdiff_t delta) {
 }
 
 void uv32_set_len(uv32_t *view, size_t len) {
-    assert(uv32_valid_p(view));
+    assert(uv32_valid_p(view) && (!len || view->chars));
     view->len = len;
 }
 
@@ -1001,7 +1001,11 @@ uc32_t *uv32_chars(uv32_t view) {
 
 void uv32_set_chars(uv32_t *view, uc32_t *chars) {
     assert(uv32_valid_p(view) && chars);
+
     view->chars = chars;
+
+    if (!chars)
+        view->len = 0;
 }
 
 bool uv32_valid_p(const uv32_t *view) {
