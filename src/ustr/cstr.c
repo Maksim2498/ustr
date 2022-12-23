@@ -454,7 +454,9 @@ size_t uz32_from_fmt_n_v(uc32_t *cstr, const uc32_t *fmt_cstr, size_t n, va_list
                 const uc8_t *val = va_arg(*args, const uc8_t *);
 
                 if (!cstr) {
-                    len += fmt.use_precision ? uz8_n_32_len(val, precision) : uz8_32_len(val);
+                    len += fmt.use_precision ? uz8_n_32_len(val, precision) 
+                                             : uz8_32_len(val);
+
                     break;
                 }
 
@@ -468,7 +470,9 @@ size_t uz32_from_fmt_n_v(uc32_t *cstr, const uc32_t *fmt_cstr, size_t n, va_list
                 const uc16_t *val = va_arg(*args, const uc16_t *);
 
                 if (!cstr) {
-                    len += fmt.use_precision ? uz16_n_32_len(val, precision) : uz16_32_len(val);
+                    len += fmt.use_precision ? uz16_n_32_len(val, precision) 
+                                             : uz16_32_len(val);
+
                     break;
                 }
 
@@ -486,7 +490,7 @@ size_t uz32_from_fmt_n_v(uc32_t *cstr, const uc32_t *fmt_cstr, size_t n, va_list
                     break;
                 }
 
-                len += fmt.use_precision ? uz32_copy_n(cstr + len , val, precision)
+                len += fmt.use_precision ? uz32_copy_n(cstr + len, val, precision)
                                          : uz32_copy(cstr + len, val);
 
                 break;
@@ -615,9 +619,558 @@ size_t uz16_from_fmt_n(uc16_t *cstr, const uc16_t *fmt, size_t n, ...) {
     return res;
 }
 
-size_t uz16_from_fmt_n_v(uc16_t *cstr, const uc16_t *fmt, size_t n, va_list *args) {
-    // TODO
-    return 0;
+size_t uz16_from_fmt_n_v(uc16_t *cstr, const uc16_t *fmt_cstr, size_t n, va_list *args) {
+    assert(fmt_cstr && args);
+
+    size_t len = 0;
+
+    for (size_t i = 0; i < n;) {
+        uc16_t c = fmt_cstr[i++];
+
+        if (U'%' != c || i == n) {
+            if (cstr)
+                cstr[len++] = c;
+            else
+                ++len;
+
+            continue;
+        }
+
+        struct ufmt fmt = ufmt_from_uz16_n(fmt_cstr + i, n - i);
+
+        struct uifmt ifmt;
+        struct uffmt ffmt;
+        size_t       precision;
+
+        switch (utype_group(fmt.type)) {
+            case UTGROUP_INT:
+                ifmt = uifmt_from_ufmt(&fmt, args);
+                break;
+
+            case UTGROUP_FLOAT:
+                ffmt = uffmt_from_ufmt(&fmt, args);
+                break;
+
+            case UTGROUP_CHAR:
+            case UTGROUP_STR:
+                if (fmt.use_precision)
+                    precision = fmt.arg_precision ? va_arg(*args, size_t) : fmt.precision;
+        }
+
+        switch (fmt.type) {
+            case UTYPE_FLOAT: {
+                float val = va_arg(*args, double);
+                len += uz16_from_float_fmt(cstr ? cstr + len : NULL, val, &ffmt); 
+                break;
+            }
+
+            case UTYPE_DOUBLE: {
+                double val = va_arg(*args, double);
+                len += uz16_from_float_fmt(cstr ? cstr + len : NULL, val, &ffmt); 
+                break;
+            }
+
+            case UTYPE_LDOUBLE: {
+                long double val = va_arg(*args, long double);
+                len += uz16_from_float_fmt(cstr ? cstr + len : NULL, val, &ffmt); 
+                break;
+            }
+
+            case UTYPE_SINT: {
+                short val = va_arg(*args, int);
+                len += uz16_from_int_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_USINT: {
+                unsigned short val = va_arg(*args, unsigned);
+                len += uz16_from_uint_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_INT: {
+                int val = va_arg(*args, int);
+                len += uz16_from_int_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_UINT: {
+                unsigned val = va_arg(*args, unsigned);
+                len += uz16_from_uint_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_LINT: {
+                long val = va_arg(*args, long);
+                len += uz16_from_int_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_ULINT: {
+                unsigned long val = va_arg(*args, unsigned long);
+                len += uz16_from_uint_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_LLINT: {
+                long long val = va_arg(*args, long long);
+                len += uz16_from_int_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_ULLINT: {
+                unsigned long long val = va_arg(*args, unsigned long long);
+                len += uz16_from_uint_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_INT_8: {
+                int8_t val = va_arg(*args, uarg_int8_t);
+                len += uz16_from_int_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_UINT_8: {
+                uint8_t val = va_arg(*args, uarg_uint8_t);
+                len += uz16_from_uint_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_INT_16: {
+                int16_t val = va_arg(*args, uarg_int16_t);
+                len += uz16_from_int_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_UINT_16: {
+                uint16_t val = va_arg(*args, uarg_uint16_t);
+                len += uz16_from_uint_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_INT_32: {
+                int32_t val = va_arg(*args, uarg_int32_t);
+                len += uz16_from_int_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_UINT_32: {
+                uint32_t val = va_arg(*args, uarg_uint32_t);
+                len += uz16_from_uint_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_INT_64: {
+                int64_t val = va_arg(*args, uarg_int64_t);
+                len += uz16_from_int_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_UINT_64: {
+                uint64_t val = va_arg(*args, uarg_uint64_t);
+                len += uz16_from_uint_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_FAST_8: {
+                int_fast8_t val = va_arg(*args, uarg_int_fast8_t);
+                len += uz16_from_int_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_UFAST_8: {
+                uint_fast8_t val = va_arg(*args, uarg_uint_fast8_t);
+                len += uz16_from_uint_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_FAST_16: {
+                int_fast16_t val = va_arg(*args, uarg_int_fast16_t);
+                len += uz16_from_int_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_UFAST_16: {
+                uint_fast16_t val = va_arg(*args, uarg_uint_fast16_t);
+                len += uz16_from_uint_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_FAST_32: {
+                int_fast32_t val = va_arg(*args, uarg_int_fast32_t);
+                len += uz16_from_int_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_UFAST_32: {
+                uint_fast32_t val = va_arg(*args, uarg_uint_fast32_t);
+                len += uz16_from_uint_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_FAST_64: {
+                int_fast64_t val = va_arg(*args, uarg_int_fast64_t);
+                len += uz16_from_int_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_UFAST_64: {
+                uint_fast64_t val = va_arg(*args, uarg_uint_fast64_t);
+                len += uz16_from_uint_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_LEAST_8: {
+                int_least8_t val = va_arg(*args, uarg_int_least8_t);
+                len += uz16_from_int_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_ULEAST_8: {
+                uint_least8_t val = va_arg(*args, uarg_uint_least8_t);
+                len += uz16_from_uint_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_LEAST_16: {
+                int_least16_t val = va_arg(*args, uarg_int_least16_t);
+                len += uz16_from_int_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_ULEAST_16: {
+                uint_least16_t val = va_arg(*args, uarg_uint_least16_t);
+                len += uz16_from_uint_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_LEAST_32: {
+                int_least32_t val = va_arg(*args, uarg_int_least32_t);
+                len += uz16_from_int_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_ULEAST_32: {
+                uint_least32_t val = va_arg(*args, uarg_uint_least32_t);
+                len += uz16_from_uint_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_LEAST_64: {
+                int_least64_t val = va_arg(*args, uarg_int_least64_t);
+                len += uz16_from_int_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_ULEAST_64: {
+                uint_least64_t val = va_arg(*args, uarg_uint_least64_t);
+                len += uz16_from_uint_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_MAX: {
+                intmax_t val = va_arg(*args, intmax_t);
+                len += uz16_from_int_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_UMAX: {
+                uintmax_t val = va_arg(*args, uintmax_t);
+                len += uz16_from_uint_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_PTR: {
+                intptr_t val = va_arg(*args, intptr_t);
+                len += uz16_from_int_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_UPTR: {
+                uintptr_t val = va_arg(*args, uintptr_t);
+                len += uz16_from_uint_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_SIZE: {
+                size_t val = va_arg(*args, size_t);
+                len += uz16_from_uint_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_PTRDIFF: {
+                ptrdiff_t val = va_arg(*args, ptrdiff_t);
+                len += uz16_from_int_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_CHAR: {
+                char val = va_arg(*args, int);
+
+                if (!cstr) {
+                    len += fmt.use_precision ? precision : 1;
+                    break;
+                }
+
+                if (!fmt.use_precision) {
+                    cstr[len++] = val;
+                    break;
+                }
+
+                while (precision--)
+                    cstr[len++] = val;
+
+                break;
+			}
+
+            case UTYPE_SCHAR: {
+                signed char val = va_arg(*args, int);
+                len += uz16_from_int_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_UCHAR: {
+                unsigned char val = va_arg(*args, unsigned);
+                len += uz16_from_uint_fmt(cstr ? cstr + len : NULL, val, &ifmt);
+                break;
+			}
+
+            case UTYPE_CSTR: {
+                const char *val = va_arg(*args, const char *);
+                
+                if (!cstr) {
+                    len += fmt.use_precision ? precision : strlen(val);
+                    break;
+                }
+                
+                if (fmt.use_precision) {
+                    while (precision--)
+                        cstr[len++] = *val++;
+
+                    break;
+                }
+
+                while (*val)
+                    cstr[len++] = *val++;
+                
+                break;
+			}
+
+            case UTYPE_BOOL: {
+                bool val = va_arg(*args, int);
+                len += uz16_from_case_bool(cstr ? cstr + len : NULL, val, fmt.b.char_case);
+                break;
+			}
+
+            case UTYPE_UC8: {
+                uc8_t val = va_arg(*args, uarg_uc8_t);
+
+                if (!cstr) {
+                    len += fmt.use_precision ? precision : 1;
+                    break;
+                }
+
+                if (!fmt.use_precision) {
+                    cstr[len++] = val;
+                    break;
+                }
+
+                while (precision--)
+                    cstr[len++] = val;
+
+                break;
+			}
+
+            case UTYPE_UC16: {
+                uc16_t val = va_arg(*args, uarg_uc16_t);
+
+                if (!cstr) {
+                    len += fmt.use_precision ? precision : 1;
+                    break;
+                }
+
+                if (!fmt.use_precision) {
+                    cstr[len++] = val;
+                    break;
+                }
+
+                while (precision--)
+                    cstr[len++] = val;
+
+                break;
+			}
+
+            case UTYPE_UC32: {
+                uc32_t val = va_arg(*args, uarg_uc32_t);
+
+                uc16_t   c16[2];
+                unsigned c16_len = uc16_from_uc32(c16, val);
+
+                if (!cstr) {
+                    len += c16_len * (fmt.use_precision ? precision : 1);
+                    break;
+                }
+
+                if (c16_len == 2) {
+                    if (!fmt.use_precision) {
+                        cstr[len++] = c16[0];
+                        cstr[len++] = c16[1];
+                        break;
+                    }
+
+                    while (precision--) { 
+                        cstr[len++] = c16[0];
+                        cstr[len++] = c16[1];
+                    }
+
+                    break;
+                }
+
+                if (!fmt.use_precision) {
+                    cstr[len++] = c16[0];
+                    break;
+                }
+
+                while (precision--)
+                    cstr[len++] = c16[0];
+
+                break;
+			}
+
+            case UTYPE_UZ8: {
+                const uc8_t *val = va_arg(*args, const uc8_t *);
+
+                if (!cstr) {
+                    len += fmt.use_precision ? uz8_n_16_len(val, precision) 
+                                             : uz8_16_len(val);
+
+                    break;
+                }
+
+                len += fmt.use_precision ? uz16_from_uz8_n(cstr + len, val, precision) 
+                                         : uz16_from_uz8(cstr + len, val);
+
+                break;
+			}
+
+            case UTYPE_UZ16: {
+                const uc16_t *val = va_arg(*args, const uc16_t *);
+
+                if (!cstr) {
+                    len += fmt.use_precision ? precision 
+                                             : uz16_len(val);
+
+                    break;
+                }
+
+                len += fmt.use_precision ? uz16_copy_n(cstr + len, val, precision)
+                                         : uz16_copy(cstr + len, val);
+
+                break;
+			}
+
+            case UTYPE_UZ32: {
+                const uc32_t *val = va_arg(*args, const uc32_t *);
+
+                if (!cstr) {
+                    len += fmt.use_precision ? uz32_n_16_len(val, precision) 
+                                             : uz32_16_len(val);
+
+                    break;
+                }
+
+                len += fmt.use_precision ? uz16_from_uz32_n(cstr + len, val, precision)
+                                         : uz16_from_uz32(cstr + len, val);
+
+                break;
+			}
+
+            case UTYPE_US32: {
+                const us32_t *val = va_arg(*args, const us32_t *);
+                
+                if (!cstr) {
+                    len += fmt.use_precision ? us32_16_len_to(val, precision)
+                                             : us32_16_len(val);
+
+                    break;
+                }
+
+                if (fmt.use_precision) {
+                    assert(us32_ebounds(val, precision));
+                    len += uz16_from_uz32_n(cstr + len, us32_cchars(val), precision);
+                    break;
+                }
+
+                len += uz16_from_uz32_n(cstr + len, US32_CEXPAND(val));
+                
+                break;
+			}
+
+            case UTYPE_UV32: {
+                uv32_t val = va_arg(*args, uv32_t);
+
+                if (!cstr) {
+                    len += fmt.use_precision ? uv32_16_len_to(val, precision)
+                                             : uv32_16_len(val);
+
+                    break;
+                }
+
+                if (fmt.use_precision) {
+                    assert(uv32_ebounds(val, precision));
+                    len += uz16_from_uz32_n(cstr + len, uv32_cchars(val), precision);
+                    break;
+                }
+
+                len += uz16_from_uz32_n(cstr + len, UV32_CEXPAND(val));
+
+                break;
+			}
+
+            case UTYPE_UCV32: {
+                ucv32_t val = va_arg(*args, ucv32_t);
+
+                if (!cstr) {
+                    len += fmt.use_precision ? ucv32_16_len_to(val, precision)
+                                             : ucv32_16_len(val);
+
+                    break;
+                }
+
+                if (fmt.use_precision) {
+                    assert(ucv32_ebounds(val, precision));
+                    len += uz16_from_uz32_n(cstr + len, ucv32_cchars(val), precision);
+                    break;
+                }
+
+                len += uz16_from_uz32_n(cstr + len, UCV32_CEXPAND(val));
+
+                break;
+			}
+
+            case UTYPE_CUSTOM: {
+                uz_from_t val = va_arg(*args, uz_from_t);
+                len += val(cstr ? cstr + len : NULL, 2, &fmt, args);
+                break;
+			}
+
+            case UTYPE_UNKNOWN: {
+                if (cstr)
+                    cstr[len++] = c;
+                else
+                    ++len;
+
+                continue;
+			}
+
+            default:
+                assert(false);
+        }
+
+        i += fmt.len;
+    }
+
+    return len;
 }
 
 size_t uz8_from_fmt(uc8_t *cstr, const uc8_t *fmt, ...) {
@@ -1411,9 +1964,11 @@ size_t uz16_n_8_len(const uc16_t *cstr, size_t n) {
 
     size_t len = 0;
 
-    while (n--) {
-        len  += uc16_8_len(*cstr);
-        cstr += uc16_len(*cstr);
+    for (size_t i = 0; i < n;) {
+        uc16_t c = cstr[i];
+
+        i   += uc16_len(c);
+        len += uc16_8_len(c);
     }
 
     return len;
@@ -1437,8 +1992,8 @@ size_t uz16_n_32_len(const uc16_t *cstr, size_t n) {
 
     size_t len = 0;
 
-    while (n--) {
-        cstr +=  uc16_len(*cstr);
+    for (size_t i = 0; i < n;) {
+        i += uc16_len(cstr[i]);
         ++len;
     }
 
@@ -1501,9 +2056,11 @@ size_t uz8_n_16_len(const uc8_t *cstr, size_t n) {
 
     size_t len = 0;
 
-    while (n--) {
-        len  += uc8_16_len(*cstr);
-        cstr += uc8_len(*cstr);
+    for (size_t i = 0; i < n;) {
+        uc8_t c = cstr[i];
+
+        i   += uc8_len(c);
+        len += uc8_16_len(c);
     }
 
     return len;
@@ -1518,8 +2075,8 @@ size_t uz8_n_32_len(const uc8_t *cstr, size_t n) {
 
     size_t len = 0;
 
-    while (n--) {
-        cstr += uc8_len(*cstr);
+    for (size_t i = 0; i < n;) {
+        i += uc8_len(cstr[i]);
         ++len;
     }
 
@@ -1530,21 +2087,21 @@ size_t uz32_len(const uc32_t *cstr) {
     assert(cstr);
     const uc32_t *init_cstr = cstr;
     while (*cstr++);
-    return cstr - init_cstr;
+    return cstr - init_cstr - 1;
 }
 
 size_t uz16_len(const uc16_t *cstr) {
     assert(cstr);
     const uc16_t *init_cstr = cstr;
     while (*cstr++);
-    return cstr - init_cstr;
+    return cstr - init_cstr - 1;
 }
 
 size_t uz8_len(const uc8_t *cstr) {
     assert(cstr);
     const uc8_t *init_cstr = cstr;
     while (*cstr++);
-    return cstr - init_cstr;
+    return cstr - init_cstr - 1;
 }
 
 #define USTR_RETURN_CMP_(T, lhs, rhs) \
