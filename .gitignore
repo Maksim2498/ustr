@@ -3,4 +3,5 @@
 /build
 /CMakeFiles
 /test/manual
+/CMakeCache.txt
 .DS_Store
