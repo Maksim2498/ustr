@@ -25,8 +25,8 @@
 us32_t us32_mk(void);
 us32_t us32_from(us32_t *str);
 us32_t us32_from_e(us32_t *str, bool *error);
-us32_t us32_from_us32_range(us32_t *str, size_t from, size_t len);
-us32_t us32_from_us32_range_e(us32_t *str, size_t from, size_t len, bool *error);
+us32_t us32_from_range(us32_t *str, size_t from, size_t len);
+us32_t us32_from_range_e(us32_t *str, size_t from, size_t len, bool *error);
 us32_t us32_from_uv32(uv32_t view);
 us32_t us32_from_uv32_e(uv32_t view, bool *error);
 us32_t us32_from_uv32_range(uv32_t view, size_t from, size_t len);
@@ -70,10 +70,25 @@ void us32_free(us32_t *str);
 
 // Cross-UTF Len
 
+size_t us32_n_len_from(const us32_t *str, unsigned n, size_t from);
+size_t us32_32_len_from(const us32_t *str, size_t from);
+size_t us32_16_len_from(const us32_t *str, size_t from);
+size_t us32_8_len_from(const us32_t *str, size_t from);
+
+size_t us32_n_len_to(const us32_t *str, unsigned n, size_t to);
+size_t us32_32_len_to(const us32_t *str, size_t to);
+size_t us32_16_len_to(const us32_t *str, size_t to);
+size_t us32_8_len_to(const us32_t *str, size_t to);
+
+size_t us32_n_len_range(const us32_t *str, unsigned n, size_t from, size_t len);
+size_t us32_32_len_range(const us32_t *str, size_t from, size_t len);
+size_t us32_16_len_range(const us32_t *str, size_t from, size_t len);
+size_t us32_8_len_range(const us32_t *str, size_t from, size_t len);
+
 size_t us32_n_len(const us32_t *str, unsigned n);
 size_t us32_32_len(const us32_t *str);
 size_t us32_16_len(const us32_t *str);
-size_t us32_z8_len(const us32_t *str);
+size_t us32_8_len(const us32_t *str);
 
 // Prepend
 
@@ -290,11 +305,15 @@ const uc32_t *us32_coffset(const us32_t *str, size_t index);
 
 bool us32_bounds(const us32_t *str, size_t index);
 bool us32_ebounds(const us32_t *str, size_t index);
+bool us32_bounds_range(const us32_t *str, size_t from, size_t len);
+bool us32_ebounds_range(const us32_t *str, size_t from, size_t len);
+
 size_t us32_len(const us32_t *str);
 size_t us32_add_len(us32_t *str, ptrdiff_t delta);
 size_t us32_add_len_e(us32_t *str, ptrdiff_t delta, bool *error);
 size_t us32_set_len(us32_t *str, size_t len);
 size_t us32_set_len_e(us32_t *str, size_t len, bool *error);
+
 bool us32_empty(const us32_t *str);
 void us32_clear(us32_t *str);
 

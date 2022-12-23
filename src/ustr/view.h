@@ -24,13 +24,28 @@
     }
 
 uv32_t uv32_mk(void);
+uv32_t uv32_from_range(uv32_t view, size_t from, size_t len);
 uv32_t uv32_from_us32(us32_t *str);
 uv32_t uv32_from_us32_range(us32_t *str, size_t from, size_t len);
-uv32_t uv32_from_uv32_range(uv32_t view, size_t from, size_t len);
 uv32_t uv32_from_uz32(uc32_t *cstr);
 uv32_t uv32_from_uz32_n(uc32_t *cstr, size_t n);
 
 // Cross-UTF Len
+
+size_t uv32_n_len_from(uv32_t view, unsigned n, size_t from);
+size_t uv32_32_len_from(uv32_t view, size_t from);
+size_t uv32_16_len_from(uv32_t view, size_t from);
+size_t uv32_8_len_from(uv32_t view, size_t from);
+
+size_t uv32_n_len_to(uv32_t view, unsigned n, size_t to);
+size_t uv32_32_len_to(uv32_t view, size_t to);
+size_t uv32_16_len_to(uv32_t view, size_t to);
+size_t uv32_8_len_to(uv32_t view, size_t to);
+
+size_t uv32_n_len_range(uv32_t view, unsigned n, size_t from, size_t len);
+size_t uv32_32_len_range(uv32_t view, size_t from, size_t len);
+size_t uv32_16_len_range(uv32_t view, size_t from, size_t len);
+size_t uv32_8_len_range(uv32_t view, size_t from, size_t len);
 
 size_t uv32_n_len(uv32_t view, unsigned n);
 size_t uv32_32_len(uv32_t view);
@@ -141,9 +156,13 @@ const uc32_t *uv32_coffset(uv32_t view, size_t index);
 
 bool uv32_bounds(uv32_t view, size_t index);
 bool uv32_ebounds(uv32_t view, size_t index);
+bool uv32_bounds_range(uv32_t view, size_t from, size_t len);
+bool uv32_ebounds_range(uv32_t view, size_t from, size_t len);
+
 size_t uv32_len(uv32_t view);
 size_t uv32_len(uv32_t view);
 size_t uv32_add_len(uv32_t *view, ptrdiff_t delta);
+
 bool uv32_empty(uv32_t view);
 
 // Split
@@ -308,6 +327,7 @@ void uv32_set_chars(uv32_t *view, uc32_t *chars);
 
 // Valid
 
+bool uv32_valid_p(const uv32_t *view);
 bool uv32_valid(uv32_t view);
 
 #endif
