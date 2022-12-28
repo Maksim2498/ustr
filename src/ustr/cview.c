@@ -15,6 +15,10 @@ ucv32_t ucv32_mk(void) {
 }
 
 ucv32_t ucv32_from_range(ucv32_t view, size_t from, size_t len) {
+    return ucv32_from_ucv32_range(view, from, len);
+}
+
+ucv32_t ucv32_from_ucv32_range(ucv32_t view, size_t from, size_t len) {
     assert(ucv32_ebounds_range(view, from, len));
     
     return (ucv32_t) {
@@ -216,10 +220,18 @@ uc32_t ucv32_at(ucv32_t view, size_t index) {
 }
 
 int ucv32_cmp(ucv32_t lhs, ucv32_t rhs) {
-    return uz32_n_cmp_n(UCV32_CEXPAND(lhs), UCV32_CEXPAND(rhs));
+    return ucv32_cmp_ucv32(lhs, rhs);
 }
 
 int ucv32_cmp_n(ucv32_t lhs, ucv32_t rhs, size_t n) {
+    return ucv32_cmp_ucv32_n(lhs, rhs, n);
+}
+
+int ucv32_cmp_ucv32(ucv32_t lhs, ucv32_t rhs) {
+    return uz32_n_cmp_n(UCV32_CEXPAND(lhs), UCV32_CEXPAND(rhs));
+}
+
+int ucv32_cmp_ucv32_n(ucv32_t lhs, ucv32_t rhs, size_t n) {
     assert(ucv32_ebounds(lhs, n) && ucv32_ebounds(rhs, n));
     return uz32_n_cmp_n(ucv32_cchars(lhs), n, ucv32_cchars(rhs), n);
 }
@@ -251,10 +263,18 @@ int ucv32_cmp_uz32_n(ucv32_t lhs, const uc32_t *rhs, size_t n) {
 }
 
 ptrdiff_t ucv32_pos(ucv32_t view, ucv32_t another) {
-    return uz32_n_pos_n(UCV32_CEXPAND(view), UCV32_CEXPAND(another));
+    return ucv32_ucv32_pos(view, another);
 }
 
 ptrdiff_t ucv32_pos_from(ucv32_t view, ucv32_t another, size_t from) {
+    return ucv32_ucv32_pos_from(view, another, from);
+}
+
+ptrdiff_t ucv32_ucv32_pos(ucv32_t view, ucv32_t another) {
+    return uz32_n_pos_n(UCV32_CEXPAND(view), UCV32_CEXPAND(another));
+}
+
+ptrdiff_t ucv32_ucv32_pos_from(ucv32_t view, ucv32_t another, size_t from) {
     assert(ucv32_ebounds(view, from));
     ptrdiff_t pos = uz32_n_pos_n(ucv32_cchars(view) + from, view.len - from, UCV32_CEXPAND(another));
     return pos < 0 ? pos : pos + from;
@@ -311,10 +331,18 @@ ptrdiff_t ucv32_us32_pos_from(ucv32_t view, const us32_t *str, size_t from) {
 }
 
 ptrdiff_t ucv32_pos_r(ucv32_t view, ucv32_t another) {
-    return uz32_n_pos_n_r(UCV32_CEXPAND(view), UCV32_CEXPAND(another), view.len - 1);
+    return ucv32_ucv32_pos_r(view, another);
 }
 
 ptrdiff_t ucv32_pos_from_r(ucv32_t view, ucv32_t another, size_t from) {
+    return ucv32_ucv32_pos_from_r(view, another, from);
+}
+
+ptrdiff_t ucv32_ucv32_pos_r(ucv32_t view, ucv32_t another) {
+    return uz32_n_pos_n_r(UCV32_CEXPAND(view), UCV32_CEXPAND(another), view.len - 1);
+}
+
+ptrdiff_t ucv32_ucv32_pos_from_r(ucv32_t view, ucv32_t another, size_t from) {
     assert(ucv32_ebounds(view, from));
     return uz32_n_pos_n_r(UCV32_CEXPAND(view), UCV32_CEXPAND(another), from);
 }
@@ -419,15 +447,27 @@ bool ucv32_empty(ucv32_t view) {
     return !view.len;
 }
 
-size_t ucv32_new_csplit(ucv32_t view, uc32_t c, ucv32_t **array) {
+size_t ucv32_new_csplit(ucv32_t view, ucv32_t another, ucv32_t **array) {
+    return ucv32_new_csplit_ucv32(view, another, array);
+}
+
+size_t ucv32_new_csplit_e(ucv32_t view, ucv32_t another, ucv32_t **array, bool *error) {
+    return ucv32_new_csplit_ucv32_e(view, another, array, error);
+}
+
+size_t ucv32_csplit(ucv32_t view, ucv32_t another, ucv32_t *array, size_t array_len) {
+    return ucv32_csplit_ucv32(view, another, array, array_len);
+}
+
+size_t ucv32_new_csplit_uc32(ucv32_t view, uc32_t c, ucv32_t **array) {
     return uz32_n_new_csplit(UCV32_CEXPAND(view), c, array);
 }
 
-size_t ucv32_new_csplit_e(ucv32_t view, uc32_t c, ucv32_t **array, bool *error) {
+size_t ucv32_new_csplit_uc32_e(ucv32_t view, uc32_t c, ucv32_t **array, bool *error) {
     return uz32_n_new_csplit_e(UCV32_CEXPAND(view), c, array, error);
 }
 
-size_t ucv32_csplit(ucv32_t view, uc32_t c, ucv32_t *array, size_t array_len) {
+size_t ucv32_csplit_uc32(ucv32_t view, uc32_t c, ucv32_t *array, size_t array_len) {
     return uz32_n_csplit(UCV32_CEXPAND(view), c, array, array_len);
 }
 
