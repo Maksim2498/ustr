@@ -85,35 +85,35 @@ int ucv32_cmp_uz32_n(ucv32_t lhs, const uc32_t *rhs, size_t n);
 
 ptrdiff_t ucv32_pos(ucv32_t view, ucv32_t another);
 ptrdiff_t ucv32_pos_from(ucv32_t view, ucv32_t another, size_t from);
-ptrdiff_t ucv32_ucv32_pos(ucv32_t view, ucv32_t another);
-ptrdiff_t ucv32_ucv32_pos_from(ucv32_t view, ucv32_t another, size_t from);
-ptrdiff_t ucv32_uc32_pos(ucv32_t view, uc32_t c);
-ptrdiff_t ucv32_uc32_pos_from(ucv32_t view, uc32_t c, size_t from);
-ptrdiff_t ucv32_uz32_pos(ucv32_t view, const uc32_t *cstr);
-ptrdiff_t ucv32_uz32_pos_from(ucv32_t view, const uc32_t *cstr, size_t from);
-ptrdiff_t ucv32_uz32_n_pos(ucv32_t view, const uc32_t *cstr, size_t n);
-ptrdiff_t ucv32_uz32_n_pos_from(ucv32_t view, const uc32_t *cstr, size_t n, size_t from);
-ptrdiff_t ucv32_uv32_pos(ucv32_t view, uv32_t another);
-ptrdiff_t ucv32_uv32_pos_from(ucv32_t view, uv32_t another, size_t from);
-ptrdiff_t ucv32_us32_pos(ucv32_t view, const us32_t *str);
-ptrdiff_t ucv32_us32_pos_from(ucv32_t view, const us32_t *str, size_t from);
+ptrdiff_t ucv32_pos_ucv32(ucv32_t view, ucv32_t another);
+ptrdiff_t ucv32_pos_ucv32_from(ucv32_t view, ucv32_t another, size_t from);
+ptrdiff_t ucv32_pos_uc32(ucv32_t view, uc32_t c);
+ptrdiff_t ucv32_pos_uc32_from(ucv32_t view, uc32_t c, size_t from);
+ptrdiff_t ucv32_pos_uz32(ucv32_t view, const uc32_t *cstr);
+ptrdiff_t ucv32_pos_uz32_from(ucv32_t view, const uc32_t *cstr, size_t from);
+ptrdiff_t ucv32_pos_uz32_n(ucv32_t view, const uc32_t *cstr, size_t n);
+ptrdiff_t ucv32_pos_uz32_n_from(ucv32_t view, const uc32_t *cstr, size_t n, size_t from);
+ptrdiff_t ucv32_pos_uv32(ucv32_t view, uv32_t another);
+ptrdiff_t ucv32_pos_uv32_from(ucv32_t view, uv32_t another, size_t from);
+ptrdiff_t ucv32_pos_us32(ucv32_t view, const us32_t *str);
+ptrdiff_t ucv32_pos_us32_from(ucv32_t view, const us32_t *str, size_t from);
 
 // - Backward
 
-ptrdiff_t ucv32_pos_r(ucv32_t view, ucv32_t another);
-ptrdiff_t ucv32_pos_from_r(ucv32_t view, ucv32_t another, size_t from);
-ptrdiff_t ucv32_ucv32_pos_r(ucv32_t view, ucv32_t another);
-ptrdiff_t ucv32_ucv32_pos_from_r(ucv32_t view, ucv32_t another, size_t from);
-ptrdiff_t ucv32_uc32_pos_r(ucv32_t view, uc32_t c);
-ptrdiff_t ucv32_uc32_pos_from_r(ucv32_t view, uc32_t c, size_t from);
-ptrdiff_t ucv32_uz32_pos_r(ucv32_t view, const uc32_t *cstr);
-ptrdiff_t ucv32_uz32_pos_from_r(ucv32_t view, const uc32_t *cstr, size_t from);
-ptrdiff_t ucv32_uz32_n_pos_r(ucv32_t view, const uc32_t *cstr, size_t n);
-ptrdiff_t ucv32_uz32_n_pos_from_r(ucv32_t view, const uc32_t *cstr, size_t n, size_t from);
-ptrdiff_t ucv32_uv32_pos_r(ucv32_t view, uv32_t another);
-ptrdiff_t ucv32_uv32_pos_from_r(ucv32_t view, uv32_t another, size_t from);
-ptrdiff_t ucv32_us32_pos_r(ucv32_t view, const us32_t *str);
-ptrdiff_t ucv32_us32_pos_from_r(ucv32_t view, const us32_t *str, size_t from);
+ptrdiff_t ucv32_rpos(ucv32_t view, ucv32_t another);
+ptrdiff_t ucv32_rpos_from(ucv32_t view, ucv32_t another, size_t from);
+ptrdiff_t ucv32_rpos_ucv32(ucv32_t view, ucv32_t another);
+ptrdiff_t ucv32_rpos_ucv32_from(ucv32_t view, ucv32_t another, size_t from);
+ptrdiff_t ucv32_rpos_uc32(ucv32_t view, uc32_t c);
+ptrdiff_t ucv32_rpos_uc32_from(ucv32_t view, uc32_t c, size_t from);
+ptrdiff_t ucv32_rpos_uz32(ucv32_t view, const uc32_t *cstr);
+ptrdiff_t ucv32_rpos_uz32_from(ucv32_t view, const uc32_t *cstr, size_t from);
+ptrdiff_t ucv32_rpos_uz32_n(ucv32_t view, const uc32_t *cstr, size_t n);
+ptrdiff_t ucv32_rpos_uz32_n_from(ucv32_t view, const uc32_t *cstr, size_t n, size_t from);
+ptrdiff_t ucv32_rpos_uv32(ucv32_t view, uv32_t another);
+ptrdiff_t ucv32_rpos_uv32_from(ucv32_t view, uv32_t another, size_t from);
+ptrdiff_t ucv32_rpos_us32(ucv32_t view, const us32_t *str);
+ptrdiff_t ucv32_rpos_us32_from(ucv32_t view, const us32_t *str, size_t from);
 
 // Iteration
 

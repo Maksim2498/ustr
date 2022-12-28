@@ -185,44 +185,44 @@ ptrdiff_t uz32_n_pos(const uc32_t *cstr, size_t n, const uc32_t *another);
 ptrdiff_t uz32_pos_n(const uc32_t *cstr, const uc32_t *another, size_t n);
 ptrdiff_t uz32_n_pos_n(const uc32_t *cstr, size_t cstr_len, const uc32_t *another, size_t another_len);
 ptrdiff_t uz32_uc32_pos(const uc32_t *cstr, uc32_t c);
-ptrdiff_t uz32_n_uc32_pos(const uc32_t *cstr, size_t n, uc32_t c);
+ptrdiff_t uz32_n_pos_uc32(const uc32_t *cstr, size_t n, uc32_t c);
 
 ptrdiff_t uz16_pos(const uc16_t *cstr, const uc16_t *another);
 ptrdiff_t uz16_n_pos(const uc16_t *cstr, size_t n, const uc16_t *another);
 ptrdiff_t uz16_pos_n(const uc16_t *cstr, const uc16_t *another, size_t n);
 ptrdiff_t uz16_n_pos_n(const uc16_t *cstr, size_t cstr_len, const uc16_t *another, size_t another_len);
-ptrdiff_t uz16_uc32_pos(const uc16_t *cstr, uc16_t c);
-ptrdiff_t uz16_n_uc32_pos(const uc16_t *cstr, size_t n, uc16_t c);
+ptrdiff_t uz16_pos_uc32(const uc16_t *cstr, uc16_t c);
+ptrdiff_t uz16_n_pos_uc32(const uc16_t *cstr, size_t n, uc16_t c);
 
 ptrdiff_t uz8_pos(const uc8_t *cstr, const uc8_t *another);
 ptrdiff_t uz8_n_pos(const uc8_t *cstr, size_t n, const uc8_t *another);
 ptrdiff_t uz8_pos_n(const uc8_t *cstr, const uc8_t *another, size_t n);
 ptrdiff_t uz8_n_pos_n(const uc8_t *cstr, size_t cstr_len, const uc8_t *another, size_t another_len);
-ptrdiff_t uz8_uc8_pos(const uc8_t *cstr, uc8_t c);
-ptrdiff_t uz8_n_uc8_pos(const uc8_t *cstr, size_t n, uc8_t c);
+ptrdiff_t uz8_pos_uc8(const uc8_t *cstr, uc8_t c);
+ptrdiff_t uz8_n_pos_uc8(const uc8_t *cstr, size_t n, uc8_t c);
 
 // - Backward
 
-ptrdiff_t uz32_pos_r(const uc32_t *cstr, const uc32_t *another, size_t from);
-ptrdiff_t uz32_pos_n_r(const uc32_t *cstr, const uc32_t *another, size_t n, size_t from);
-ptrdiff_t uz32_n_pos_r(const uc32_t *cstr, size_t n, const uc32_t *another, size_t from);
-ptrdiff_t uz32_n_pos_n_r(const uc32_t *cstr, size_t cstr_len, const uc32_t *another, size_t another_len, size_t from);
-ptrdiff_t uz32_uc32_pos_r(const uc32_t *cstr, uc32_t c, size_t from);
-ptrdiff_t uz32_n_uc32_pos_r(const uc32_t *cstr, size_t n, uc32_t c, size_t from);
+ptrdiff_t uz32_rpos(const uc32_t *cstr, const uc32_t *another, size_t from);
+ptrdiff_t uz32_rpos_n(const uc32_t *cstr, const uc32_t *another, size_t n, size_t from);
+ptrdiff_t uz32_n_rpos(const uc32_t *cstr, size_t n, const uc32_t *another, size_t from);
+ptrdiff_t uz32_n_rpos_n(const uc32_t *cstr, size_t cstr_len, const uc32_t *another, size_t another_len, size_t from);
+ptrdiff_t uz32_rpos_uc32(const uc32_t *cstr, uc32_t c, size_t from);
+ptrdiff_t uz32_n_rpos_uc32(const uc32_t *cstr, size_t n, uc32_t c, size_t from);
 
-ptrdiff_t uz16_pos_r(const uc16_t *cstr, const uc16_t *another, size_t from);
-ptrdiff_t uz16_pos_n_r(const uc16_t *cstr, const uc16_t *another, size_t n, size_t from);
-ptrdiff_t uz16_n_pos_r(const uc16_t *cstr, size_t n, const uc16_t *another, size_t from);
-ptrdiff_t uz16_n_pos_n_r(const uc16_t *cstr, size_t cstr_len, const uc16_t *another, size_t another_len, size_t from);
-ptrdiff_t uz16_uc16_pos_r(const uc16_t *cstr, uc16_t c, size_t from);
-ptrdiff_t uz16_n_uc16_pos_r(const uc16_t *cstr, size_t n, uc16_t c, size_t from);
+ptrdiff_t uz16_rpos(const uc16_t *cstr, const uc16_t *another, size_t from);
+ptrdiff_t uz16_rpos_n(const uc16_t *cstr, const uc16_t *another, size_t n, size_t from);
+ptrdiff_t uz16_n_rpos(const uc16_t *cstr, size_t n, const uc16_t *another, size_t from);
+ptrdiff_t uz16_n_rpos_n(const uc16_t *cstr, size_t cstr_len, const uc16_t *another, size_t another_len, size_t from);
+ptrdiff_t uz16_rpos_uc16(const uc16_t *cstr, uc16_t c, size_t from);
+ptrdiff_t uz16_n_rpos_uc16(const uc16_t *cstr, size_t n, uc16_t c, size_t from);
 
-ptrdiff_t uz8_pos_r(const uc8_t *cstr, const uc8_t *another, size_t from);
-ptrdiff_t uz8_pos_n_r(const uc8_t *cstr, const uc8_t *another, size_t n, size_t from);
-ptrdiff_t uz8_n_pos_r(const uc8_t *cstr, size_t n, const uc8_t *another, size_t from);
-ptrdiff_t uz8_n_pos_n_r(const uc8_t *cstr, size_t cstr_len, const uc8_t *another, size_t another_len, size_t from);
-ptrdiff_t uz8_uc8_pos_r(const uc8_t *cstr, uc8_t c, size_t from);
-ptrdiff_t uz8_n_uc8_pos_r(const uc8_t *cstr, size_t n, uc8_t c, size_t from);
+ptrdiff_t uz8_rpos(const uc8_t *cstr, const uc8_t *another, size_t from);
+ptrdiff_t uz8_rpos_n(const uc8_t *cstr, const uc8_t *another, size_t n, size_t from);
+ptrdiff_t uz8_n_rpos(const uc8_t *cstr, size_t n, const uc8_t *another, size_t from);
+ptrdiff_t uz8_n_rpos_n(const uc8_t *cstr, size_t cstr_len, const uc8_t *another, size_t another_len, size_t from);
+ptrdiff_t uz8_rpos_uc8(const uc8_t *cstr, uc8_t c, size_t from);
+ptrdiff_t uz8_n_rpos_uc8(const uc8_t *cstr, size_t n, uc8_t c, size_t from);
 
 // Fill
 
