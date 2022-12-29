@@ -23,48 +23,72 @@ void uset_locale(void);
 /*
 // - Fmt
 
-size_t uprintln_ucv32_fmt(ucv32_t fmt, ...);
-size_t uprint_ucv32_fmt(ucv32_t fmt, ...);
+size_t uprintln_fmt_ucv32(ucv32_t fmt, ...);
+size_t uprint_fmt_ucv32(ucv32_t fmt, ...);
 
-size_t uprintln_uv32_fmt(uv32_t fmt, ...);
-size_t uprint_uv32_fmt(uv32_t fmt, ...);
+size_t uprintln_fmt_uv32(uv32_t fmt, ...);
+size_t uprint_fmt_uv32(uv32_t fmt, ...);
 
-size_t uprintln_us32_fmt(const us32_t *fmt, ...);
-size_t uprint_us32_fmt(const us32_t *fmt, ...);
+size_t uprintln_fmt_us32(const us32_t *fmt, ...);
+size_t uprint_fmt_us32(const us32_t *fmt, ...);
 
-size_t uprintln_uz32_fmt(const uc32_t *fmt, ...);
-size_t uprint_uz32_fmt(const uc32_t *fmt, ...);
+size_t uprintln_fmt_uz32(const uc32_t *fmt, ...);
+size_t uprint_fmt_uz32(const uc32_t *fmt, ...);
 
-size_t uprintln_uz16_fmt(const uc16_t *fmt, ...);
-size_t uprint_uz16_fmt(const uc16_t *fmt, ...);
+size_t uprintln_fmt_uz32n(const uc32_t *fmt, size_t n, ...);
+size_t uprint_fmt_uz32n(const uc32_t *fmt, size_t n, ...);
 
-size_t uprintln_uz8_fmt(const uc8_t *fmt, ...);
-size_t uprint_uz8_fmt(const uc8_t *fmt, ...);
+size_t uprintln_fmt_uz16(const uc16_t *fmt, ...);
+size_t uprint_fmt_uz16(const uc16_t *fmt, ...);
 
-size_t uprintln_fmt(const char *fmt, ...);
-size_t uprint_fmt(const char *fmt, ...);
+size_t uprintln_fmt_uz16n(const uc16_t *fmt, size_t n, ...);
+size_t uprint_fmt_uz16n(const uc16_t *fmt, size_t n, ...);
+
+size_t uprintln_fmt_uz8(const uc8_t *fmt, ...);
+size_t uprintln_fmt_uz8(const uc8_t *fmt, ...);
+
+size_t uprint_fmt_uz8n(const uc8_t *fmt, size_t n, ...);
+size_t uprint_fmt_uz8n(const uc8_t *fmt, size_t n, ...);
+
+size_t uprintln_fmt_z(const char *fmt, ...);
+size_t uprint_fmt_z(const char *fmt, ...);
+
+size_t uprintln_fmt_zn(const char *fmt, size_t n, ...);
+size_t uprint_fmt_zn(const char *fmt, size_t n, ...);
 
 
-size_t ufprintln_ucv32_fmt(FILE *file, ucv32_t fmt, ...);
-size_t ufprint_ucv32_fmt(FILE *file, ucv32_t fmt, ...);
+size_t ufprintln_fmt_ucv32(FILE *file, ucv32_t fmt, ...);
+size_t ufprint_fmt_ucv32(FILE *file, ucv32_t fmt, ...);
 
-size_t ufprintln_uv32_fmt(FILE *file, uv32_t fmt, ...);
-size_t ufprint_uv32_fmt(FILE *file, uv32_t fmt, ...);
+size_t ufprintln_fmt_uv32(FILE *file, uv32_t fmt, ...);
+size_t ufprint_fmt_uv32(FILE *file, uv32_t fmt, ...);
 
-size_t ufprintln_us32_fmt(FILE *file, const us32_t *fmt, ...);
-size_t ufprint_us32_fmt(FILE *file, const us32_t *fmt, ...);
+size_t ufprintln_fmt_us32(FILE *file, const us32_t *fmt, ...);
+size_t ufprint_fmt_us32(FILE *file, const us32_t *fmt, ...);
 
-size_t ufprintln_uz32_fmt(FILE *file, const uc32_t *fmt, ...);
-size_t ufprint_uz32_fmt(FILE *file, const uc32_t *fmt, ...);
+size_t ufprintln_fmt_uz32(FILE *file, const uc32_t *fmt, ...);
+size_t ufprint_fmt_uz32(FILE *file, const uc32_t *fmt, ...);
 
-size_t ufprintln_uz16_fmt(FILE *file, const uc16_t *fmt, ...);
-size_t ufprint_uz16_fmt(FILE *file, const uc16_t *fmt, ...);
+size_t ufprintln_fmt_uz32n(FILE *file, const uc32_t *fmt, size_t n, ...);
+size_t ufprint_fmt_uz32n(FILE *file, const uc32_t *fmt, size_t n, ...);
 
-size_t ufprintln_uz8_fmt(FILE *file, const uc8_t *fmt, ...);
-size_t ufprint_uz8_fmt(FILE *file, const uc8_t *fmt, ...);
+size_t ufprintln_fmt_uz16(FILE *file, const uc16_t *fmt, ...);
+size_t ufprint_fmt_uz16(FILE *file, const uc16_t *fmt, ...);
 
-size_t ufprintln_fmt(FILE *file, const char *fmt, ...);
-size_t ufprint_fmt(FILE *file, const char *fmt, ...);
+size_t ufprintln_fmt_uz16n(FILE *file, const uc16_t *fmt, size_t n, ...);
+size_t ufprint_fmt_uz16n(FILE *file, const uc16_t *fmt, size_t n, ...);
+
+size_t ufprintln_fmt_uz8(FILE *file, const uc8_t *fmt, ...);
+size_t ufprint_fmt_uz8(FILE *file, const uc8_t *fmt, ...);
+
+size_t ufprintln_fmt_uz8n(FILE *file, const uc8_t *fmt, size_t n, ...);
+size_t ufprint_fmt_uz8n(FILE *file, const uc8_t *fmt, size_t n, ...);
+
+size_t ufprintln_fmt_z(FILE *file, const char *fmt, ...);
+size_t ufprint_fmt_z(FILE *file, const char *fmt, ...);
+
+size_t ufprintln_fmt_zn(FILE *file, const char *fmt, size_t n, ...);
+size_t ufprint_fmt_zn(FILE *file, const char *fmt, size_t n, ...);
 */
 
 // - Bool
