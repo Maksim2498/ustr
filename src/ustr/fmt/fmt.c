@@ -16,38 +16,38 @@ static struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len);
 static uc32_t uget_c_(const void *cstr, size_t n, size_t i);
 
 struct ufmt ufmt_from_ucv32(ucv32_t view) {
-    return ufmt_from_uz32_n(UCV32_CEXPAND(view));
+    return ufmt_from_uz32n(UCV32_CEXPAND(view));
 }
 
 struct ufmt ufmt_from_us32(const us32_t *str) {
-    return ufmt_from_uz32_n(US32_CEXPAND(str));
+    return ufmt_from_uz32n(US32_CEXPAND(str));
 }
 
 struct ufmt ufmt_from_uv32(uv32_t view) {
-    return ufmt_from_uz32_n(UV32_CEXPAND(view));
+    return ufmt_from_uz32n(UV32_CEXPAND(view));
 }
 
 struct ufmt ufmt_from_uz32(const uc32_t *cstr) {
-    return ufmt_from_uz32_n(cstr, uz32_len(cstr));
+    return ufmt_from_uz32n(cstr, uz32_len(cstr));
 }
 
-struct ufmt ufmt_from_uz32_n(const uc32_t *cstr, size_t n) {
+struct ufmt ufmt_from_uz32n(const uc32_t *cstr, size_t n) {
     return ufmt_from_uz_n_(cstr, sizeof(uc32_t), n);
 }
 
 struct ufmt ufmt_from_uz16(const uc16_t *cstr) {
-    return ufmt_from_uz16_n(cstr, uz16_len(cstr));
+    return ufmt_from_uz16n(cstr, uz16_len(cstr));
 }
 
-struct ufmt ufmt_from_uz16_n(const uc16_t *cstr, size_t n) {
+struct ufmt ufmt_from_uz16n(const uc16_t *cstr, size_t n) {
     return ufmt_from_uz_n_(cstr, sizeof(uc16_t), n);
 }
 
 struct ufmt ufmt_from_uz8(const uc8_t *cstr) {
-    return ufmt_from_uz8_n(cstr, uz8_len(cstr));
+    return ufmt_from_uz8n(cstr, uz8_len(cstr));
 }
 
-struct ufmt ufmt_from_uz8_n(const uc8_t *cstr, size_t n) {
+struct ufmt ufmt_from_uz8n(const uc8_t *cstr, size_t n) {
     return ufmt_from_uz_n_(cstr, sizeof(uc8_t), n);
 }
 
@@ -55,8 +55,8 @@ struct ufmt ufmt_from_z(const char *cstr) {
     return ufmt_from_uz8((const uc8_t *) cstr);
 }
 
-struct ufmt ufmt_from_z_n(const char *cstr, size_t n) {
-    return ufmt_from_uz8_n((const uc8_t *) cstr, n);
+struct ufmt ufmt_from_zn(const char *cstr, size_t n) {
+    return ufmt_from_uz8n((const uc8_t *) cstr, n);
 }
 
 struct ufmt ufmt_from_uz_n_(const void *cstr, size_t n, size_t len) {

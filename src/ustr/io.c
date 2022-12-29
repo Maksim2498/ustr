@@ -127,7 +127,7 @@ size_t ufprint_float_fmt(FILE *file, double f, const struct uffmt *fmt) {
 
 		inner_fmt.start_from += len;
 		to_write             -= len;
-		written              += ufprint_uz8_n(file, (uc8_t *) uio_buffer_, len);
+		written              += ufprint_uz8n(file, (uc8_t *) uio_buffer_, len);
 	}
 
 	return written;
@@ -209,7 +209,7 @@ size_t ufprint_int_fmt_(FILE *file, uintmax_t i, const struct uifmt *fmt, size_t
 
 		inner_fmt.start_from += len;
 		to_write             -= len;
-		written              += ufprint_uz8_n(file, (uc8_t *) uio_buffer_, len);
+		written              += ufprint_uz8n(file, (uc8_t *) uio_buffer_, len);
 	}
 
 	return written;
@@ -229,7 +229,7 @@ size_t ufprintln_ucv32(FILE *file, ucv32_t view) {
 
 size_t ufprint_ucv32(FILE *file, ucv32_t view) {
     assert(ucv32_valid(view));
-    return ufprint_uz32_n(file, view.chars, view.len);
+    return ufprint_uz32n(file, view.chars, view.len);
 }
 
 size_t uprintln_us32(const us32_t *str) {
@@ -246,7 +246,7 @@ size_t ufprintln_us32(FILE *file, const us32_t *str) {
 
 size_t ufprint_us32(FILE *file, const us32_t *str) {
     assert(us32_valid(str));
-    return ufprint_uz32_n(file, str->chars, str->len);
+    return ufprint_uz32n(file, str->chars, str->len);
 }
 
 size_t uprintln_uv32(uv32_t view) {
@@ -263,7 +263,7 @@ size_t ufprintln_uv32(FILE *file, uv32_t view) {
 
 size_t ufprint_uv32(FILE *file, uv32_t view) {
     assert(uv32_valid(view));
-    return ufprint_uz32_n(file, view.chars, view.len);
+    return ufprint_uz32n(file, view.chars, view.len);
 }
 
 size_t uprintln_uz32(const uc32_t *cstr) {
@@ -274,12 +274,12 @@ size_t uprint_uz32(const uc32_t *cstr) {
 	return ufprint_uz32(stdout, cstr);
 }
 
-size_t uprintln_uz32_n(const uc32_t *cstr, size_t n) {
-	return uprint_uz32_n(cstr, n) + uprintln();
+size_t uprintln_uz32n(const uc32_t *cstr, size_t n) {
+	return uprint_uz32n(cstr, n) + uprintln();
 }
 
-size_t uprint_uz32_n(const uc32_t *cstr, size_t n) {
-	return ufprint_uz32_n(stdout, cstr, n);
+size_t uprint_uz32n(const uc32_t *cstr, size_t n) {
+	return ufprint_uz32n(stdout, cstr, n);
 }
 
 size_t uprintln_uz16(const uc16_t *cstr) {
@@ -290,12 +290,12 @@ size_t uprint_uz16(const uc16_t *cstr) {
 	return ufprint_uz16(stdout, cstr);
 }
 
-size_t uprintln_uz16_n(const uc16_t *cstr, size_t n) {
-	return uprint_uz16_n(cstr, n) + uprintln();
+size_t uprintln_uz16n(const uc16_t *cstr, size_t n) {
+	return uprint_uz16n(cstr, n) + uprintln();
 }
 
-size_t uprint_uz16_n(const uc16_t *cstr, size_t n) {
-	return ufprint_uz16_n(stdout, cstr, n);
+size_t uprint_uz16n(const uc16_t *cstr, size_t n) {
+	return ufprint_uz16n(stdout, cstr, n);
 }
 
 size_t uprintln_uz8(const uc8_t *cstr) {
@@ -306,12 +306,12 @@ size_t uprint_uz8(const uc8_t *cstr) {
 	return ufprint_uz8(stdout, cstr);
 }
 
-size_t uprintln_uz8_n(const uc8_t *cstr, size_t n) {
-	return uprint_uz8_n(cstr, n) + uprintln();
+size_t uprintln_uz8n(const uc8_t *cstr, size_t n) {
+	return uprint_uz8n(cstr, n) + uprintln();
 }
 
-size_t uprint_uz8_n(const uc8_t *cstr, size_t n) {
-	return ufprint_uz8_n(stdout, cstr, n);
+size_t uprint_uz8n(const uc8_t *cstr, size_t n) {
+	return ufprint_uz8n(stdout, cstr, n);
 }
 
 size_t uprintln_z(const char *cstr) {
@@ -322,12 +322,12 @@ size_t uprint_z(const char *cstr) {
 	return uprint_uz8((const uc8_t *) cstr);
 }
 
-size_t uprintln_z_n(const char *cstr, size_t n) {
-	return uprintln_uz8_n((const uc8_t *) cstr, n);
+size_t uprintln_zn(const char *cstr, size_t n) {
+	return uprintln_uz8n((const uc8_t *) cstr, n);
 }
 
-size_t uprint_z_n(const char *cstr, size_t n) {
-	return uprint_uz8_n((const uc8_t *) cstr, n);
+size_t uprint_zn(const char *cstr, size_t n) {
+	return uprint_uz8n((const uc8_t *) cstr, n);
 }
 
 size_t ufprintln_uz32(FILE *file, const uc32_t *cstr) {
@@ -350,11 +350,11 @@ size_t ufprint_uz32(FILE *file, const uc32_t *cstr) {
 	return written;
 }
 
-size_t ufprintln_uz32_n(FILE *file, const uc32_t *cstr, size_t n) {
-	return ufprint_uz32_n(file, cstr, n) + ufprintln(file);
+size_t ufprintln_uz32n(FILE *file, const uc32_t *cstr, size_t n) {
+	return ufprint_uz32n(file, cstr, n) + ufprintln(file);
 }
 
-size_t ufprint_uz32_n(FILE *file, const uc32_t *cstr, size_t n) {
+size_t ufprint_uz32n(FILE *file, const uc32_t *cstr, size_t n) {
 	assert(cstr);
 
 	size_t written = 0;
@@ -375,14 +375,14 @@ size_t ufprintln_uz16(FILE *file, const uc16_t *cstr) {
 }
 
 size_t ufprint_uz16(FILE *file, const uc16_t *cstr) {
-	return ufprint_uz16_n(file, cstr, uz16_len(cstr));
+	return ufprint_uz16n(file, cstr, uz16_len(cstr));
 }
 
-size_t ufprintln_uz16_n(FILE *file, const uc16_t *cstr, size_t n) {
-	return ufprint_uz16_n(file, cstr, n) + ufprintln(file);
+size_t ufprintln_uz16n(FILE *file, const uc16_t *cstr, size_t n) {
+	return ufprint_uz16n(file, cstr, n) + ufprintln(file);
 }
 
-size_t ufprint_uz16_n(FILE *file, const uc16_t *cstr, size_t n) {
+size_t ufprint_uz16n(FILE *file, const uc16_t *cstr, size_t n) {
 	assert(cstr);
 
 	size_t written = 0;
@@ -403,14 +403,14 @@ size_t ufprintln_uz8(FILE *file, const uc8_t *cstr) {
 }
 
 size_t ufprint_uz8(FILE *file, const uc8_t *cstr) {
-	return ufprint_uz8_n(file, cstr, uz8_len(cstr));
+	return ufprint_uz8n(file, cstr, uz8_len(cstr));
 }
 
-size_t ufprintln_uz8_n(FILE *file, const uc8_t *cstr, size_t n) {
-	return ufprint_uz8_n(file, cstr, n) + ufprintln(file);
+size_t ufprintln_uz8n(FILE *file, const uc8_t *cstr, size_t n) {
+	return ufprint_uz8n(file, cstr, n) + ufprintln(file);
 }
 
-size_t ufprint_uz8_n(FILE *file, const uc8_t *cstr, size_t n) {
+size_t ufprint_uz8n(FILE *file, const uc8_t *cstr, size_t n) {
 	assert(cstr);
 	return fwrite(cstr, 1, n, file);
 }
@@ -423,12 +423,12 @@ size_t ufprint_z(FILE *file, const char *cstr) {
 	return ufprint_uz8(file, (const uc8_t *) cstr);
 }
 
-size_t ufprintln_z_n(FILE *file, const char *cstr, size_t n) {
-	return ufprintln_uz8_n(file, (const uc8_t *) cstr, n);
+size_t ufprintln_zn(FILE *file, const char *cstr, size_t n) {
+	return ufprintln_uz8n(file, (const uc8_t *) cstr, n);
 }
 
-size_t ufprint_z_n(FILE *file, const char *cstr, size_t n) {
-	return ufprint_uz8_n(file, (const uc8_t *) cstr, n);
+size_t ufprint_zn(FILE *file, const char *cstr, size_t n) {
+	return ufprint_uz8n(file, (const uc8_t *) cstr, n);
 }
 
 size_t uprintln_uc32(uc32_t c) {

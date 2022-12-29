@@ -67,7 +67,7 @@ size_t uz32_from_fmt_n_v(uc32_t *cstr, const uc32_t *fmt_cstr, size_t n, va_list
             continue;
         }
 
-        struct ufmt fmt = ufmt_from_uz32_n(fmt_cstr + i, n - i);
+        struct ufmt fmt = ufmt_from_uz32n(fmt_cstr + i, n - i);
 
         struct uifmt ifmt;
         struct uffmt ffmt;
@@ -596,7 +596,7 @@ size_t uz16_from_fmt_n_v(uc16_t *cstr, const uc16_t *fmt_cstr, size_t n, va_list
             continue;
         }
 
-        struct ufmt fmt = ufmt_from_uz16_n(fmt_cstr + i, n - i);
+        struct ufmt fmt = ufmt_from_uz16n(fmt_cstr + i, n - i);
 
         struct uifmt ifmt;
         struct uffmt ffmt;
@@ -1131,7 +1131,7 @@ size_t uz8_from_fmt_n_v(uc8_t *cstr, const uc8_t *fmt_cstr, size_t n, va_list *a
             continue;
         }
 
-        struct ufmt fmt = ufmt_from_uz8_n(fmt_cstr + i, n - i);
+        struct ufmt fmt = ufmt_from_uz8n(fmt_cstr + i, n - i);
 
         struct uifmt ifmt;
         struct uffmt ffmt;
@@ -3411,14 +3411,14 @@ size_t uz32_trim(uc32_t *cstr) {
 }
 
 size_t uz32_n_trim(uc32_t *cstr, size_t n) {
-    return uz32_n_trim_right(cstr, uz32_n_trim_left(cstr, n));
+    return uz32_n_rtrim(cstr, uz32_n_ltrim(cstr, n));
 }
 
-size_t uz32_trim_left(uc32_t *cstr) {
-    return uz32_n_trim_left(cstr, uz32_len(cstr));
+size_t uz32_ltrim(uc32_t *cstr) {
+    return uz32_n_ltrim(cstr, uz32_len(cstr));
 }
 
-size_t uz32_n_trim_left(uc32_t *cstr, size_t n) {
+size_t uz32_n_ltrim(uc32_t *cstr, size_t n) {
     assert(cstr);
 
     size_t wspace_len = 0;
@@ -3437,11 +3437,11 @@ size_t uz32_n_trim_left(uc32_t *cstr, size_t n) {
     return new_len;
 }
 
-size_t uz32_trim_right(const uc32_t *cstr) {
-    return uz32_n_trim_right(cstr, uz32_len(cstr));
+size_t uz32_rtrim(const uc32_t *cstr) {
+    return uz32_n_rtrim(cstr, uz32_len(cstr));
 }
 
-size_t uz32_n_trim_right(const uc32_t *cstr, size_t n) {
+size_t uz32_n_rtrim(const uc32_t *cstr, size_t n) {
     assert(cstr);
 
     size_t wspace_len = 0;
@@ -3456,50 +3456,50 @@ size_t uz32_n_trim_right(const uc32_t *cstr, size_t n) {
 }
 
 size_t uz16_trim(uc16_t *cstr) {
-	return uz16_n_trim_right(cstr, uz16_trim_left(cstr));
+	return uz16_n_rtrim(cstr, uz16_ltrim(cstr));
 }
 
 size_t uz16_n_trim(uc16_t *cstr, size_t n) {
-    return uz16_n_trim_right(cstr, uz16_n_trim_left(cstr, n));
+    return uz16_n_rtrim(cstr, uz16_n_ltrim(cstr, n));
 }
 
-size_t uz16_trim_left(uc16_t *cstr) {
-	return uz16_n_trim_left(cstr, uz16_len(cstr));
+size_t uz16_ltrim(uc16_t *cstr) {
+	return uz16_n_ltrim(cstr, uz16_len(cstr));
 }
 
-size_t uz16_n_trim_left(uc16_t *cstr, size_t n) {
+size_t uz16_n_ltrim(uc16_t *cstr, size_t n) {
     USTR_RETURN_Z_N_TRIM_LEFT_(16, cstr, n);
 }
 
-size_t uz16_trim_right(const uc16_t *cstr) {
-	return uz16_n_trim_right(cstr, uz16_len(cstr));
+size_t uz16_rtrim(const uc16_t *cstr) {
+	return uz16_n_rtrim(cstr, uz16_len(cstr));
 }
 
-size_t uz16_n_trim_right(const uc16_t *cstr, size_t n) {
+size_t uz16_n_rtrim(const uc16_t *cstr, size_t n) {
     USTR_RETURN_Z_N_TRIM_RIGHT_(16, cstr, n);
 }
 
 size_t uz8_trim(uc8_t *cstr) {
-	return uz8_n_trim_right(cstr, uz8_trim_left(cstr));
+	return uz8_n_rtrim(cstr, uz8_ltrim(cstr));
 }
 
 size_t uz8_n_trim(uc8_t *cstr, size_t n) {
-    return uz8_n_trim_right(cstr, uz8_n_trim_left(cstr, n));
+    return uz8_n_rtrim(cstr, uz8_n_ltrim(cstr, n));
 }
 
-size_t uz8_trim_left(uc8_t *cstr) {
-	return uz8_n_trim_left(cstr, uz8_len(cstr));
+size_t uz8_ltrim(uc8_t *cstr) {
+	return uz8_n_ltrim(cstr, uz8_len(cstr));
 }
 
-size_t uz8_n_trim_left(uc8_t *cstr, size_t n) {
+size_t uz8_n_ltrim(uc8_t *cstr, size_t n) {
     USTR_RETURN_Z_N_TRIM_LEFT_(8, cstr, n);
 }
 
-size_t uz8_trim_right(const uc8_t *cstr) {
-	return uz8_n_trim_right(cstr, uz8_len(cstr));
+size_t uz8_rtrim(const uc8_t *cstr) {
+	return uz8_n_rtrim(cstr, uz8_len(cstr));
 }
 
-size_t uz8_n_trim_right(const uc8_t *cstr, size_t n) {
+size_t uz8_n_rtrim(const uc8_t *cstr, size_t n) {
     USTR_RETURN_Z_N_TRIM_RIGHT_(8, cstr, n);
 }
 
@@ -3759,7 +3759,7 @@ size_t uz32_n_split(uc32_t *cstr, size_t n, uc32_t c, uv32_t *array, size_t arra
 
         if (array && count < array_len) {
             size_t view_len = pos < 0 ? len : rel_pos;
-            array[count] = uv32_from_uz32_n(begin, view_len);
+            array[count] = uv32_from_uz32n(begin, view_len);
         }
 
         prev_pos = pos >= 0 ? pos + prev_pos + 1 : pos;
@@ -3894,7 +3894,7 @@ size_t uz32_n_split_uz32_n(uc32_t *cstr, size_t cstr_len, const uc32_t *another,
 
         if (array && count < array_len) {
             size_t view_len = pos < 0 ? len : rel_pos;
-            array[count] = uv32_from_uz32_n(begin, view_len);
+            array[count] = uv32_from_uz32n(begin, view_len);
         }
 
         prev_pos = pos >= 0 ? pos + prev_pos + another_len : pos;

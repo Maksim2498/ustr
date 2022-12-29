@@ -12,6 +12,7 @@
 #include "type/fmt/int.h"
 #include "type/char.h"
 #include "type/cview.h"
+#include "type/str.h"
 #include "type/view.h"
 
 // Creation
@@ -281,24 +282,24 @@ void uz8_n_to_case(const uc8_t *from, size_t n, uc8_t *to, ucase_t ca);
 
 size_t uz32_trim(uc32_t *cstr);
 size_t uz32_n_trim(uc32_t *cstr, size_t n);
-size_t uz32_trim_left(uc32_t *cstr);
-size_t uz32_n_trim_left(uc32_t *cstr, size_t n);
-size_t uz32_trim_right(const uc32_t *cstr);
-size_t uz32_n_trim_right(const uc32_t *cstr, size_t n);
+size_t uz32_ltrim(uc32_t *cstr);
+size_t uz32_n_ltrim(uc32_t *cstr, size_t n);
+size_t uz32_rtrim(const uc32_t *cstr);
+size_t uz32_n_rtrim(const uc32_t *cstr, size_t n);
 
 size_t uz16_trim(uc16_t *cstr);
 size_t uz16_n_trim(uc16_t *cstr, size_t n);
-size_t uz16_trim_left(uc16_t *cstr);
-size_t uz16_n_trim_left(uc16_t *cstr, size_t n);
-size_t uz16_trim_right(const uc16_t *cstr);
-size_t uz16_n_trim_right(const uc16_t *cstr, size_t n);
+size_t uz16_ltrim(uc16_t *cstr);
+size_t uz16_n_ltrim(uc16_t *cstr, size_t n);
+size_t uz16_rtrim(const uc16_t *cstr);
+size_t uz16_n_rtrim(const uc16_t *cstr, size_t n);
 
 size_t uz8_trim(uc8_t *cstr);
 size_t uz8_n_trim(uc8_t *cstr, size_t n);
-size_t uz8_trim_left(uc8_t *cstr);
-size_t uz8_n_trim_left(uc8_t *cstr, size_t n);
-size_t uz8_trim_right(const uc8_t *cstr);
-size_t uz8_n_trim_right(const uc8_t *cstr, size_t n);
+size_t uz8_ltrim(uc8_t *cstr);
+size_t uz8_n_ltrim(uc8_t *cstr, size_t n);
+size_t uz8_rtrim(const uc8_t *cstr);
+size_t uz8_n_rtrim(const uc8_t *cstr, size_t n);
 
 // Copy
 
