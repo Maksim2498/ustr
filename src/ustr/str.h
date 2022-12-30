@@ -286,10 +286,10 @@ ptrdiff_t us32_rpos_ucv32_from(const us32_t *str, ucv32_t view, size_t from);
 
 // Fill
 
-void us32_fill(us32_t *str, const us32_t *another);
-void us32_fill_from(us32_t *str, const us32_t *another, size_t from);
-void us32_fill_to(us32_t *str, const us32_t *another, size_t to);
-void us32_fill_range(us32_t *str, const us32_t *another, size_t from, size_t len);
+void us32_fill(us32_t *str, uc32_t c);
+void us32_fill_from(us32_t *str, uc32_t c, size_t from);
+void us32_fill_to(us32_t *str, uc32_t c, size_t to);
+void us32_fill_range(us32_t *str, uc32_t c, size_t from, size_t len);
 void us32_fill_uc32(us32_t *str, uc32_t c);
 void us32_fill_uc32_from(us32_t *str, uc32_t c, size_t from);
 void us32_fill_uc32_to(us32_t *str, uc32_t c, size_t to);
