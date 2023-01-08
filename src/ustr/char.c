@@ -202,7 +202,7 @@ uc32_t uc32_case_radix_from_val(ucase_t ca, uradix_t radix, unsigned val) {
             return uc32_upper_radix_from_val(radix, val);
 
         default:
-            return 0;
+            return radix <= 9 && val < radix ? '0' + val : 0;
     }
 }
 
