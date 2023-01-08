@@ -33897,7 +33897,7 @@ bool uc8_priv(const uc8_t *c) {
     return uc32_priv(uc32_from_uc8(c));
 }
 
-bool uc8_lead(uc8_t c) {
+unsigned uc8_lead(uc8_t c) {
     // 0xxx xxxx
     if ((c & 0x80) == 0)
         return 1;

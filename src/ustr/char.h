@@ -219,7 +219,7 @@ bool uc8_space(const uc8_t *c);
 bool uc8_wspace(const uc8_t *c);
 bool uc8_punct(const uc8_t *c);
 bool uc8_priv(const uc8_t *c);
-bool uc8_lead(uc8_t c);
+unsigned uc8_lead(uc8_t c);
 bool uc8_trail(uc8_t c);
 
 // Length
