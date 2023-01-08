@@ -7,7 +7,7 @@
 
 typedef struct {
     const uc32_t *chars;
-    size_t len;
+    size_t        len;
 } ucv32_t;
 
 #endif

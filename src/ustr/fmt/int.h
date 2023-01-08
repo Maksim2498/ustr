@@ -61,6 +61,7 @@ static const struct uifmt UIFMT_HEX = {
 };
 
 struct uifmt uifmt_from_ufmt(const struct ufmt *fmt, va_list *args);
+
 bool uifmt_valid(const struct uifmt *fmt);
 
 #endif

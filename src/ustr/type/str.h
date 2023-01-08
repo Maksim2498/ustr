@@ -7,8 +7,8 @@
 
 typedef struct {
     uc32_t *chars;
-    size_t len;
-    size_t cap;
+    size_t  len;
+    size_t  cap;
 } us32_t;
 
 #endif

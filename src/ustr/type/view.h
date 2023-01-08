@@ -7,7 +7,7 @@
 
 typedef struct {
     uc32_t *chars;
-    size_t len;
+    size_t  len;
 } uv32_t;
 
 #endif

@@ -2,543 +2,96 @@
 
 #include <assert.h>
 
+#include "fmt/case.h"
 #include "fmt/radix.h"
-#include "util/endian.h"
-#include "config.h"
 
-bool uc32_from_uc16_e(uc32_t *to, uendian_t to_endian, const uc16_t *from, uendian_t from_endian) {
-	assert(uendian_valid(to_endian) && uendian_valid(from_endian));
-
-	switch (to_endian) {
-		case UENDIAN_BIG:
-			switch (from_endian) {
-				case UENDIAN_BIG:
-					return uc32be_from_uc16be(to, from);
-				
-				case UENDIAN_LITTLE:
-					return uc32be_from_uc16le(to, from);
-
-				default:
-					return false;
-			}
-		
-		case UENDIAN_LITTLE:
-			switch (from_endian) {
-				case UENDIAN_BIG:
-					return uc32le_from_uc16be(to, from);
-				
-				case UENDIAN_LITTLE:
-					return uc32le_from_uc16le(to, from);
-
-				default:
-					return false;
-			}
-
-		default:
-			return false;
-	}
+uc32_t uc32_from_uc32(uc32_t from) {
+    return from;
 }
 
-bool uc32_from_uc8_e(uc32_t *to, uendian_t to_endian, const uc8_t *from) {
-	assert(uendian_valid(to_endian));
-
-	switch (to_endian) {
-		case UENDIAN_BIG:
-			return uc32be_from_uc8(to, from);
-
-		case UENDIAN_LITTLE:
-			return uc32le_from_uc8(to, from);
-
-		default:
-			return false;
-	}
-}
-
-bool uc32_from_uc16(uc32_t *to, const uc16_t *from) {
+uc32_t uc32_from_uc16(const uc16_t *from) {
 	assert(from);
 
 	uc16_t low = from[0];
-	
-	if (!uc16_srgt(low)) {
-		if (to)
-			*to = low;
 
-		return true;
-	}
-
-	if (uc16_srgt_high(low))
-		return false;
+	if (!uc16_srgt_low(low))
+        return low;
 
 	uc16_t high = from[1];
 
-	if (!uc16_srgt_high(high))
-		return false;
-
-	if (to) {
-		*to  = (low  & 0x3FF) << 10;
-		*to |= (high & 0x3FF);
-		*to += 0x10000;
-	}
-
-	return true;
+    return ((low  & 0x3FF) << 10 | (high & 0x3FF)) + 0x10000;
 }
 
-bool uc32_from_uc16be(uc32_t *to, const uc16_t *from) {
-	#ifndef USTR_BIG_ENDIAN
-		assert(from);
-
-		uc16_t from_le[2] = { from[0] };
-
-		uendian_toggle(from_le, sizeof(uc16_t));
-
-		if (uc16_srgt(from_le[0])) {
-			from_le[1] = from[1];
-			uendian_toggle(from_le + 1, sizeof(uc16_t));
-		}
-
-		return uc32_from_uc16(to, from_le);
-	#else
-		return uc32_from_uc16(to, from);
-	#endif
-}
-
-bool uc32_from_uc16le(uc32_t *to, const uc16_t *from) {
-	#ifdef USTR_BIG_ENDIAN
-		assert(from);
-
-		uc16_t from_be[2] = { from[0] };
-
-		uendian_toggle(from_be, sizeof(uc16_t));
-
-		if (uc16_srgt(from_be[0])) {
-			from_be[1] = from[1];
-			uendian_toggle(from_be + 1, sizeof(uc16_t));
-		}
-
-		return uc32_from_uc16(to, from_be);
-	#else
-		return uc32_from_uc16(to, from);
-	#endif
-}
-
-bool uc32_from_uc8(uc32_t *to, const uc8_t *from) {
+uc32_t uc32_from_uc8(const uc8_t *from) {
 	assert(from);
 
-	unsigned len = uc8_len(*from);
+    switch (uc8_len(*from)) {
+        case 1:
+            return from[0] & 0x7F;
 
-	if (!len)
-		return false;
+        case 2:
+            return (uc32_t) (from[0] & 0x1F) << 6
+                 |          (from[1] & 0x3F);
 
-	if (to)
-		switch (len) {
-			case 1:
-				*to = from[0] & 0x7F;
-				break;
+        case 3:
+            return (uc32_t) (from[0] & 0x0F) << 12
+                 | (uc32_t) (from[1] & 0x3F) << 6
+                 |          (from[2] & 0x3F);
 
-			case 2:
-				*to = (uc32_t) (from[0] & 0x1F) << 6
-				    | 		   (from[1] & 0x3F);
-				break;
+        case 4:
+            return (uc32_t) (from[0] & 0x07) << 18
+                 | (uc32_t) (from[1] & 0x3F) << 12
+                 | (uc32_t) (from[2] & 0x3F) << 6
+                 |          (from[3] & 0x3F);
 
-			case 3:
-				*to = (uc32_t) (from[0] & 0x0F) << 12
-					| (uc32_t) (from[1] & 0x3F) << 6
-					|          (from[2] & 0x3F);
-				break;
-
-			default:
-				assert(false);
-
-			case 4:
-				*to = (uc32_t) (from[0] & 0x07) << 18
-					| (uc32_t) (from[1] & 0x3F) << 12
-					| (uc32_t) (from[2] & 0x3F) << 6
-					|          (from[3] & 0x3F);
-		}
-	
-	return true;
+        default:
+            assert(false);
+            return 0;
+    }
 }
 
-bool uc32le_from_uc16(uc32_t *to, const uc16_t *from) {
-	bool res = uc32_from_uc16(to, from);
-	
-	#ifdef USTR_BIG_ENDIAN
-		if (res && to)
-			uendian_toggle(to, sizeof(uc32_t));
-	#endif
-
-	return res;
-}
-
-bool uc32le_from_uc16be(uc32_t *to, const uc16_t *from) {
-	#ifndef USTR_BIG_ENDIAN
-		assert(from);
-
-		uc16_t from_le[2] = { from[0] };
-
-		uendian_toggle(from_le, sizeof(uc16_t));
-
-		if (uc16_srgt(from_le[0])) {
-			from_le[1] = from[1];
-			uendian_toggle(from_le + 1, sizeof(uc16_t));
-		}
-
-		return uc32_from_uc16(to, from_le);
-	#else
-		bool res = uc32_from_uc16(to, from);
-
-		if (res && to)
-			uendian_toggle(to, sizeof(uc32_t));
-
-		return res;
-	#endif
-}
-
-bool uc32le_from_uc16le(uc32_t *to, const uc16_t *from) {
-	#ifdef USTR_BIG_ENDIAN
-		assert(from);
-
-		uc16_t from_be[2] = { from[0] };
-
-		uendian_toggle(from_be, sizeof(uc16_t));
-
-		if (uc16_srgt(from_be[0])) {
-			from_be[1] = from[1];
-			uendian_toggle(from_be + 1, sizeof(uc16_t));
-		}
-
-		bool res = uc32_from_uc16(to, from_be);
-
-		if (res && to)
-			uendian_toggle(to, sizeof(uc32_t));
-
-		return res;
-	#else
-		return uc32_from_uc16(to, from);
-	#endif
-}
-
-bool uc32le_from_uc8(uc32_t *to, const uc8_t *from) {
-	bool res = uc32_from_uc8(to, from);
-
-	#ifdef USTR_BIG_ENDIAN
-		if (res && to)
-			uendian_toggle(to, sizeof(uc32_t));
-	#endif
-
-	return res;
-}
-
-bool uc32be_from_uc16(uc32_t *to, const uc16_t *from) {
-	bool res = uc32_from_uc16(to, from);
-	
-	#ifndef USTR_BIG_ENDIAN
-		if (res && to)
-			uendian_toggle(to, sizeof(uc32_t));
-	#endif
-
-	return res;
-}
-
-bool uc32be_from_uc16be(uc32_t *to, const uc16_t *from) {
-	#ifndef USTR_BIG_ENDIAN
-		assert(from);
-
-		uc16_t from_le[2] = { from[0] };
-
-		uendian_toggle(from_le, sizeof(uc16_t));
-
-		if (uc16_srgt(from_le[0])) {
-			from_le[1] = from[1];
-			uendian_toggle(from_le + 1, sizeof(uc16_t));
-		}
-
-		bool res = uc32_from_uc16(to, from_le);
-
-		if (res && to)
-			uendian_toggle(to, sizeof(uc32_t));
-
-		return res;
-	#else
-		return uc32_from_uc16(to, from);
-	#endif
-}
-
-bool uc32be_from_uc16le(uc32_t *to, const uc16_t *from) {
-	#ifdef USTR_BIG_ENDIAN
-		assert(from);
-
-		uc16_t from_be[2] = { from[0] };
-
-		uendian_toggle(from_be, sizeof(uc16_t));
-
-		if (uc16_srgt(from_be[0])) {
-			from_be[1] = from[1];
-			uendian_toggle(from_be + 1, sizeof(uc16_t));
-		}
-
-		return uc32_from_uc16(to, from_be);
-	#else
-		bool res = uc32_from_uc16(to, from);
-
-		if (res && to)
-			uendian_toggle(to, sizeof(uc32_t));
-
-		return res;
-	#endif
-}
-
-bool uc32be_from_uc8(uc32_t *to, const uc8_t *from) {
-	bool res = uc32_from_uc8(to, from);
-
-	#ifndef USTR_BIG_ENDIAN
-		if (res && to)
-			uendian_toggle(to, sizeof(uc32_t));
-	#endif
-
-	return res;
-}
-
-unsigned uc16_from_uc32_e(uc16_t *to, uendian_t to_endian, uc32_t from, uendian_t from_endian) {
-	assert(uendian_valid(to_endian) && uendian_valid(from_endian));
-
-	switch (to_endian) {
-		case UENDIAN_BIG:
-			switch (from_endian) {
-				case UENDIAN_BIG:
-					return uc16be_from_uc32be(to, from);
-
-				case UENDIAN_LITTLE:
-					return uc16be_from_uc32le(to, from);
-
-				default:
-					return 0;
-			}
-
-		case UENDIAN_LITTLE:
-			switch (from_endian) {
-				case UENDIAN_BIG:
-					return uc16le_from_uc32be(to, from);
-
-				case UENDIAN_LITTLE:
-					return uc16le_from_uc32le(to, from);
-
-				default:
-					return 0;
-			}
-
-		default:
-			return 0;
-	}
-}
-
-unsigned uc16_from_uc8_e(uc16_t *to, uendian_t to_endian, const uc8_t *from) {
-	assert(uendian_valid(to_endian));
-
-	switch (to_endian) {
-		case UENDIAN_BIG:
-			return uc16be_from_uc8(to, from);
-
-		case UENDIAN_LITTLE:
-			return uc16le_from_uc8(to, from);
-
-		default:
-			return 0;
-	}
-}
-
-unsigned uc16_from_uc32(uc16_t *to, uc32_t from) {
+unsigned uc16_from_uc32(UNULLABLE uc16_t *to, uc32_t from) {
 	if (from < 0x10000) {
-		*to = from;
+        if (to)
+            *to = from;
+
 		return 1;
 	}
 
-	if (from <= UMAX_CP) {
-		from -= 0x10000;
+    if (to) {
+        from -= 0x10000;
 
-		if (to) {
-			uc16_t top10 = from >> 10;
-			top10       += 0xD800;
-			to[0]        = top10;
+        uc16_t top10 = from >> 10;
+        uc16_t low10 = from & 0x003FF;
 
-			uc16_t low10 = from & 0x003FF;
-			low10       += 0xDC00;
-			to[1]        = low10; 
-		}
+        to[0] = top10 + 0xD800;
+        to[1] = low10 + 0xDC00; 
+    }
 
-		return 2;
-	}
-
-	return 0;
+    return 2;
 }
 
-unsigned uc16_from_uc32le(uc16_t *to, uc32_t from) {
-	#ifdef USTR_BIG_ENDIAN
-		if (to)
-			uendian_toggle(&from, sizeof from);
-	#endif
+unsigned uc16_from_uc16(UNULLABLE uc16_t *to, const uc16_t *from) {
+    assert(from);
 
-	return uc16_from_uc32(to, from);
+    unsigned len = uc16_len(*from);
+
+    if (to) {
+        to[0] = from[0];
+
+        if (len > 1)
+            to[1] = from[1];
+    }
+
+    return len;
 }
 
-unsigned uc16_from_uc32be(uc16_t *to, uc32_t from) {
-	#ifndef USTR_BIG_ENDIAN
-		if (to)
-			uendian_toggle(&from, sizeof from);
-	#endif
-
-	return uc16_from_uc32(to, from);
+unsigned uc16_from_uc8(UNULLABLE uc16_t *to, const uc8_t *from) {
+	return uc16_from_uc32(to, uc32_from_uc8(from));
 }
 
-unsigned uc16_from_uc8(uc16_t *to, const uc8_t *from) {
-	uc32_t from32;
-	uc32_from_uc8(&from32, from);
-	return uc16_from_uc32(to, from32);
-}
-
-unsigned uc16le_from_uc32(uc16_t *to, uc32_t from) {
-	unsigned res = uc16_from_uc32(to, from);
-	
-	#ifdef USTR_BIG_ENDIAN
-		if (to && res)
-			uendian_toggle_arr(to, res, sizeof(uc16_t));
-	#endif
-
-	return res;
-}
-
-unsigned uc16le_from_uc32le(uc16_t *to, uc32_t from) {
-	#ifdef USTR_BIG_ENDIAN
-		if (to)
-			uendian_toggle(&from, sizeof from);
-	#endif
-
-	unsigned res = uc16_from_uc32(to, from);
-	
-	#ifdef USTR_BIG_ENDIAN
-		if (to && res)
-			uendian_toggle_arr(to, res, sizeof(uc16_t));
-	#endif
-
-	return res;
-}
-
-unsigned uc16le_from_uc32be(uc16_t *to, uc32_t from) {
-	#ifndef USTR_BIG_ENDIAN
-		if (to)
-			uendian_toggle(&from, sizeof from);
-	#endif
-
-	unsigned res = uc16_from_uc32(to, from);
-	
-	#ifdef USTR_BIG_ENDIAN
-		if (to && res)
-			uendian_toggle_arr(to, res, sizeof(uc16_t));
-	#endif
-
-	return res;
-}
-
-unsigned uc16le_from_uc8(uc16_t *to, const uc8_t *from) {
-	unsigned res = uc16_from_uc8(to, from);
-
-	#ifdef USTR_BIG_ENDIAN
-		if (to && res)
-			uendian_toggle_arr(to, res, sizeof(uc16_t));
-	#endif
-
-	return res;
-}
-
-unsigned uc16be_from_uc32(uc16_t *to, uc32_t from) {
-	unsigned res = uc16_from_uc32(to, from);
-	
-	#ifndef USTR_BIG_ENDIAN
-		if (to && res)
-			uendian_toggle_arr(to, res, sizeof(uc16_t));
-	#endif
-
-	return res;
-}
-
-unsigned uc16be_from_uc32le(uc16_t *to, uc32_t from) {
-	#ifdef USTR_BIG_ENDIAN
-		if (to)
-			uendian_toggle(&from, sizeof from);
-	#endif
-
-	unsigned res = uc16_from_uc32(to, from);
-	
-	#ifndef USTR_BIG_ENDIAN
-		if (to && res)
-			uendian_toggle_arr(to, res, sizeof(uc16_t));
-	#endif
-
-	return res;
-}
-
-unsigned uc16be_from_uc32be(uc16_t *to, uc32_t from) {
-	#ifndef USTR_BIG_ENDIAN
-		if (to)
-			uendian_toggle(&from, sizeof from);
-	#endif
-
-	unsigned res = uc16_from_uc32(to, from);
-	
-	#ifndef USTR_BIG_ENDIAN
-		if (to && res)
-			uendian_toggle_arr(to, res, sizeof(uc16_t));
-	#endif
-
-	return res;
-}
-
-unsigned uc16be_from_uc8(uc16_t *to, const uc8_t *from) {
-	unsigned res = uc16_from_uc8(to, from);
-
-	#ifndef USTR_BIG_ENDIAN
-		if (to && res)
-			uendian_toggle_arr(to, res, sizeof(uc16_t));
-	#endif
-
-	return res;
-}
-
-unsigned uc8_from_uc32_e(uc8_t *to, uc32_t from, uendian_t from_endian) {
-	assert(uendian_valid(from_endian));
-
-	switch (from_endian) {
-		case UENDIAN_BIG:
-			return uc8_from_uc32be(to, from);
-
-		case UENDIAN_LITTLE:
-			return uc8_from_uc32le(to, from);
-
-		default:
-			return 0;
-	}
-}
-
-unsigned uc8_from_uc16_e(uc8_t *to, const uc16_t *from, uendian_t from_endian) {
-	assert(uendian_valid(from_endian));
-
-	switch (from_endian) {
-		case UENDIAN_BIG:
-			return uc8_from_uc16be(to, from);
-
-		case UENDIAN_LITTLE:
-			return uc8_from_uc16le(to, from);
-
-		default:
-			return 0;
-	}
-}
-
-unsigned uc8_from_uc32(uc8_t *to, uc32_t from) {
+unsigned uc8_from_uc32(UNULLABLE uc8_t *to, uc32_t from) {
 	unsigned len = uc32_8_len(from);
-
-	if (!len)
-		return 0;
 
 	if (to)
 		switch (len) {
@@ -567,958 +120,461 @@ unsigned uc8_from_uc32(uc8_t *to, uc32_t from) {
 	return len;
 }
 
-unsigned uc8_from_uc32le(uc8_t *to, uc32_t from) {
-	#ifdef USTR_BIG_ENDIAN
-		uendian_toggle(&from, sizeof from);
-	#endif
-
-	return uc8_from_uc32(to, from);
-}
-
-unsigned uc8_from_uc32be(uc8_t *to, uc32_t from) {
-	#ifndef USTR_BIG_ENDIAN
-		uendian_toggle(&from, sizeof from);
-	#endif
-
-	return uc8_from_uc32(to, from);
-}
-
-unsigned uc8_from_uc16(uc8_t *to, const uc16_t *from) {
-	uc32_t from32;
-	uc32_from_uc16(&from32, from);
-	return uc8_from_uc32(to, from32);
-}
-
-unsigned uc8_from_uc16le(uc8_t *to, const uc16_t *from) {
-	#ifdef USTR_BIG_ENDIAN
-		assert(from);
-
-		uc16_t from_be[2] = { from[0] };
-
-		uendian_toggle(from_be, sizeof(uc16_t));
-
-		if (uc16_srgt(from_be[0])) {
-			from_be[1] = from[1];
-			uendian_toggle(from_be + 1, sizeof(uc16_t));
-		}
-
-		return uc8_from_uc16(to, from_be);
-	#else
-		return uc8_from_uc16(to, from);
-	#endif
-}
-
-unsigned uc8_from_uc16be(uc8_t *to, const uc16_t *from) {
-	#ifndef USTR_BIG_ENDIAN
-		assert(from);
-
-		uc16_t from_le[2] = { from[0] };
-
-		uendian_toggle(from_le, sizeof(uc16_t));
-
-		if (uc16_srgt(from_le[0])) {
-			from_le[1] = from[1];
-			uendian_toggle(from_le + 1, sizeof(uc16_t));
-		}
-
-		return uc8_from_uc16(to, from_le);
-	#else
-		return uc8_from_uc16(to, from);
-	#endif
-}
-
-uc8_t uc8_dec_from_val(unsigned char val) {
-	return uc32_dec_from_val(val);
-}
-
-uc8_t uc8_case_hex_from_val(unsigned char val, ucase_t ca) {
-	return uc32_case_hex_from_val(val, ca);
-}
-
-uc8_t uc8_upper_hex_from_val(unsigned char val) {
-	return uc32_upper_hex_from_val(val);
-}
-
-uc8_t uc8_lower_hex_from_val(unsigned char val) {
-	return uc32_lower_hex_from_val(val);
-}
-
-uc8_t uc8_oct_from_val(unsigned char val) {
-	return uc32_oct_from_val(val);
-}
-
-uc8_t uc8_bin_from_val(unsigned char val) {
-	return uc32_bin_from_val(val);
-}
-
-uc8_t uc8_case_radix_from_val(unsigned char val, uradix_t radix, ucase_t ca) {
-	return uc32_case_radix_from_val(val, radix, ca);
-}
-
-uc8_t uc8_upper_radix_from_val(unsigned char val, uradix_t radix) {
-	return uc32_upper_radix_from_val(val, radix);
-}
-
-uc8_t uc8_lower_radix_from_val(unsigned char val, uradix_t radix) {
-	return uc32_lower_radix_from_val(val, radix);
-}
-
-int uc8_dec_val(uc8_t c) {
-	return uc32_dec_val(c);
-}
-
-int uc8_hex_val(uc8_t c) {
-	return uc32_hex_val(c);
-}
-
-int uc8_case_hex_val(uc8_t c, ucase_t ca) {
-	return uc32_case_hex_val(c, ca);
-}
-
-int uc8_lower_hex_val(uc8_t c) {
-	return uc32_lower_hex_val(c);
-}
-
-int uc8_upper_hex_val(uc8_t c) {
-	return uc32_upper_hex_val(c);
-}
-
-int uc8_oct_val(uc8_t c) {
-	return uc32_oct_val(c);
-}
-
-int uc8_bin_val(uc8_t c) {
-	return uc32_bin_val(c);
-}
-
-int uc8_radix_val(uc8_t c, uradix_t radix) {
-	return uc32_radix_val(c, radix);
-}
-
-int uc8_case_radix_val(uc8_t c, uradix_t radix, ucase_t ca) {
-	return uc32_case_radix_val(c, radix, ca);
-}
-
-int uc8_lower_radix_val(uc8_t c, uradix_t radix) {
-	return uc32_lower_radix_val(c, radix);
-}
-
-int uc8_upper_radix_val(uc8_t c, uradix_t radix) {
-	return uc32_radix_upper_val(c, radix);
-}
-
-bool uc8_dec(uc8_t c) {
-	return uc32_dec(c);
-}
-
-bool uc8_hex(uc8_t c) {
-	return uc32_hex(c);
-}
-
-bool uc8_case_hex(uc8_t c, ucase_t ca) {
-	return uc32_case_hex(c, ca);
-}
-
-bool uc8_lower_hex(uc8_t c) {
-	return uc32_lower_hex(c);
-}
-
-bool uc8_upper_hex(uc8_t c) {
-	return uc32_upper_hex(c);
-}
-
-bool uc8_oct(uc8_t c) {
-	return uc32_oct(c);
-}
-
-bool uc8_bin(uc8_t c) {
-	return uc32_bin(c);
-}
-
-bool uc8_radix(uc8_t c, uradix_t radix) {
-	return uc32_radix(c, radix);
-}
-
-bool uc8_case_radix(uc8_t c, uradix_t radix, ucase_t ca) {
-	return uc32_case_radix(c, radix, ca);
-}
-
-bool uc8_lower_radix(uc8_t c, uradix_t radix) {
-	return uc32_lower_radix(c, radix);
-}
-
-bool uc8_upper_radix(uc8_t c, uradix_t radix) {
-	return uc32_upper_radix(c, radix);
-}
-
-uc8_case_len_func_t uc8_case_len_func_from_ucase(ucase_t ca) {
-	assert(ucase_valid(ca));
-
-	switch (ca) {
-		case UCASE_UPPER:
-			return uc8_upper_len;
-
-		case UCASE_LOWER:
-			return uc8_lower_len;
-
-		default:
-			return NULL;
-	}
-}
-
-unsigned uc8_case_len(const uc8_t *c, ucase_t ca) {
-	assert(ucase_valid(ca));
-
-	switch (ca) {
-		case UCASE_UPPER:
-			return uc8_upper_len(c);
-
-		case UCASE_LOWER:
-			return uc8_lower_len(c);
-
-		default:
-			return uc8_len(*c);
-	}
-}
-
-unsigned uc8_upper_len(const uc8_t *c) {
-	uc32_t c32;
-	return uc32_from_uc8(&c32, c) ? uc32_8_len(uc32_to_upper(c32)) : 0;
-}
-
-unsigned uc8_lower_len(const uc8_t *c) {
-	uc32_t c32;
-	return uc32_from_uc8(&c32, c) ? uc32_8_len(uc32_to_lower(c32)) : 0;
-}
-
-uc8_to_case_func_t uc8_to_case_func_from_ucase(ucase_t ca) {
-	assert(ucase_valid(ca));
-
-	switch (ca) {
-		case UCASE_UPPER:
-			return uc8_to_upper;
-
-		case UCASE_LOWER:
-			return uc8_to_lower;
-
-		default:
-			return NULL;
-	}
-}
-
-unsigned uc8_to_case(uc8_t *c, ucase_t ca) {
-	assert(c && ucase_valid(ca));
-
-	switch (ca) {
-		case UCASE_UPPER:
-			return uc8_to_upper(c);
-
-		case UCASE_LOWER:
-			return uc8_to_lower(c);
-
-		default:
-			return uc8_len(*c);
-	}
-}
-
-unsigned uc8_to_upper(uc8_t *c) {
-	uc32_t c32;
-	return uc32_from_uc8(&c32, c) ? uc8_from_uc32(c, uc32_to_upper(c32)) : 0;
-}
-
-unsigned uc8_to_lower(uc8_t *c) {
-	uc32_t c32;
-	return uc32_from_uc8(&c32, c) ? uc8_from_uc32(c, uc32_to_lower(c32)) : 0;
-}
-
-bool uc8_letter(const uc8_t *c) {
-	uc32_t c32;
-	return uc32_from_uc8(&c32, c) && uc32_letter(c32);
-}
-
-bool uc8_upper(const uc8_t *c) {
-	uc32_t c32;
-	return uc32_from_uc8(&c32, c) && uc32_upper(c32);
-}
-
-bool uc8_lower(const uc8_t *c) {
-	uc32_t c32;
-	return uc32_from_uc8(&c32, c) && uc32_lower(c32);
-}
-
-bool uc8_title(const uc8_t *c) {
-	uc32_t c32;
-	return uc32_from_uc8(&c32, c) && uc32_title(c32);
-}
-
-bool uc8_mod(const uc8_t *c) {
-	uc32_t c32;
-	return uc32_from_uc8(&c32, c) && uc32_mod(c32);
-}
-
-bool uc8_oletter(const uc8_t *c) {
-	uc32_t c32;
-	return uc32_from_uc8(&c32, c) && uc32_oletter(c32);
-}
-
-bool uc8_number(const uc8_t *c) {
-	uc32_t c32;
-	return uc32_from_uc8(&c32, c) && uc32_number(c32);
-}
-
-bool uc8_cntrl(const uc8_t *c) {
-	uc32_t c32;
-	return uc32_from_uc8(&c32, c) && uc32_cntrl(c32);
-}
-
-bool uc8_space(const uc8_t *c) {
-	uc32_t c32;
-	return uc32_from_uc8(&c32, c) && uc32_space(c32);
-}
-
-bool uc8_wspace(const uc8_t *c) {
-	uc32_t c32;
-	return uc32_from_uc8(&c32, c) && uc32_wspace(c32);
-}
-
-bool uc8_punct(const uc8_t *c) {
-	uc32_t c32;
-	return uc32_from_uc8(&c32, c) && uc32_punct(c32);
-}
-
-bool uc8_priv(const uc8_t *c) {
-	uc32_t c32;
-	return uc32_from_uc8(&c32, c) && uc32_priv(c32);
-}
-
-bool uc8_srgt(const uc8_t *c) {
-	uc32_t c32;
-	return uc32_from_uc8(&c32, c) && uc32_srgt(c32);
-}
-
-bool uc8_srgt_low(const uc8_t *c) {
-	uc32_t c32;
-	return uc32_from_uc8(&c32, c) && uc32_srgt_low(c32);
-}
-
-bool uc8_srgt_high(const uc8_t *c) {
-	uc32_t c32;
-	return uc32_from_uc8(&c32, c) && uc32_srgt_high(c32);
-}
-
-bool uc8_lead(uc8_t c) {
-	return (c & 0x80) == 0     // 0xxx xxxx
-		|| (c & 0xE0) == 0xC0  // 110x xxxx
-		|| (c & 0xF0) == 0xE0  // 1110 xxxx
-		|| (c & 0xF7) == 0xF0; // 1111 0xxx
-}
-
-bool uc8_trail(uc8_t c) {
-	return (c & 0xC0) == 0x80; // 10xx xxxx
-}
-
-unsigned uc8_len(uc8_t c) {
-	// 0xxx xxxx
-	if ((c & 0x80) == 0)
-		return 1;
-
-	// 110x xxxx
-	if ((c & 0xE0) == 0xC0)
-		return 2;
-
-	// 1110 xxxx
-	if ((c & 0xF0) == 0xE0)
-		return 3;
-
-	// 1111 0xxx
-	if ((c & 0xF7) == 0xF0)
-		return 4;
-
-	return 1;
-}
-
-unsigned uc8_n_len(uc8_t c, unsigned n) {
-	switch (n) {
-		case 1:
-			return uc8_8_len(c);
-
-		case 2:
-			return uc8_16_len(c);
-
-		case 4:
-			return uc8_32_len(c);
-
-		default:
-			assert(false);
-			return 0;
-	}
-}
-
-unsigned uc8_32_len(uc8_t c) {
-	return 1;
-}
-
-unsigned uc8_16_len(uc8_t c) {
-	return uc8_len(c) == 4 ? 2 : 1;
-}
-
-unsigned uc8_8_len(uc8_t c) {
-	return uc8_len(c);
-}
-
-unsigned uc8_valid(const uc8_t *c) {
-	assert(c);
-
-	uc8_t    lead = c[0];
-	unsigned len  = uc8_len(lead);
-
-	for (unsigned i = 1; i <= len; ++i) 
-		if (!uc8_trail(c[i]))
-			return 0;
-
-	return len;
-}
-
-uc16_t uc16_dec_from_val(unsigned char val) {
-	return uc32_dec_from_val(val);
-}
-
-uc16_t uc16_case_hex_from_val(unsigned char val, ucase_t ca) {
-	return uc32_case_hex_from_val(val, ca);
-}
-
-uc16_t uc16_upper_hex_from_val(unsigned char val) {
-	return uc32_upper_hex_from_val(val);
-}
-
-uc16_t uc16_lower_hex_from_val(unsigned char val) {
-	return uc32_lower_hex_from_val(val);
+unsigned uc8_from_uc16(UNULLABLE uc8_t *to, const uc16_t *from) {
+    return uc8_from_uc32(to, uc32_from_uc16(from));
 }
 
-uc16_t uc16_oct_from_val(unsigned char val) {
-	return uc32_oct_from_val(val);
-}
-
-uc16_t uc16_bin_from_val(unsigned char val) {
-	return uc32_bin_from_val(val);
-}
-
-uc16_t uc16_case_radix_from_val(unsigned char val, uradix_t radix, ucase_t ca) {
-	return uc32_case_radix_from_val(val, radix, ca);
-}
-
-uc16_t uc16_upper_radix_from_val(unsigned char val, uradix_t radix) {
-	return uc32_upper_radix_from_val(val, radix);
-}
-
-uc16_t uc16_lower_radix_from_val(unsigned char val, uradix_t radix) {
-	return uc32_lower_radix_from_val(val, radix);
-}
-
-int uc16_dec_val(uc16_t c) {
-	return uc32_dec_val(c);
-}
-
-int uc16_hex_val(uc16_t c) {
-	return uc32_hex_val(c);
-}
-
-int uc16_case_hex_val(uc16_t c, ucase_t ca) {
-	return uc32_case_hex_val(c, ca);
-}
-
-int uc16_lower_hex_val(uc16_t c) {
-	return uc32_lower_hex_val(c);
-}
+unsigned uc8_from_uc8(UNULLABLE uc8_t *to, const uc8_t *from) {
+    assert(from);
 
-int uc16_upper_hex_val(uc16_t c) {
-	return uc32_upper_hex_val(c);
-}
-
-int uc16_oct_val(uc16_t c) {
-	return uc32_oct_val(c);
-}
+    unsigned len = uc8_len(*from);
 
-int uc16_bin_val(uc16_t c) {
-	return uc32_bin_val(c);
-}
+    if (to)
+        for (unsigned i = 0; i < len; ++i)
+            *to++ = *from++;
 
-int uc16_radix_val(uc16_t c, uradix_t radix) {
-	return uc32_radix_val(c, radix);
+    return len;
 }
 
-int uc16_case_radix_val(uc16_t c, uradix_t radix, ucase_t ca) {
-	return uc32_case_radix_val(c, radix, ca);
+uc32_t uc32_bin_from_val(unsigned val) {
+    return val <= 1 ? '0' + val : 0;
 }
 
-int uc16_lower_radix_val(uc16_t c, uradix_t radix) {
-	return uc32_lower_radix_val(c, radix);
+uc32_t uc32_oct_from_val(unsigned val) {
+    return val <= 7 ? '0' + val : 0;
 }
 
-int uc16_upper_radix_val(uc16_t c, uradix_t radix) {
-	return uc32_radix_upper_val(c, radix);
+uc32_t uc32_dec_from_val(unsigned val) {
+    return val <= 9 ? '0' + val : 0;
 }
 
-bool uc16_dec(uc16_t c) {
-	return uc32_dec(c);
+uc32_t uc32_hex_from_val(unsigned val) {
+    return uc32_upper_hex_from_val(val);
 }
 
-bool uc16_hex(uc16_t c) {
-	return uc32_hex(c);
-}
+uc32_t uc32_case_hex_from_val(ucase_t ca, unsigned val) {
+    assert(ucase_valid(ca));
 
-bool uc16_case_hex(uc16_t c, ucase_t ca) {
-	return uc32_case_hex(c, ca);
-}
+    switch (ca) {
+        case UCASE_LOWER:
+            return uc32_lower_hex_from_val(val);
 
-bool uc16_hex_lower(uc16_t c) {
-	return uc32_lower_hex(c);
-}
+        case UCASE_UPPER:
+            return uc32_upper_hex_from_val(val);
 
-bool uc16_upper_hex(uc16_t c) {
-	return uc32_upper_hex(c);
+        default:
+            return 0;
+    }
 }
 
-bool uc16_oct(uc16_t c) {
-	return uc32_oct(c);
-}
+uc32_t uc32_lower_hex_from_val(unsigned val) {
+    if (val <= 9)
+        return '0' + val;
 
-bool uc16_bin(uc16_t c) {
-	return uc32_bin(c);
-}
+    if (val <= 15)
+        return 'a' + val;
 
-bool uc16_rad(uc16_t c, uradix_t radix) {
-	return uc32_radix(c, radix);
+    return 0;
 }
 
-bool uc16_rad_case(uc16_t c, uradix_t radix, ucase_t ca) {
-	return uc32_case_radix(c, radix, ca);
-}
+uc32_t uc32_upper_hex_from_val(unsigned val) {
+    if (val <= 9)
+        return '0' + val;
 
-bool uc16_rad_lower(uc16_t c, uradix_t radix) {
-	return uc32_lower_radix(c, radix);
-}
+    if (val <= 15)
+        return 'A' + val;
 
-bool uc16_upper_radix(uc16_t c, uradix_t radix) {
-	return uc32_upper_radix(c, radix);
+    return 0;
 }
-
-uc16_to_case_func_t uc16_to_case_func_from_ucase(ucase_t ca) {
-	assert(ucase_valid(ca));
 
-	switch (ca) {
-		case UCASE_UPPER:
-			return uc16_to_upper;
-
-		case UCASE_LOWER:
-			return uc16_to_lower;
-
-		default:
-			return NULL;
-	}
+uc32_t uc32_radix_from_val(uradix_t radix, unsigned val) {
+    return uc32_upper_radix_from_val(radix, val);
 }
 
-unsigned uc16_to_case(uc16_t *c, ucase_t ca) {
-	assert(c && ucase_valid(ca));
+uc32_t uc32_case_radix_from_val(ucase_t ca, uradix_t radix, unsigned val) {
+    assert(ucase_valid(ca));
 
-	switch (ca) {
-		case UCASE_UPPER:
-			return uc16_to_upper(c);
+    switch (ca) {
+        case UCASE_LOWER:
+            return uc32_lower_radix_from_val(radix, val);
 
-		case UCASE_LOWER:
-			return uc16_to_lower(c);
+        case UCASE_UPPER:
+            return uc32_upper_radix_from_val(radix, val);
 
-		default:
-			return uc16_32_len(*c);
-	}
+        default:
+            return 0;
+    }
 }
 
-unsigned uc16_to_upper(uc16_t *c) {
-	uc32_t c32;
-	return uc32_from_uc16(&c32, c) ? uc16_from_uc32(c, uc32_to_upper(c32)) : 0;
-}
+uc32_t uc32_lower_radix_from_val(uradix_t radix, unsigned val) {
+    assert(uradix_valid(radix));
 
-unsigned uc16_to_lower(uc16_t *c) {
-	uc32_t c32;
-	return uc32_from_uc16(&c32, c) ? uc16_from_uc32(c, uc32_to_lower(c32)) : 0;
-}
+    if (val >= radix)
+        return 0;
 
-bool uc16_letter(const uc16_t *c) {
-	uc32_t c32;
-	return uc32_from_uc16(&c32, c) && uc32_letter(c32);
-}
+    if (val <= 9)
+        return '0' + val;
 
-bool uc16_upper(const uc16_t *c) {
-	uc32_t c32;
-	return uc32_from_uc16(&c32, c) && uc32_upper(c32);
+    return 'a' + val;
 }
 
-bool uc16_lower(const uc16_t *c) {
-	uc32_t c32;
-	return uc32_from_uc16(&c32, c) && uc32_lower(c32);
-}
+uc32_t uc32_upper_radix_from_val(uradix_t radix, unsigned val) {
+    assert(uradix_valid(radix));
 
-bool uc16_title(const uc16_t *c) {
-	uc32_t c32;
-	return uc32_from_uc16(&c32, c) && uc32_title(c32);
-}
+    if (val >= radix)
+        return 0;
 
-bool uc16_mod(const uc16_t *c) {
-	uc32_t c32;
-	return uc32_from_uc16(&c32, c) && uc32_mod(c32);
-}
+    if (val <= 9)
+        return '0' + val;
 
-bool uc16_oletter(const uc16_t *c) {
-	uc32_t c32;
-	return uc32_from_uc16(&c32, c) && uc32_oletter(c32);
+    return 'A' + val;
 }
 
-bool uc16_number(const uc16_t *c) {
-	uc32_t c32;
-	return uc32_from_uc16(&c32, c) && uc32_number(c32);
+uc16_t uc16_bin_from_val(unsigned val) {
+    return uc32_bin_from_val(val);
 }
 
-bool uc16_cntrl(const uc16_t *c) {
-	uc32_t c32;
-	return uc32_from_uc16(&c32, c) && uc32_cntrl(c32);
+uc16_t uc16_oct_from_val(unsigned val) {
+    return uc32_oct_from_val(val);
 }
 
-bool uc16_space(const uc16_t *c) {
-	uc32_t c32;
-	return uc32_from_uc16(&c32, c) && uc32_space(c32);
+uc16_t uc16_dec_from_val(unsigned val) {
+    return uc32_dec_from_val(val);
 }
 
-bool uc16_wspace(const uc16_t *c) {
-	uc32_t c32;
-	return uc32_from_uc16(&c32, c) && uc32_wspace(c32);
+uc16_t uc16_hex_from_val(unsigned val) {
+    return uc32_hex_from_val(val);
 }
 
-bool uc16_punct(const uc16_t *c) {
-	uc32_t c32;
-	return uc32_from_uc16(&c32, c) && uc32_punct(c32);
+uc16_t uc16_case_hex_from_val(ucase_t ca, unsigned val) {
+    return uc32_case_hex_from_val(ca, val);
 }
 
-bool uc16_priv(const uc16_t *c) {
-	uc32_t c32;
-	return uc32_from_uc16(&c32, c) && uc32_priv(c32);
+uc16_t uc16_lower_hex_from_val(unsigned val) {
+    return uc32_lower_hex_from_val(val);
 }
 
-bool uc16_srgt(uc16_t c) {
-	return uc32_srgt(c);
+uc16_t uc16_upper_hex_from_val(unsigned val) {
+    return uc32_upper_hex_from_val(val);
 }
 
-bool uc16_srgt_low(uc16_t c) {
-	return uc32_srgt_low(c);
+uc16_t uc16_radix_from_val(uradix_t radix, unsigned val) {
+    return uc32_radix_from_val(radix, val);
 }
 
-bool uc16_srgt_high(uc16_t c) {
-	return uc32_srgt_high(c);
+uc16_t uc16_case_radix_from_val(ucase_t ca, uradix_t radix, unsigned val) {
+    return uc32_case_radix_from_val(ca, radix, val);
 }
 
-unsigned uc16_len(uc16_t c) {
-	return uc16_srgt_low(c) ? 2 : 1;
+uc16_t uc16_lower_radix_from_val(uradix_t radix, unsigned val) {
+    return uc32_lower_radix_from_val(radix, val);
 }
-
-unsigned uc16_n_len(uc16_t c, unsigned n) {
-	switch (n) {
-		case 1:
-			return uc16_8_len(c);
-
-		case 2:
-			return uc16_16_len(c);
 
-		case 4:
-			return uc16_32_len(c);
-
-		default:
-			assert(false);
-			return 0;
-	}
+uc16_t uc16_upper_radix_from_val(uradix_t radix, unsigned val) {
+    return uc32_upper_radix_from_val(radix, val);
 }
 
-unsigned uc16_32_len(uc16_t c) {
-	return 1;
+uc8_t uc8_bin_from_val(unsigned val) {
+    return uc32_bin_from_val(val);
 }
 
-unsigned uc16_16_len(uc16_t c) {
-	return uc16_len(c);
+uc8_t uc8_oct_from_val(unsigned val) {
+    return uc32_oct_from_val(val);
 }
-
-unsigned uc16_8_len(uc16_t c) {
-	if (c <= 0x7F)
-		return 1;
-
-	if (c <= 0x7FF)
-		return 2;
-
-	if (uc16_srgt_low(c))
-		return 3;
 
-	return 4;
+uc8_t uc8_dec_from_val(unsigned val) {
+    return uc32_dec_from_val(val);
 }
 
-unsigned uc16_valid(const uc16_t *c) {
-	assert(c);
-
-	uc16_t low = c[0];
-
-	if (!uc16_srgt(low))
-		return 1;
-
-	if (uc16_srgt_high(low))
-		return 0;
-
-	uc16_t high = c[1];
-
-	return uc16_srgt_high(high) ? 2 : 0;
+uc8_t uc8_hex_from_val(unsigned val) {
+    return uc32_hex_from_val(val);
 }
 
-uc32_t uc32_dec_from_val(unsigned char val) {
-	return val < 10 ? U'0' + val : 0;
+uc8_t uc8_case_hex_from_val(ucase_t ca, unsigned val) {
+    return uc32_case_hex_from_val(ca, val);
 }
 
-uc32_t uc32_case_hex_from_val(unsigned char val, ucase_t ca) {
-	return ucase_lower(ca) ? uc32_lower_hex_from_val(val) : uc32_upper_hex_from_val(val);
+uc8_t uc8_lower_hex_from_val(unsigned val) {
+    return uc32_lower_hex_from_val(val);
 }
-
-uc32_t uc32_upper_hex_from_val(unsigned char val) {
-	if (val < 10)
-		return U'0' + val;
-
-	if (val < 16)
-		return U'A' + val - 10;
 
-	return 0;
+uc8_t uc8_upper_hex_from_val(unsigned val) {
+    return uc32_upper_hex_from_val(val);
 }
 
-uc32_t uc32_lower_hex_from_val(unsigned char val) {
-	if (val < 10)
-		return U'0' + val;
-
-	if (val < 16)
-		return U'a' + val - 10;
-
-	return 0;
+uc8_t uc8_radix_from_val(uradix_t radix, unsigned val) {
+    return uc32_radix_from_val(radix, val);
 }
 
-uc32_t uc32_oct_from_val(unsigned char val) {
-	return val < 8 ? U'0' + val : 0;
+uc8_t uc8_case_radix_from_val(ucase_t ca, uradix_t radix, unsigned val) {
+    return uc32_case_radix_from_val(ca, radix, val);
 }
 
-uc32_t uc32_bin_from_val(unsigned char val) {
-	switch (val) {
-		case 0:
-			return U'0';
-		
-		case 1:
-			return U'1';
-			
-		default:
-			return 0;
-	}
+uc8_t uc8_lower_radix_from_val(uradix_t radix, unsigned val) {
+    return uc32_lower_radix_from_val(radix, val);
 }
 
-uc32_t uc32_case_radix_from_val(unsigned char val, uradix_t radix, ucase_t ca) {
-	return ucase_lower(ca) ? uc32_lower_radix_from_val(val, radix) : uc32_upper_radix_from_val(val, radix);
+uc8_t uc8_upper_radix_from_val(uradix_t radix, unsigned val) {
+    return uc32_upper_radix_from_val(radix, val);
 }
-
-uc32_t uc32_upper_radix_from_val(unsigned char val, uradix_t radix) {
-	assert(uradix_valid(radix));
-
-	if (val >= radix)
-		return 0;
 
-	if (val < 10)
-		return U'0' + val;
-
-	return U'A' + val - 10;
+int uc32_bin_val(uc32_t c) {
+    return uc32_bin(c) ? c - '0' : -1;
 }
-
-uc32_t uc32_lower_radix_from_val(unsigned char val, uradix_t radix) {
-	assert(uradix_valid(radix));
-
-	if (val >= radix)
-		return 0;
-
-	if (val < 10)
-		return U'0' + val;
 
-	return U'a' + val - 10;
+int uc32_oct_val(uc32_t c) {
+    return uc32_oct(c) ? c - '0' : -1;
 }
 
 int uc32_dec_val(uc32_t c) {
-    return uc32_dec(c) ? c - U'0' : -1;
+    return uc32_dec(c) ? c - '0' : -1;
 }
 
 int uc32_hex_val(uc32_t c) {
-    if (uc32_dec(c))
-        return c - U'0';
+    if ('0' <= c && c <= '9')
+        return c - '0';
 
-    if (U'A' <= c && c <= U'F')
-        return c - U'A' + 10;
+    if ('A' <= c && c <= 'F')
+        return c - 'A' + 10;
 
-    if (U'a' <= c && c <= U'f')
-        return c - U'a' + 10;
+    if ('a' <= c && c <= 'f')
+        return c - 'a' + 10;
 
     return -1;
 }
 
 int uc32_case_hex_val(uc32_t c, ucase_t ca) {
-	assert(ucase_valid(ca));
+    assert(ucase_valid(ca));
 
-	switch (ca) {
-		case UCASE_UPPER:
-			return uc32_upper_hex_val(c);
+    switch (ca) {
+        case UCASE_LOWER:
+            return uc32_lower_hex_val(c);
 
-		case UCASE_LOWER:
-			return uc32_lower_hex_val(c);
+        case UCASE_UPPER:
+            return uc32_upper_hex_val(c);
 
-		default:
-			return uc32_hex_val(c);
-	}
+        default:
+            return uc32_hex_val(c);
+    }
 }
 
 int uc32_lower_hex_val(uc32_t c) {
-    if (uc32_dec(c))
-        return c - U'0';
+    if ('0' <= c && c <= '9')
+        return c - '0';
 
-    if (U'a' <= c && c <= U'f')
-        return c - U'a' + 10;
+    if ('a' <= c && c <= 'f')
+        return c - 'a' + 10;
 
     return -1;
 }
 
 int uc32_upper_hex_val(uc32_t c) {
-    if (uc32_dec(c))
-        return c - U'0';
+    if ('0' <= c && c <= '9')
+        return c - '0';
 
-    if (U'A' <= c && c <= U'F')
-        return c - U'A' + 10;
+    if ('A' <= c && c <= 'F')
+        return c - 'A' + 10;
 
     return -1;
 }
 
-int uc32_oct_val(uc32_t c) {
-    return uc32_oct(c) ? c - U'0' : -1;
-}
-
-int uc32_bin_val(uc32_t c) {
-    return uc32_bin(c) ? c - U'0' : -1;
-}
-
 int uc32_radix_val(uc32_t c, uradix_t radix) {
     assert(uradix_valid(radix));
+    
+    int val;
 
-    if (U'0' <= c && c <= U'9')
-        c -= U'0';
-    else if (U'A' <= c && c <= U'Z') {
-        c -= U'A';
-        c += 10;
-    } else if (U'a' <= c && c <= U'z') {
-        c -= U'a';
-        c += 10;
-    } else
-        return -1;
+    if ('0' <= c && c <= '9')
+        val = c - '0';
+    else if ('A' <= c && c <= 'Z')
+        val = c - 'A' + 10;
+    else if ('a' <= c && c <= 'z')
+        val = c - 'a' + 10;
 
-    return c < radix ? c : -1;
+    return val < radix ? val : -1;
 }
 
-int uc32_case_radix_val(uc32_t c, uradix_t radix, ucase_t ca) {
-	assert(ucase_valid(ca));
+int uc32_case_radix_val(uc32_t c, ucase_t ca, uradix_t radix) {
+    assert(ucase_valid(ca));
 
-	switch (ca) {
-		case UCASE_UPPER:
-			return uc32_radix_upper_val(c, radix);
+    switch (ca) {
+        case UCASE_LOWER:
+            return uc32_lower_radix_val(c, radix);
 
-		case UCASE_LOWER:
-			return uc32_lower_radix_val(c, radix);
+        case UCASE_UPPER:
+            return uc32_upper_radix_val(c, radix);
 
-		default:
-			return uc32_radix_val(c, radix);
-	}
+        default:
+            return uc32_radix_val(c, radix);
+    }
 }
 
 int uc32_lower_radix_val(uc32_t c, uradix_t radix) {
     assert(uradix_valid(radix));
 
-    if (U'0' <= c && c <= U'9')
-        c -= U'0';
-    else if (U'a' <= c && c <= U'z') {
-        c -= U'a';
-        c += 10;
-    } else
-        return -1;
+    int val;
 
-    return c < radix ? c : -1;
+    if ('0' <= c && c <= '9')
+        val = c - '0';
+    else if ('a' <= c && c <= 'z')
+        val = c - 'a' + 10;
+
+    return val < radix ? val : -1;
 }
 
-int uc32_radix_upper_val(uc32_t c, uradix_t radix) {
+int uc32_upper_radix_val(uc32_t c, uradix_t radix) {
     assert(uradix_valid(radix));
 
-    if (U'0' <= c && c <= U'9')
-        c -= U'0';
-    else if (U'A' <= c && c <= U'Z') {
-        c -= U'A';
-        c += 10;
-    } else
-        return -1;
+    int val;
 
-    return c < radix ? c : -1;
+    if ('0' <= c && c <= '9')
+        val = c - '0';
+    else if ('A' <= c && c <= 'Z')
+        val = c - 'A' + 10;
+
+    return val < radix ? val : -1;
 }
 
-bool uc32_dec(uc32_t c) {
-    return U'0' <= c && c <= U'9';
+int uc16_bin_val(uc16_t c) {
+    return uc32_bin_val(c);
 }
 
-bool uc32_case_hex(uc32_t c, ucase_t ca) {
-	assert(ucase_valid(ca));
-
-	switch (ca) {
-		case UCASE_UPPER:
-			return uc32_upper_hex(c);
-
-		case UCASE_LOWER:
-			return uc32_lower_hex(c);
-
-		default:
-			return uc32_hex(c);
-	}
+int uc16_oct_val(uc16_t c) {
+    return uc32_oct_val(c);
 }
 
-bool uc32_hex(uc32_t c) {
-    return U'0' <= c && c <= U'9'
-        || U'A' <= c && c <= U'F'
-        || U'a' <= c && c <= U'f';
+int uc16_dec_val(uc16_t c) {
+    return uc32_dec_val(c);
 }
 
-bool uc32_lower_hex(uc32_t c) {
-	return U'0' <= c && c <= U'9'
-        || U'a' <= c && c <= U'f';
+int uc16_hex_val(uc16_t c) {
+    return uc32_hex_val(c);
 }
 
-bool uc32_upper_hex(uc32_t c) {
-	return U'0' <= c && c <= U'9'
-        || U'A' <= c && c <= U'F';
+int uc16_case_hex_val(uc16_t c, ucase_t ca) {
+    return uc32_case_hex_val(c, ca);
 }
 
-bool uc32_oct(uc32_t c) {
-    return U'0' <= c && c <= U'7';
+int uc16_lower_hex_val(uc16_t c) {
+    return uc32_lower_hex_val(c);
+}
+
+int uc16_upper_hex_val(uc16_t c) {
+    return uc32_upper_hex_val(c);
+}
+
+int uc16_radix_val(uc16_t c, uradix_t radix) {
+    return uc32_radix_val(c, radix);
+}
+
+int uc16_case_radix_val(uc16_t c, ucase_t ca, uradix_t radix) {
+    return uc32_case_radix_val(c, ca, radix);
+}
+
+int uc16_lower_radix_val(uc16_t c, uradix_t radix) {
+    return uc32_lower_radix_val(c, radix);
+}
+
+int uc16_upper_radix_val(uc16_t c, uradix_t radix) {
+    return uc32_upper_radix_val(c, radix);
+}
+
+int uc8_bin_val(uc8_t c) {
+    return uc32_bin_val(c);
+}
+
+int uc8_oct_val(uc8_t c) {
+    return uc32_oct_val(c);
+}
+
+int uc8_dec_val(uc8_t c) {
+    return uc32_dec_val(c);
+}
+
+int uc8_hex_val(uc8_t c) {
+    return uc32_hex_val(c);
+}
+
+int uc8_case_hex_val(uc8_t c, ucase_t ca) {
+    return uc32_case_hex_val(c, ca);
+}
+
+int uc8_lower_hex_val(uc8_t c) {
+    return uc32_lower_hex_val(c);
+}
+
+int uc8_upper_hex_val(uc8_t c) {
+    return uc32_upper_hex_val(c);
+}
+
+int uc8_radix_val(uc8_t c, uradix_t radix) {
+    return uc32_radix_val(c, radix);
+}
+
+int uc8_case_radix_val(uc8_t c, ucase_t ca, uradix_t radix) {
+    return uc32_case_radix_val(c, ca, radix);
+}
+
+int uc8_lower_radix_val(uc8_t c, uradix_t radix) {
+    return uc32_lower_radix_val(c, radix);
+}
+
+int uc8_upper_radix_val(uc8_t c, uradix_t radix) {
+    return uc32_upper_radix_val(c, radix);
 }
 
 bool uc32_bin(uc32_t c) {
-    return U'0' == c || U'1' == c;
+    return '0' == c || '1' == c;
+}
+
+bool uc32_oct(uc32_t c) {
+    return '0' <= c && c <= '7';
+}
+
+bool uc32_dec(uc32_t c) {
+    return '0' <= c && c <= '9';
+}
+
+bool uc32_hex(uc32_t c) {
+    return '0' <= c && c <= '9'
+        || 'A' <= c && c <= 'F'
+        || 'a' <= c && c <= 'f';
+}
+
+bool uc32_case_hex(uc32_t c, ucase_t ca) {
+    assert(ucase_valid(ca));
+
+    switch (ca) {
+        case UCASE_LOWER:
+            return uc32_lower_hex(c);
+
+        case UCASE_UPPER:
+            return uc32_upper_hex(c);
+
+        default:
+            return uc32_hex(c);
+    }
+}
+
+bool uc32_lower_hex(uc32_t c) {
+    return '0' <= c && c <= '9'
+        || 'a' <= c && c <= 'f';
+}
+
+bool uc32_upper_hex(uc32_t c) {
+    return '0' <= c && c <= '9'
+        || 'A' <= c && c <= 'F';
 }
 
 bool uc32_radix(uc32_t c, uradix_t radix) {
-	assert(uradix_valid(radix));
+    assert(uradix_valid(radix));
 
-    if (uc32_dec(c))
-        c -= U'0';
-    else if (U'A' <= c && c <= U'F') {
-        c -= U'A';
+    if ('0' <= c && c <= '9')
+        c -= '0';
+    else if ('A' <= c && c <= 'F') {
+        c -= 'A';
         c += 10;
-    } else if (U'a' <= c && c <= U'f') {
-        c -= U'a';
+    } else if ('a' <= c && c <= 'f') {
+        c -= 'a';
         c += 10;
     } else
         return false;
@@ -1526,28 +582,28 @@ bool uc32_radix(uc32_t c, uradix_t radix) {
     return c < radix;
 }
 
-bool uc32_case_radix(uc32_t c, uradix_t radix, ucase_t ca) {
-	assert(ucase_valid(ca));
+bool uc32_case_radix(uc32_t c, ucase_t ca, uradix_t radix) {
+    assert(ucase_valid(ca));
 
-	switch (ca) {
-		case UCASE_UPPER:
-			return uc32_upper_radix(c, radix);
+    switch (ca) {
+        case UCASE_LOWER:
+            return uc32_lower_radix(c, radix);
 
-		case UCASE_LOWER:
-			return uc32_lower_radix(c, radix);
+        case UCASE_UPPER:
+            return uc32_upper_radix(c, radix);
 
-		default:
-			return uc32_radix(c, radix);
-	}
+        default:
+            return uc32_radix(c, radix);
+    }
 }
 
 bool uc32_lower_radix(uc32_t c, uradix_t radix) {
-	assert(uradix_valid(radix));
+    assert(uradix_valid(radix));
 
-    if (uc32_dec(c))
-        c -= U'0';
-    else if (U'a' <= c && c <= U'f') {
-        c -= U'a';
+    if ('0' <= c && c <= '9')
+        c -= '0';
+    else if ('a' <= c && c <= 'f') {
+        c -= 'a';
         c += 10;
     } else
         return false;
@@ -1556,12 +612,12 @@ bool uc32_lower_radix(uc32_t c, uradix_t radix) {
 }
 
 bool uc32_upper_radix(uc32_t c, uradix_t radix) {
-	assert(uradix_valid(radix));
+    assert(uradix_valid(radix));
 
-    if (uc32_dec(c))
-        c -= U'0';
-    else if (U'A' <= c && c <= U'F') {
-        c -= U'A';
+    if ('0' <= c && c <= '9')
+        c -= '0';
+    else if ('A' <= c && c <= 'F') {
+        c -= 'A';
         c += 10;
     } else
         return false;
@@ -1569,30 +625,4205 @@ bool uc32_upper_radix(uc32_t c, uradix_t radix) {
     return c < radix;
 }
 
+bool uc16_bin(uc16_t c) {
+    return uc32_bin(c);
+}
+
+bool uc16_oct(uc16_t c) {
+    return uc32_oct(c);
+}
+
+bool uc16_dec(uc16_t c) {
+    return uc32_dec(c);
+}
+
+bool uc16_hex(uc16_t c) {
+    return uc32_hex(c);
+}
+
+bool uc16_case_hex(uc16_t c, ucase_t ca) {
+    return uc32_case_hex(c, ca);
+}
+
+bool uc16_lower_hex(uc16_t c) {
+    return uc32_lower_hex(c);
+}
+
+bool uc16_upper_hex(uc16_t c) {
+    return uc32_upper_hex(c);
+}
+
+bool uc16_radix(uc16_t c, uradix_t radix) {
+    return uc32_radix(c, radix);
+}
+
+bool uc16_case_radix(uc16_t c, ucase_t ca, uradix_t radix) {
+    return uc32_case_radix(c, ca, radix);
+}
+
+bool uc16_lower_radix(uc16_t c, uradix_t radix) {
+    return uc32_lower_radix(c, radix);
+}
+
+bool uc16_upper_radix(uc16_t c, uradix_t radix) {
+    return uc32_upper_radix(c, radix);
+}
+
+bool uc8_bin(uc8_t c) {
+    return uc32_bin(c);
+}
+
+bool uc8_oct(uc8_t c) {
+    return uc32_oct(c);
+}
+
+bool uc8_dec(uc8_t c) {
+    return uc32_dec(c);
+}
+
+bool uc8_hex(uc8_t c) {
+    return uc32_hex(c);
+}
+
+bool uc8_case_hex(uc8_t c, ucase_t ca) {
+    return uc32_case_hex(c, ca);
+}
+
+bool uc8_lower_hex(uc8_t c) {
+    return uc32_lower_hex(c);
+}
+
+bool uc8_upper_hex(uc8_t c) {
+    return uc32_upper_hex(c);
+}
+
+bool uc8_radix(uc8_t c, uradix_t radix) {
+    return uc32_radix(c, radix);
+}
+
+bool uc8_case_radix(uc8_t c, ucase_t ca, uradix_t radix) {
+    return uc32_case_radix(c, ca, radix);
+}
+
+bool uc8_lower_radix(uc8_t c, uradix_t radix) {
+    return uc32_lower_radix(c, radix);
+}
+
+bool uc8_upper_radix(uc8_t c, uradix_t radix) {
+    return uc32_upper_radix(c, radix);
+}
+
 uc32_to_case_func_t uc32_to_case_func_from_ucase(ucase_t ca) {
-	assert(ucase_valid(ca));
+    assert(ucase_valid(ca));
 
-	switch (ca) {
-		case UCASE_UPPER:
-			return uc32_to_upper;
+    switch (ca) {
+        case UCASE_LOWER:
+            return uc32_to_lower;
 
-		case UCASE_LOWER:
-			return uc32_to_lower;
+        case UCASE_UPPER:
+            return uc32_to_upper;
 
-		default:
-			return NULL;
-	}
+        default:
+            return uc32_from_uc32;
+    }
 }
 
 uc32_t uc32_to_case(uc32_t c, ucase_t ca) {
-	assert(ucase_valid(ca));
+    assert(uc32_valid(ca));
 
-	switch (ca) {
-		case UCASE_UPPER:
-			return uc32_to_upper(c);
+    switch (ca) {
+        case UCASE_LOWER:
+            return uc32_to_lower(c);
 
-		case UCASE_LOWER:
-			return uc32_to_lower(c);
+        case UCASE_UPPER:
+            return uc32_to_upper(c);
+
+        default:
+            return c;
+    }
+}
+
+uc32_t uc32_to_lower(uc32_t c) {
+	switch (c) {
+		case 0x0041:
+			return 0x0061;
+
+		case 0x0042:
+			return 0x0062;
+
+		case 0x0043:
+			return 0x0063;
+
+		case 0x0044:
+			return 0x0064;
+
+		case 0x0045:
+			return 0x0065;
+
+		case 0x0046:
+			return 0x0066;
+
+		case 0x0047:
+			return 0x0067;
+
+		case 0x0048:
+			return 0x0068;
+
+		case 0x0049:
+			return 0x0069;
+
+		case 0x004A:
+			return 0x006A;
+
+		case 0x004B:
+			return 0x006B;
+
+		case 0x004C:
+			return 0x006C;
+
+		case 0x004D:
+			return 0x006D;
+
+		case 0x004E:
+			return 0x006E;
+
+		case 0x004F:
+			return 0x006F;
+
+		case 0x0050:
+			return 0x0070;
+
+		case 0x0051:
+			return 0x0071;
+
+		case 0x0052:
+			return 0x0072;
+
+		case 0x0053:
+			return 0x0073;
+
+		case 0x0054:
+			return 0x0074;
+
+		case 0x0055:
+			return 0x0075;
+
+		case 0x0056:
+			return 0x0076;
+
+		case 0x0057:
+			return 0x0077;
+
+		case 0x0058:
+			return 0x0078;
+
+		case 0x0059:
+			return 0x0079;
+
+		case 0x005A:
+			return 0x007A;
+
+		case 0x00C0:
+			return 0x00E0;
+
+		case 0x00C1:
+			return 0x00E1;
+
+		case 0x00C2:
+			return 0x00E2;
+
+		case 0x00C3:
+			return 0x00E3;
+
+		case 0x00C4:
+			return 0x00E4;
+
+		case 0x00C5:
+			return 0x00E5;
+
+		case 0x00C6:
+			return 0x00E6;
+
+		case 0x00C7:
+			return 0x00E7;
+
+		case 0x00C8:
+			return 0x00E8;
+
+		case 0x00C9:
+			return 0x00E9;
+
+		case 0x00CA:
+			return 0x00EA;
+
+		case 0x00CB:
+			return 0x00EB;
+
+		case 0x00CC:
+			return 0x00EC;
+
+		case 0x00CD:
+			return 0x00ED;
+
+		case 0x00CE:
+			return 0x00EE;
+
+		case 0x00CF:
+			return 0x00EF;
+
+		case 0x00D0:
+			return 0x00F0;
+
+		case 0x00D1:
+			return 0x00F1;
+
+		case 0x00D2:
+			return 0x00F2;
+
+		case 0x00D3:
+			return 0x00F3;
+
+		case 0x00D4:
+			return 0x00F4;
+
+		case 0x00D5:
+			return 0x00F5;
+
+		case 0x00D6:
+			return 0x00F6;
+
+		case 0x00D8:
+			return 0x00F8;
+
+		case 0x00D9:
+			return 0x00F9;
+
+		case 0x00DA:
+			return 0x00FA;
+
+		case 0x00DB:
+			return 0x00FB;
+
+		case 0x00DC:
+			return 0x00FC;
+
+		case 0x00DD:
+			return 0x00FD;
+
+		case 0x00DE:
+			return 0x00FE;
+
+		case 0x0100:
+			return 0x0101;
+
+		case 0x0102:
+			return 0x0103;
+
+		case 0x0104:
+			return 0x0105;
+
+		case 0x0106:
+			return 0x0107;
+
+		case 0x0108:
+			return 0x0109;
+
+		case 0x010A:
+			return 0x010B;
+
+		case 0x010C:
+			return 0x010D;
+
+		case 0x010E:
+			return 0x010F;
+
+		case 0x0110:
+			return 0x0111;
+
+		case 0x0112:
+			return 0x0113;
+
+		case 0x0114:
+			return 0x0115;
+
+		case 0x0116:
+			return 0x0117;
+
+		case 0x0118:
+			return 0x0119;
+
+		case 0x011A:
+			return 0x011B;
+
+		case 0x011C:
+			return 0x011D;
+
+		case 0x011E:
+			return 0x011F;
+
+		case 0x0120:
+			return 0x0121;
+
+		case 0x0122:
+			return 0x0123;
+
+		case 0x0124:
+			return 0x0125;
+
+		case 0x0126:
+			return 0x0127;
+
+		case 0x0128:
+			return 0x0129;
+
+		case 0x012A:
+			return 0x012B;
+
+		case 0x012C:
+			return 0x012D;
+
+		case 0x012E:
+			return 0x012F;
+
+		case 0x0130:
+			return 0x0069;
+
+		case 0x0132:
+			return 0x0133;
+
+		case 0x0134:
+			return 0x0135;
+
+		case 0x0136:
+			return 0x0137;
+
+		case 0x0139:
+			return 0x013A;
+
+		case 0x013B:
+			return 0x013C;
+
+		case 0x013D:
+			return 0x013E;
+
+		case 0x013F:
+			return 0x0140;
+
+		case 0x0141:
+			return 0x0142;
+
+		case 0x0143:
+			return 0x0144;
+
+		case 0x0145:
+			return 0x0146;
+
+		case 0x0147:
+			return 0x0148;
+
+		case 0x014A:
+			return 0x014B;
+
+		case 0x014C:
+			return 0x014D;
+
+		case 0x014E:
+			return 0x014F;
+
+		case 0x0150:
+			return 0x0151;
+
+		case 0x0152:
+			return 0x0153;
+
+		case 0x0154:
+			return 0x0155;
+
+		case 0x0156:
+			return 0x0157;
+
+		case 0x0158:
+			return 0x0159;
+
+		case 0x015A:
+			return 0x015B;
+
+		case 0x015C:
+			return 0x015D;
+
+		case 0x015E:
+			return 0x015F;
+
+		case 0x0160:
+			return 0x0161;
+
+		case 0x0162:
+			return 0x0163;
+
+		case 0x0164:
+			return 0x0165;
+
+		case 0x0166:
+			return 0x0167;
+
+		case 0x0168:
+			return 0x0169;
+
+		case 0x016A:
+			return 0x016B;
+
+		case 0x016C:
+			return 0x016D;
+
+		case 0x016E:
+			return 0x016F;
+
+		case 0x0170:
+			return 0x0171;
+
+		case 0x0172:
+			return 0x0173;
+
+		case 0x0174:
+			return 0x0175;
+
+		case 0x0176:
+			return 0x0177;
+
+		case 0x0178:
+			return 0x00FF;
+
+		case 0x0179:
+			return 0x017A;
+
+		case 0x017B:
+			return 0x017C;
+
+		case 0x017D:
+			return 0x017E;
+
+		case 0x0181:
+			return 0x0253;
+
+		case 0x0182:
+			return 0x0183;
+
+		case 0x0184:
+			return 0x0185;
+
+		case 0x0186:
+			return 0x0254;
+
+		case 0x0187:
+			return 0x0188;
+
+		case 0x0189:
+			return 0x0256;
+
+		case 0x018A:
+			return 0x0257;
+
+		case 0x018B:
+			return 0x018C;
+
+		case 0x018E:
+			return 0x01DD;
+
+		case 0x018F:
+			return 0x0259;
+
+		case 0x0190:
+			return 0x025B;
+
+		case 0x0191:
+			return 0x0192;
+
+		case 0x0193:
+			return 0x0260;
+
+		case 0x0194:
+			return 0x0263;
+
+		case 0x0196:
+			return 0x0269;
+
+		case 0x0197:
+			return 0x0268;
+
+		case 0x0198:
+			return 0x0199;
+
+		case 0x019C:
+			return 0x026F;
+
+		case 0x019D:
+			return 0x0272;
+
+		case 0x019F:
+			return 0x0275;
+
+		case 0x01A0:
+			return 0x01A1;
+
+		case 0x01A2:
+			return 0x01A3;
+
+		case 0x01A4:
+			return 0x01A5;
+
+		case 0x01A6:
+			return 0x0280;
+
+		case 0x01A7:
+			return 0x01A8;
+
+		case 0x01A9:
+			return 0x0283;
+
+		case 0x01AC:
+			return 0x01AD;
+
+		case 0x01AE:
+			return 0x0288;
+
+		case 0x01AF:
+			return 0x01B0;
+
+		case 0x01B1:
+			return 0x028A;
+
+		case 0x01B2:
+			return 0x028B;
+
+		case 0x01B3:
+			return 0x01B4;
+
+		case 0x01B5:
+			return 0x01B6;
+
+		case 0x01B7:
+			return 0x0292;
+
+		case 0x01B8:
+			return 0x01B9;
+
+		case 0x01BC:
+			return 0x01BD;
+
+		case 0x01C4:
+			return 0x01C6;
+
+		case 0x01C7:
+			return 0x01C9;
+
+		case 0x01CA:
+			return 0x01CC;
+
+		case 0x01CD:
+			return 0x01CE;
+
+		case 0x01CF:
+			return 0x01D0;
+
+		case 0x01D1:
+			return 0x01D2;
+
+		case 0x01D3:
+			return 0x01D4;
+
+		case 0x01D5:
+			return 0x01D6;
+
+		case 0x01D7:
+			return 0x01D8;
+
+		case 0x01D9:
+			return 0x01DA;
+
+		case 0x01DB:
+			return 0x01DC;
+
+		case 0x01DE:
+			return 0x01DF;
+
+		case 0x01E0:
+			return 0x01E1;
+
+		case 0x01E2:
+			return 0x01E3;
+
+		case 0x01E4:
+			return 0x01E5;
+
+		case 0x01E6:
+			return 0x01E7;
+
+		case 0x01E8:
+			return 0x01E9;
+
+		case 0x01EA:
+			return 0x01EB;
+
+		case 0x01EC:
+			return 0x01ED;
+
+		case 0x01EE:
+			return 0x01EF;
+
+		case 0x01F1:
+			return 0x01F3;
+
+		case 0x01F4:
+			return 0x01F5;
+
+		case 0x01F6:
+			return 0x0195;
+
+		case 0x01F7:
+			return 0x01BF;
+
+		case 0x01F8:
+			return 0x01F9;
+
+		case 0x01FA:
+			return 0x01FB;
+
+		case 0x01FC:
+			return 0x01FD;
+
+		case 0x01FE:
+			return 0x01FF;
+
+		case 0x0200:
+			return 0x0201;
+
+		case 0x0202:
+			return 0x0203;
+
+		case 0x0204:
+			return 0x0205;
+
+		case 0x0206:
+			return 0x0207;
+
+		case 0x0208:
+			return 0x0209;
+
+		case 0x020A:
+			return 0x020B;
+
+		case 0x020C:
+			return 0x020D;
+
+		case 0x020E:
+			return 0x020F;
+
+		case 0x0210:
+			return 0x0211;
+
+		case 0x0212:
+			return 0x0213;
+
+		case 0x0214:
+			return 0x0215;
+
+		case 0x0216:
+			return 0x0217;
+
+		case 0x0218:
+			return 0x0219;
+
+		case 0x021A:
+			return 0x021B;
+
+		case 0x021C:
+			return 0x021D;
+
+		case 0x021E:
+			return 0x021F;
+
+		case 0x0220:
+			return 0x019E;
+
+		case 0x0222:
+			return 0x0223;
+
+		case 0x0224:
+			return 0x0225;
+
+		case 0x0226:
+			return 0x0227;
+
+		case 0x0228:
+			return 0x0229;
+
+		case 0x022A:
+			return 0x022B;
+
+		case 0x022C:
+			return 0x022D;
+
+		case 0x022E:
+			return 0x022F;
+
+		case 0x0230:
+			return 0x0231;
+
+		case 0x0232:
+			return 0x0233;
+
+		case 0x023A:
+			return 0x2C65;
+
+		case 0x023B:
+			return 0x023C;
+
+		case 0x023D:
+			return 0x019A;
+
+		case 0x023E:
+			return 0x2C66;
+
+		case 0x0241:
+			return 0x0242;
+
+		case 0x0243:
+			return 0x0180;
+
+		case 0x0244:
+			return 0x0289;
+
+		case 0x0245:
+			return 0x028C;
+
+		case 0x0246:
+			return 0x0247;
+
+		case 0x0248:
+			return 0x0249;
+
+		case 0x024A:
+			return 0x024B;
+
+		case 0x024C:
+			return 0x024D;
+
+		case 0x024E:
+			return 0x024F;
+
+		case 0x0370:
+			return 0x0371;
+
+		case 0x0372:
+			return 0x0373;
+
+		case 0x0376:
+			return 0x0377;
+
+		case 0x037F:
+			return 0x03F3;
+
+		case 0x0386:
+			return 0x03AC;
+
+		case 0x0388:
+			return 0x03AD;
+
+		case 0x0389:
+			return 0x03AE;
+
+		case 0x038A:
+			return 0x03AF;
+
+		case 0x038C:
+			return 0x03CC;
+
+		case 0x038E:
+			return 0x03CD;
+
+		case 0x038F:
+			return 0x03CE;
+
+		case 0x0391:
+			return 0x03B1;
+
+		case 0x0392:
+			return 0x03B2;
+
+		case 0x0393:
+			return 0x03B3;
+
+		case 0x0394:
+			return 0x03B4;
+
+		case 0x0395:
+			return 0x03B5;
+
+		case 0x0396:
+			return 0x03B6;
+
+		case 0x0397:
+			return 0x03B7;
+
+		case 0x0398:
+			return 0x03B8;
+
+		case 0x0399:
+			return 0x03B9;
+
+		case 0x039A:
+			return 0x03BA;
+
+		case 0x039B:
+			return 0x03BB;
+
+		case 0x039C:
+			return 0x03BC;
+
+		case 0x039D:
+			return 0x03BD;
+
+		case 0x039E:
+			return 0x03BE;
+
+		case 0x039F:
+			return 0x03BF;
+
+		case 0x03A0:
+			return 0x03C0;
+
+		case 0x03A1:
+			return 0x03C1;
+
+		case 0x03A3:
+			return 0x03C3;
+
+		case 0x03A4:
+			return 0x03C4;
+
+		case 0x03A5:
+			return 0x03C5;
+
+		case 0x03A6:
+			return 0x03C6;
+
+		case 0x03A7:
+			return 0x03C7;
+
+		case 0x03A8:
+			return 0x03C8;
+
+		case 0x03A9:
+			return 0x03C9;
+
+		case 0x03AA:
+			return 0x03CA;
+
+		case 0x03AB:
+			return 0x03CB;
+
+		case 0x03CF:
+			return 0x03D7;
+
+		case 0x03D8:
+			return 0x03D9;
+
+		case 0x03DA:
+			return 0x03DB;
+
+		case 0x03DC:
+			return 0x03DD;
+
+		case 0x03DE:
+			return 0x03DF;
+
+		case 0x03E0:
+			return 0x03E1;
+
+		case 0x03E2:
+			return 0x03E3;
+
+		case 0x03E4:
+			return 0x03E5;
+
+		case 0x03E6:
+			return 0x03E7;
+
+		case 0x03E8:
+			return 0x03E9;
+
+		case 0x03EA:
+			return 0x03EB;
+
+		case 0x03EC:
+			return 0x03ED;
+
+		case 0x03EE:
+			return 0x03EF;
+
+		case 0x03F4:
+			return 0x03B8;
+
+		case 0x03F7:
+			return 0x03F8;
+
+		case 0x03F9:
+			return 0x03F2;
+
+		case 0x03FA:
+			return 0x03FB;
+
+		case 0x03FD:
+			return 0x037B;
+
+		case 0x03FE:
+			return 0x037C;
+
+		case 0x03FF:
+			return 0x037D;
+
+		case 0x0400:
+			return 0x0450;
+
+		case 0x0401:
+			return 0x0451;
+
+		case 0x0402:
+			return 0x0452;
+
+		case 0x0403:
+			return 0x0453;
+
+		case 0x0404:
+			return 0x0454;
+
+		case 0x0405:
+			return 0x0455;
+
+		case 0x0406:
+			return 0x0456;
+
+		case 0x0407:
+			return 0x0457;
+
+		case 0x0408:
+			return 0x0458;
+
+		case 0x0409:
+			return 0x0459;
+
+		case 0x040A:
+			return 0x045A;
+
+		case 0x040B:
+			return 0x045B;
+
+		case 0x040C:
+			return 0x045C;
+
+		case 0x040D:
+			return 0x045D;
+
+		case 0x040E:
+			return 0x045E;
+
+		case 0x040F:
+			return 0x045F;
+
+		case 0x0410:
+			return 0x0430;
+
+		case 0x0411:
+			return 0x0431;
+
+		case 0x0412:
+			return 0x0432;
+
+		case 0x0413:
+			return 0x0433;
+
+		case 0x0414:
+			return 0x0434;
+
+		case 0x0415:
+			return 0x0435;
+
+		case 0x0416:
+			return 0x0436;
+
+		case 0x0417:
+			return 0x0437;
+
+		case 0x0418:
+			return 0x0438;
+
+		case 0x0419:
+			return 0x0439;
+
+		case 0x041A:
+			return 0x043A;
+
+		case 0x041B:
+			return 0x043B;
+
+		case 0x041C:
+			return 0x043C;
+
+		case 0x041D:
+			return 0x043D;
+
+		case 0x041E:
+			return 0x043E;
+
+		case 0x041F:
+			return 0x043F;
+
+		case 0x0420:
+			return 0x0440;
+
+		case 0x0421:
+			return 0x0441;
+
+		case 0x0422:
+			return 0x0442;
+
+		case 0x0423:
+			return 0x0443;
+
+		case 0x0424:
+			return 0x0444;
+
+		case 0x0425:
+			return 0x0445;
+
+		case 0x0426:
+			return 0x0446;
+
+		case 0x0427:
+			return 0x0447;
+
+		case 0x0428:
+			return 0x0448;
+
+		case 0x0429:
+			return 0x0449;
+
+		case 0x042A:
+			return 0x044A;
+
+		case 0x042B:
+			return 0x044B;
+
+		case 0x042C:
+			return 0x044C;
+
+		case 0x042D:
+			return 0x044D;
+
+		case 0x042E:
+			return 0x044E;
+
+		case 0x042F:
+			return 0x044F;
+
+		case 0x0460:
+			return 0x0461;
+
+		case 0x0462:
+			return 0x0463;
+
+		case 0x0464:
+			return 0x0465;
+
+		case 0x0466:
+			return 0x0467;
+
+		case 0x0468:
+			return 0x0469;
+
+		case 0x046A:
+			return 0x046B;
+
+		case 0x046C:
+			return 0x046D;
+
+		case 0x046E:
+			return 0x046F;
+
+		case 0x0470:
+			return 0x0471;
+
+		case 0x0472:
+			return 0x0473;
+
+		case 0x0474:
+			return 0x0475;
+
+		case 0x0476:
+			return 0x0477;
+
+		case 0x0478:
+			return 0x0479;
+
+		case 0x047A:
+			return 0x047B;
+
+		case 0x047C:
+			return 0x047D;
+
+		case 0x047E:
+			return 0x047F;
+
+		case 0x0480:
+			return 0x0481;
+
+		case 0x048A:
+			return 0x048B;
+
+		case 0x048C:
+			return 0x048D;
+
+		case 0x048E:
+			return 0x048F;
+
+		case 0x0490:
+			return 0x0491;
+
+		case 0x0492:
+			return 0x0493;
+
+		case 0x0494:
+			return 0x0495;
+
+		case 0x0496:
+			return 0x0497;
+
+		case 0x0498:
+			return 0x0499;
+
+		case 0x049A:
+			return 0x049B;
+
+		case 0x049C:
+			return 0x049D;
+
+		case 0x049E:
+			return 0x049F;
+
+		case 0x04A0:
+			return 0x04A1;
+
+		case 0x04A2:
+			return 0x04A3;
+
+		case 0x04A4:
+			return 0x04A5;
+
+		case 0x04A6:
+			return 0x04A7;
+
+		case 0x04A8:
+			return 0x04A9;
+
+		case 0x04AA:
+			return 0x04AB;
+
+		case 0x04AC:
+			return 0x04AD;
+
+		case 0x04AE:
+			return 0x04AF;
+
+		case 0x04B0:
+			return 0x04B1;
+
+		case 0x04B2:
+			return 0x04B3;
+
+		case 0x04B4:
+			return 0x04B5;
+
+		case 0x04B6:
+			return 0x04B7;
+
+		case 0x04B8:
+			return 0x04B9;
+
+		case 0x04BA:
+			return 0x04BB;
+
+		case 0x04BC:
+			return 0x04BD;
+
+		case 0x04BE:
+			return 0x04BF;
+
+		case 0x04C0:
+			return 0x04CF;
+
+		case 0x04C1:
+			return 0x04C2;
+
+		case 0x04C3:
+			return 0x04C4;
+
+		case 0x04C5:
+			return 0x04C6;
+
+		case 0x04C7:
+			return 0x04C8;
+
+		case 0x04C9:
+			return 0x04CA;
+
+		case 0x04CB:
+			return 0x04CC;
+
+		case 0x04CD:
+			return 0x04CE;
+
+		case 0x04D0:
+			return 0x04D1;
+
+		case 0x04D2:
+			return 0x04D3;
+
+		case 0x04D4:
+			return 0x04D5;
+
+		case 0x04D6:
+			return 0x04D7;
+
+		case 0x04D8:
+			return 0x04D9;
+
+		case 0x04DA:
+			return 0x04DB;
+
+		case 0x04DC:
+			return 0x04DD;
+
+		case 0x04DE:
+			return 0x04DF;
+
+		case 0x04E0:
+			return 0x04E1;
+
+		case 0x04E2:
+			return 0x04E3;
+
+		case 0x04E4:
+			return 0x04E5;
+
+		case 0x04E6:
+			return 0x04E7;
+
+		case 0x04E8:
+			return 0x04E9;
+
+		case 0x04EA:
+			return 0x04EB;
+
+		case 0x04EC:
+			return 0x04ED;
+
+		case 0x04EE:
+			return 0x04EF;
+
+		case 0x04F0:
+			return 0x04F1;
+
+		case 0x04F2:
+			return 0x04F3;
+
+		case 0x04F4:
+			return 0x04F5;
+
+		case 0x04F6:
+			return 0x04F7;
+
+		case 0x04F8:
+			return 0x04F9;
+
+		case 0x04FA:
+			return 0x04FB;
+
+		case 0x04FC:
+			return 0x04FD;
+
+		case 0x04FE:
+			return 0x04FF;
+
+		case 0x0500:
+			return 0x0501;
+
+		case 0x0502:
+			return 0x0503;
+
+		case 0x0504:
+			return 0x0505;
+
+		case 0x0506:
+			return 0x0507;
+
+		case 0x0508:
+			return 0x0509;
+
+		case 0x050A:
+			return 0x050B;
+
+		case 0x050C:
+			return 0x050D;
+
+		case 0x050E:
+			return 0x050F;
+
+		case 0x0510:
+			return 0x0511;
+
+		case 0x0512:
+			return 0x0513;
+
+		case 0x0514:
+			return 0x0515;
+
+		case 0x0516:
+			return 0x0517;
+
+		case 0x0518:
+			return 0x0519;
+
+		case 0x051A:
+			return 0x051B;
+
+		case 0x051C:
+			return 0x051D;
+
+		case 0x051E:
+			return 0x051F;
+
+		case 0x0520:
+			return 0x0521;
+
+		case 0x0522:
+			return 0x0523;
+
+		case 0x0524:
+			return 0x0525;
+
+		case 0x0526:
+			return 0x0527;
+
+		case 0x0528:
+			return 0x0529;
+
+		case 0x052A:
+			return 0x052B;
+
+		case 0x052C:
+			return 0x052D;
+
+		case 0x052E:
+			return 0x052F;
+
+		case 0x0531:
+			return 0x0561;
+
+		case 0x0532:
+			return 0x0562;
+
+		case 0x0533:
+			return 0x0563;
+
+		case 0x0534:
+			return 0x0564;
+
+		case 0x0535:
+			return 0x0565;
+
+		case 0x0536:
+			return 0x0566;
+
+		case 0x0537:
+			return 0x0567;
+
+		case 0x0538:
+			return 0x0568;
+
+		case 0x0539:
+			return 0x0569;
+
+		case 0x053A:
+			return 0x056A;
+
+		case 0x053B:
+			return 0x056B;
+
+		case 0x053C:
+			return 0x056C;
+
+		case 0x053D:
+			return 0x056D;
+
+		case 0x053E:
+			return 0x056E;
+
+		case 0x053F:
+			return 0x056F;
+
+		case 0x0540:
+			return 0x0570;
+
+		case 0x0541:
+			return 0x0571;
+
+		case 0x0542:
+			return 0x0572;
+
+		case 0x0543:
+			return 0x0573;
+
+		case 0x0544:
+			return 0x0574;
+
+		case 0x0545:
+			return 0x0575;
+
+		case 0x0546:
+			return 0x0576;
+
+		case 0x0547:
+			return 0x0577;
+
+		case 0x0548:
+			return 0x0578;
+
+		case 0x0549:
+			return 0x0579;
+
+		case 0x054A:
+			return 0x057A;
+
+		case 0x054B:
+			return 0x057B;
+
+		case 0x054C:
+			return 0x057C;
+
+		case 0x054D:
+			return 0x057D;
+
+		case 0x054E:
+			return 0x057E;
+
+		case 0x054F:
+			return 0x057F;
+
+		case 0x0550:
+			return 0x0580;
+
+		case 0x0551:
+			return 0x0581;
+
+		case 0x0552:
+			return 0x0582;
+
+		case 0x0553:
+			return 0x0583;
+
+		case 0x0554:
+			return 0x0584;
+
+		case 0x0555:
+			return 0x0585;
+
+		case 0x0556:
+			return 0x0586;
+
+		case 0x10A0:
+			return 0x2D00;
+
+		case 0x10A1:
+			return 0x2D01;
+
+		case 0x10A2:
+			return 0x2D02;
+
+		case 0x10A3:
+			return 0x2D03;
+
+		case 0x10A4:
+			return 0x2D04;
+
+		case 0x10A5:
+			return 0x2D05;
+
+		case 0x10A6:
+			return 0x2D06;
+
+		case 0x10A7:
+			return 0x2D07;
+
+		case 0x10A8:
+			return 0x2D08;
+
+		case 0x10A9:
+			return 0x2D09;
+
+		case 0x10AA:
+			return 0x2D0A;
+
+		case 0x10AB:
+			return 0x2D0B;
+
+		case 0x10AC:
+			return 0x2D0C;
+
+		case 0x10AD:
+			return 0x2D0D;
+
+		case 0x10AE:
+			return 0x2D0E;
+
+		case 0x10AF:
+			return 0x2D0F;
+
+		case 0x10B0:
+			return 0x2D10;
+
+		case 0x10B1:
+			return 0x2D11;
+
+		case 0x10B2:
+			return 0x2D12;
+
+		case 0x10B3:
+			return 0x2D13;
+
+		case 0x10B4:
+			return 0x2D14;
+
+		case 0x10B5:
+			return 0x2D15;
+
+		case 0x10B6:
+			return 0x2D16;
+
+		case 0x10B7:
+			return 0x2D17;
+
+		case 0x10B8:
+			return 0x2D18;
+
+		case 0x10B9:
+			return 0x2D19;
+
+		case 0x10BA:
+			return 0x2D1A;
+
+		case 0x10BB:
+			return 0x2D1B;
+
+		case 0x10BC:
+			return 0x2D1C;
+
+		case 0x10BD:
+			return 0x2D1D;
+
+		case 0x10BE:
+			return 0x2D1E;
+
+		case 0x10BF:
+			return 0x2D1F;
+
+		case 0x10C0:
+			return 0x2D20;
+
+		case 0x10C1:
+			return 0x2D21;
+
+		case 0x10C2:
+			return 0x2D22;
+
+		case 0x10C3:
+			return 0x2D23;
+
+		case 0x10C4:
+			return 0x2D24;
+
+		case 0x10C5:
+			return 0x2D25;
+
+		case 0x10C7:
+			return 0x2D27;
+
+		case 0x10CD:
+			return 0x2D2D;
+
+		case 0x13A0:
+			return 0xAB70;
+
+		case 0x13A1:
+			return 0xAB71;
+
+		case 0x13A2:
+			return 0xAB72;
+
+		case 0x13A3:
+			return 0xAB73;
+
+		case 0x13A4:
+			return 0xAB74;
+
+		case 0x13A5:
+			return 0xAB75;
+
+		case 0x13A6:
+			return 0xAB76;
+
+		case 0x13A7:
+			return 0xAB77;
+
+		case 0x13A8:
+			return 0xAB78;
+
+		case 0x13A9:
+			return 0xAB79;
+
+		case 0x13AA:
+			return 0xAB7A;
+
+		case 0x13AB:
+			return 0xAB7B;
+
+		case 0x13AC:
+			return 0xAB7C;
+
+		case 0x13AD:
+			return 0xAB7D;
+
+		case 0x13AE:
+			return 0xAB7E;
+
+		case 0x13AF:
+			return 0xAB7F;
+
+		case 0x13B0:
+			return 0xAB80;
+
+		case 0x13B1:
+			return 0xAB81;
+
+		case 0x13B2:
+			return 0xAB82;
+
+		case 0x13B3:
+			return 0xAB83;
+
+		case 0x13B4:
+			return 0xAB84;
+
+		case 0x13B5:
+			return 0xAB85;
+
+		case 0x13B6:
+			return 0xAB86;
+
+		case 0x13B7:
+			return 0xAB87;
+
+		case 0x13B8:
+			return 0xAB88;
+
+		case 0x13B9:
+			return 0xAB89;
+
+		case 0x13BA:
+			return 0xAB8A;
+
+		case 0x13BB:
+			return 0xAB8B;
+
+		case 0x13BC:
+			return 0xAB8C;
+
+		case 0x13BD:
+			return 0xAB8D;
+
+		case 0x13BE:
+			return 0xAB8E;
+
+		case 0x13BF:
+			return 0xAB8F;
+
+		case 0x13C0:
+			return 0xAB90;
+
+		case 0x13C1:
+			return 0xAB91;
+
+		case 0x13C2:
+			return 0xAB92;
+
+		case 0x13C3:
+			return 0xAB93;
+
+		case 0x13C4:
+			return 0xAB94;
+
+		case 0x13C5:
+			return 0xAB95;
+
+		case 0x13C6:
+			return 0xAB96;
+
+		case 0x13C7:
+			return 0xAB97;
+
+		case 0x13C8:
+			return 0xAB98;
+
+		case 0x13C9:
+			return 0xAB99;
+
+		case 0x13CA:
+			return 0xAB9A;
+
+		case 0x13CB:
+			return 0xAB9B;
+
+		case 0x13CC:
+			return 0xAB9C;
+
+		case 0x13CD:
+			return 0xAB9D;
+
+		case 0x13CE:
+			return 0xAB9E;
+
+		case 0x13CF:
+			return 0xAB9F;
+
+		case 0x13D0:
+			return 0xABA0;
+
+		case 0x13D1:
+			return 0xABA1;
+
+		case 0x13D2:
+			return 0xABA2;
+
+		case 0x13D3:
+			return 0xABA3;
+
+		case 0x13D4:
+			return 0xABA4;
+
+		case 0x13D5:
+			return 0xABA5;
+
+		case 0x13D6:
+			return 0xABA6;
+
+		case 0x13D7:
+			return 0xABA7;
+
+		case 0x13D8:
+			return 0xABA8;
+
+		case 0x13D9:
+			return 0xABA9;
+
+		case 0x13DA:
+			return 0xABAA;
+
+		case 0x13DB:
+			return 0xABAB;
+
+		case 0x13DC:
+			return 0xABAC;
+
+		case 0x13DD:
+			return 0xABAD;
+
+		case 0x13DE:
+			return 0xABAE;
+
+		case 0x13DF:
+			return 0xABAF;
+
+		case 0x13E0:
+			return 0xABB0;
+
+		case 0x13E1:
+			return 0xABB1;
+
+		case 0x13E2:
+			return 0xABB2;
+
+		case 0x13E3:
+			return 0xABB3;
+
+		case 0x13E4:
+			return 0xABB4;
+
+		case 0x13E5:
+			return 0xABB5;
+
+		case 0x13E6:
+			return 0xABB6;
+
+		case 0x13E7:
+			return 0xABB7;
+
+		case 0x13E8:
+			return 0xABB8;
+
+		case 0x13E9:
+			return 0xABB9;
+
+		case 0x13EA:
+			return 0xABBA;
+
+		case 0x13EB:
+			return 0xABBB;
+
+		case 0x13EC:
+			return 0xABBC;
+
+		case 0x13ED:
+			return 0xABBD;
+
+		case 0x13EE:
+			return 0xABBE;
+
+		case 0x13EF:
+			return 0xABBF;
+
+		case 0x13F0:
+			return 0x13F8;
+
+		case 0x13F1:
+			return 0x13F9;
+
+		case 0x13F2:
+			return 0x13FA;
+
+		case 0x13F3:
+			return 0x13FB;
+
+		case 0x13F4:
+			return 0x13FC;
+
+		case 0x13F5:
+			return 0x13FD;
+
+		case 0x1C90:
+			return 0x10D0;
+
+		case 0x1C91:
+			return 0x10D1;
+
+		case 0x1C92:
+			return 0x10D2;
+
+		case 0x1C93:
+			return 0x10D3;
+
+		case 0x1C94:
+			return 0x10D4;
+
+		case 0x1C95:
+			return 0x10D5;
+
+		case 0x1C96:
+			return 0x10D6;
+
+		case 0x1C97:
+			return 0x10D7;
+
+		case 0x1C98:
+			return 0x10D8;
+
+		case 0x1C99:
+			return 0x10D9;
+
+		case 0x1C9A:
+			return 0x10DA;
+
+		case 0x1C9B:
+			return 0x10DB;
+
+		case 0x1C9C:
+			return 0x10DC;
+
+		case 0x1C9D:
+			return 0x10DD;
+
+		case 0x1C9E:
+			return 0x10DE;
+
+		case 0x1C9F:
+			return 0x10DF;
+
+		case 0x1CA0:
+			return 0x10E0;
+
+		case 0x1CA1:
+			return 0x10E1;
+
+		case 0x1CA2:
+			return 0x10E2;
+
+		case 0x1CA3:
+			return 0x10E3;
+
+		case 0x1CA4:
+			return 0x10E4;
+
+		case 0x1CA5:
+			return 0x10E5;
+
+		case 0x1CA6:
+			return 0x10E6;
+
+		case 0x1CA7:
+			return 0x10E7;
+
+		case 0x1CA8:
+			return 0x10E8;
+
+		case 0x1CA9:
+			return 0x10E9;
+
+		case 0x1CAA:
+			return 0x10EA;
+
+		case 0x1CAB:
+			return 0x10EB;
+
+		case 0x1CAC:
+			return 0x10EC;
+
+		case 0x1CAD:
+			return 0x10ED;
+
+		case 0x1CAE:
+			return 0x10EE;
+
+		case 0x1CAF:
+			return 0x10EF;
+
+		case 0x1CB0:
+			return 0x10F0;
+
+		case 0x1CB1:
+			return 0x10F1;
+
+		case 0x1CB2:
+			return 0x10F2;
+
+		case 0x1CB3:
+			return 0x10F3;
+
+		case 0x1CB4:
+			return 0x10F4;
+
+		case 0x1CB5:
+			return 0x10F5;
+
+		case 0x1CB6:
+			return 0x10F6;
+
+		case 0x1CB7:
+			return 0x10F7;
+
+		case 0x1CB8:
+			return 0x10F8;
+
+		case 0x1CB9:
+			return 0x10F9;
+
+		case 0x1CBA:
+			return 0x10FA;
+
+		case 0x1CBD:
+			return 0x10FD;
+
+		case 0x1CBE:
+			return 0x10FE;
+
+		case 0x1CBF:
+			return 0x10FF;
+
+		case 0x1E00:
+			return 0x1E01;
+
+		case 0x1E02:
+			return 0x1E03;
+
+		case 0x1E04:
+			return 0x1E05;
+
+		case 0x1E06:
+			return 0x1E07;
+
+		case 0x1E08:
+			return 0x1E09;
+
+		case 0x1E0A:
+			return 0x1E0B;
+
+		case 0x1E0C:
+			return 0x1E0D;
+
+		case 0x1E0E:
+			return 0x1E0F;
+
+		case 0x1E10:
+			return 0x1E11;
+
+		case 0x1E12:
+			return 0x1E13;
+
+		case 0x1E14:
+			return 0x1E15;
+
+		case 0x1E16:
+			return 0x1E17;
+
+		case 0x1E18:
+			return 0x1E19;
+
+		case 0x1E1A:
+			return 0x1E1B;
+
+		case 0x1E1C:
+			return 0x1E1D;
+
+		case 0x1E1E:
+			return 0x1E1F;
+
+		case 0x1E20:
+			return 0x1E21;
+
+		case 0x1E22:
+			return 0x1E23;
+
+		case 0x1E24:
+			return 0x1E25;
+
+		case 0x1E26:
+			return 0x1E27;
+
+		case 0x1E28:
+			return 0x1E29;
+
+		case 0x1E2A:
+			return 0x1E2B;
+
+		case 0x1E2C:
+			return 0x1E2D;
+
+		case 0x1E2E:
+			return 0x1E2F;
+
+		case 0x1E30:
+			return 0x1E31;
+
+		case 0x1E32:
+			return 0x1E33;
+
+		case 0x1E34:
+			return 0x1E35;
+
+		case 0x1E36:
+			return 0x1E37;
+
+		case 0x1E38:
+			return 0x1E39;
+
+		case 0x1E3A:
+			return 0x1E3B;
+
+		case 0x1E3C:
+			return 0x1E3D;
+
+		case 0x1E3E:
+			return 0x1E3F;
+
+		case 0x1E40:
+			return 0x1E41;
+
+		case 0x1E42:
+			return 0x1E43;
+
+		case 0x1E44:
+			return 0x1E45;
+
+		case 0x1E46:
+			return 0x1E47;
+
+		case 0x1E48:
+			return 0x1E49;
+
+		case 0x1E4A:
+			return 0x1E4B;
+
+		case 0x1E4C:
+			return 0x1E4D;
+
+		case 0x1E4E:
+			return 0x1E4F;
+
+		case 0x1E50:
+			return 0x1E51;
+
+		case 0x1E52:
+			return 0x1E53;
+
+		case 0x1E54:
+			return 0x1E55;
+
+		case 0x1E56:
+			return 0x1E57;
+
+		case 0x1E58:
+			return 0x1E59;
+
+		case 0x1E5A:
+			return 0x1E5B;
+
+		case 0x1E5C:
+			return 0x1E5D;
+
+		case 0x1E5E:
+			return 0x1E5F;
+
+		case 0x1E60:
+			return 0x1E61;
+
+		case 0x1E62:
+			return 0x1E63;
+
+		case 0x1E64:
+			return 0x1E65;
+
+		case 0x1E66:
+			return 0x1E67;
+
+		case 0x1E68:
+			return 0x1E69;
+
+		case 0x1E6A:
+			return 0x1E6B;
+
+		case 0x1E6C:
+			return 0x1E6D;
+
+		case 0x1E6E:
+			return 0x1E6F;
+
+		case 0x1E70:
+			return 0x1E71;
+
+		case 0x1E72:
+			return 0x1E73;
+
+		case 0x1E74:
+			return 0x1E75;
+
+		case 0x1E76:
+			return 0x1E77;
+
+		case 0x1E78:
+			return 0x1E79;
+
+		case 0x1E7A:
+			return 0x1E7B;
+
+		case 0x1E7C:
+			return 0x1E7D;
+
+		case 0x1E7E:
+			return 0x1E7F;
+
+		case 0x1E80:
+			return 0x1E81;
+
+		case 0x1E82:
+			return 0x1E83;
+
+		case 0x1E84:
+			return 0x1E85;
+
+		case 0x1E86:
+			return 0x1E87;
+
+		case 0x1E88:
+			return 0x1E89;
+
+		case 0x1E8A:
+			return 0x1E8B;
+
+		case 0x1E8C:
+			return 0x1E8D;
+
+		case 0x1E8E:
+			return 0x1E8F;
+
+		case 0x1E90:
+			return 0x1E91;
+
+		case 0x1E92:
+			return 0x1E93;
+
+		case 0x1E94:
+			return 0x1E95;
+
+		case 0x1E9E:
+			return 0x00DF;
+
+		case 0x1EA0:
+			return 0x1EA1;
+
+		case 0x1EA2:
+			return 0x1EA3;
+
+		case 0x1EA4:
+			return 0x1EA5;
+
+		case 0x1EA6:
+			return 0x1EA7;
+
+		case 0x1EA8:
+			return 0x1EA9;
+
+		case 0x1EAA:
+			return 0x1EAB;
+
+		case 0x1EAC:
+			return 0x1EAD;
+
+		case 0x1EAE:
+			return 0x1EAF;
+
+		case 0x1EB0:
+			return 0x1EB1;
+
+		case 0x1EB2:
+			return 0x1EB3;
+
+		case 0x1EB4:
+			return 0x1EB5;
+
+		case 0x1EB6:
+			return 0x1EB7;
+
+		case 0x1EB8:
+			return 0x1EB9;
+
+		case 0x1EBA:
+			return 0x1EBB;
+
+		case 0x1EBC:
+			return 0x1EBD;
+
+		case 0x1EBE:
+			return 0x1EBF;
+
+		case 0x1EC0:
+			return 0x1EC1;
+
+		case 0x1EC2:
+			return 0x1EC3;
+
+		case 0x1EC4:
+			return 0x1EC5;
+
+		case 0x1EC6:
+			return 0x1EC7;
+
+		case 0x1EC8:
+			return 0x1EC9;
+
+		case 0x1ECA:
+			return 0x1ECB;
+
+		case 0x1ECC:
+			return 0x1ECD;
+
+		case 0x1ECE:
+			return 0x1ECF;
+
+		case 0x1ED0:
+			return 0x1ED1;
+
+		case 0x1ED2:
+			return 0x1ED3;
+
+		case 0x1ED4:
+			return 0x1ED5;
+
+		case 0x1ED6:
+			return 0x1ED7;
+
+		case 0x1ED8:
+			return 0x1ED9;
+
+		case 0x1EDA:
+			return 0x1EDB;
+
+		case 0x1EDC:
+			return 0x1EDD;
+
+		case 0x1EDE:
+			return 0x1EDF;
+
+		case 0x1EE0:
+			return 0x1EE1;
+
+		case 0x1EE2:
+			return 0x1EE3;
+
+		case 0x1EE4:
+			return 0x1EE5;
+
+		case 0x1EE6:
+			return 0x1EE7;
+
+		case 0x1EE8:
+			return 0x1EE9;
+
+		case 0x1EEA:
+			return 0x1EEB;
+
+		case 0x1EEC:
+			return 0x1EED;
+
+		case 0x1EEE:
+			return 0x1EEF;
+
+		case 0x1EF0:
+			return 0x1EF1;
+
+		case 0x1EF2:
+			return 0x1EF3;
+
+		case 0x1EF4:
+			return 0x1EF5;
+
+		case 0x1EF6:
+			return 0x1EF7;
+
+		case 0x1EF8:
+			return 0x1EF9;
+
+		case 0x1EFA:
+			return 0x1EFB;
+
+		case 0x1EFC:
+			return 0x1EFD;
+
+		case 0x1EFE:
+			return 0x1EFF;
+
+		case 0x1F08:
+			return 0x1F00;
+
+		case 0x1F09:
+			return 0x1F01;
+
+		case 0x1F0A:
+			return 0x1F02;
+
+		case 0x1F0B:
+			return 0x1F03;
+
+		case 0x1F0C:
+			return 0x1F04;
+
+		case 0x1F0D:
+			return 0x1F05;
+
+		case 0x1F0E:
+			return 0x1F06;
+
+		case 0x1F0F:
+			return 0x1F07;
+
+		case 0x1F18:
+			return 0x1F10;
+
+		case 0x1F19:
+			return 0x1F11;
+
+		case 0x1F1A:
+			return 0x1F12;
+
+		case 0x1F1B:
+			return 0x1F13;
+
+		case 0x1F1C:
+			return 0x1F14;
+
+		case 0x1F1D:
+			return 0x1F15;
+
+		case 0x1F28:
+			return 0x1F20;
+
+		case 0x1F29:
+			return 0x1F21;
+
+		case 0x1F2A:
+			return 0x1F22;
+
+		case 0x1F2B:
+			return 0x1F23;
+
+		case 0x1F2C:
+			return 0x1F24;
+
+		case 0x1F2D:
+			return 0x1F25;
+
+		case 0x1F2E:
+			return 0x1F26;
+
+		case 0x1F2F:
+			return 0x1F27;
+
+		case 0x1F38:
+			return 0x1F30;
+
+		case 0x1F39:
+			return 0x1F31;
+
+		case 0x1F3A:
+			return 0x1F32;
+
+		case 0x1F3B:
+			return 0x1F33;
+
+		case 0x1F3C:
+			return 0x1F34;
+
+		case 0x1F3D:
+			return 0x1F35;
+
+		case 0x1F3E:
+			return 0x1F36;
+
+		case 0x1F3F:
+			return 0x1F37;
+
+		case 0x1F48:
+			return 0x1F40;
+
+		case 0x1F49:
+			return 0x1F41;
+
+		case 0x1F4A:
+			return 0x1F42;
+
+		case 0x1F4B:
+			return 0x1F43;
+
+		case 0x1F4C:
+			return 0x1F44;
+
+		case 0x1F4D:
+			return 0x1F45;
+
+		case 0x1F59:
+			return 0x1F51;
+
+		case 0x1F5B:
+			return 0x1F53;
+
+		case 0x1F5D:
+			return 0x1F55;
+
+		case 0x1F5F:
+			return 0x1F57;
+
+		case 0x1F68:
+			return 0x1F60;
+
+		case 0x1F69:
+			return 0x1F61;
+
+		case 0x1F6A:
+			return 0x1F62;
+
+		case 0x1F6B:
+			return 0x1F63;
+
+		case 0x1F6C:
+			return 0x1F64;
+
+		case 0x1F6D:
+			return 0x1F65;
+
+		case 0x1F6E:
+			return 0x1F66;
+
+		case 0x1F6F:
+			return 0x1F67;
+
+		case 0x1FB8:
+			return 0x1FB0;
+
+		case 0x1FB9:
+			return 0x1FB1;
+
+		case 0x1FBA:
+			return 0x1F70;
+
+		case 0x1FBB:
+			return 0x1F71;
+
+		case 0x1FC8:
+			return 0x1F72;
+
+		case 0x1FC9:
+			return 0x1F73;
+
+		case 0x1FCA:
+			return 0x1F74;
+
+		case 0x1FCB:
+			return 0x1F75;
+
+		case 0x1FD8:
+			return 0x1FD0;
+
+		case 0x1FD9:
+			return 0x1FD1;
+
+		case 0x1FDA:
+			return 0x1F76;
+
+		case 0x1FDB:
+			return 0x1F77;
+
+		case 0x1FE8:
+			return 0x1FE0;
+
+		case 0x1FE9:
+			return 0x1FE1;
+
+		case 0x1FEA:
+			return 0x1F7A;
+
+		case 0x1FEB:
+			return 0x1F7B;
+
+		case 0x1FEC:
+			return 0x1FE5;
+
+		case 0x1FF8:
+			return 0x1F78;
+
+		case 0x1FF9:
+			return 0x1F79;
+
+		case 0x1FFA:
+			return 0x1F7C;
+
+		case 0x1FFB:
+			return 0x1F7D;
+
+		case 0x2126:
+			return 0x03C9;
+
+		case 0x212A:
+			return 0x006B;
+
+		case 0x212B:
+			return 0x00E5;
+
+		case 0x2132:
+			return 0x214E;
+
+		case 0x2183:
+			return 0x2184;
+
+		case 0x2C00:
+			return 0x2C30;
+
+		case 0x2C01:
+			return 0x2C31;
+
+		case 0x2C02:
+			return 0x2C32;
+
+		case 0x2C03:
+			return 0x2C33;
+
+		case 0x2C04:
+			return 0x2C34;
+
+		case 0x2C05:
+			return 0x2C35;
+
+		case 0x2C06:
+			return 0x2C36;
+
+		case 0x2C07:
+			return 0x2C37;
+
+		case 0x2C08:
+			return 0x2C38;
+
+		case 0x2C09:
+			return 0x2C39;
+
+		case 0x2C0A:
+			return 0x2C3A;
+
+		case 0x2C0B:
+			return 0x2C3B;
+
+		case 0x2C0C:
+			return 0x2C3C;
+
+		case 0x2C0D:
+			return 0x2C3D;
+
+		case 0x2C0E:
+			return 0x2C3E;
+
+		case 0x2C0F:
+			return 0x2C3F;
+
+		case 0x2C10:
+			return 0x2C40;
+
+		case 0x2C11:
+			return 0x2C41;
+
+		case 0x2C12:
+			return 0x2C42;
+
+		case 0x2C13:
+			return 0x2C43;
+
+		case 0x2C14:
+			return 0x2C44;
+
+		case 0x2C15:
+			return 0x2C45;
+
+		case 0x2C16:
+			return 0x2C46;
+
+		case 0x2C17:
+			return 0x2C47;
+
+		case 0x2C18:
+			return 0x2C48;
+
+		case 0x2C19:
+			return 0x2C49;
+
+		case 0x2C1A:
+			return 0x2C4A;
+
+		case 0x2C1B:
+			return 0x2C4B;
+
+		case 0x2C1C:
+			return 0x2C4C;
+
+		case 0x2C1D:
+			return 0x2C4D;
+
+		case 0x2C1E:
+			return 0x2C4E;
+
+		case 0x2C1F:
+			return 0x2C4F;
+
+		case 0x2C20:
+			return 0x2C50;
+
+		case 0x2C21:
+			return 0x2C51;
+
+		case 0x2C22:
+			return 0x2C52;
+
+		case 0x2C23:
+			return 0x2C53;
+
+		case 0x2C24:
+			return 0x2C54;
+
+		case 0x2C25:
+			return 0x2C55;
+
+		case 0x2C26:
+			return 0x2C56;
+
+		case 0x2C27:
+			return 0x2C57;
+
+		case 0x2C28:
+			return 0x2C58;
+
+		case 0x2C29:
+			return 0x2C59;
+
+		case 0x2C2A:
+			return 0x2C5A;
+
+		case 0x2C2B:
+			return 0x2C5B;
+
+		case 0x2C2C:
+			return 0x2C5C;
+
+		case 0x2C2D:
+			return 0x2C5D;
+
+		case 0x2C2E:
+			return 0x2C5E;
+
+		case 0x2C2F:
+			return 0x2C5F;
+
+		case 0x2C60:
+			return 0x2C61;
+
+		case 0x2C62:
+			return 0x026B;
+
+		case 0x2C63:
+			return 0x1D7D;
+
+		case 0x2C64:
+			return 0x027D;
+
+		case 0x2C67:
+			return 0x2C68;
+
+		case 0x2C69:
+			return 0x2C6A;
+
+		case 0x2C6B:
+			return 0x2C6C;
+
+		case 0x2C6D:
+			return 0x0251;
+
+		case 0x2C6E:
+			return 0x0271;
+
+		case 0x2C6F:
+			return 0x0250;
+
+		case 0x2C70:
+			return 0x0252;
+
+		case 0x2C72:
+			return 0x2C73;
+
+		case 0x2C75:
+			return 0x2C76;
+
+		case 0x2C7E:
+			return 0x023F;
+
+		case 0x2C7F:
+			return 0x0240;
+
+		case 0x2C80:
+			return 0x2C81;
+
+		case 0x2C82:
+			return 0x2C83;
+
+		case 0x2C84:
+			return 0x2C85;
+
+		case 0x2C86:
+			return 0x2C87;
+
+		case 0x2C88:
+			return 0x2C89;
+
+		case 0x2C8A:
+			return 0x2C8B;
+
+		case 0x2C8C:
+			return 0x2C8D;
+
+		case 0x2C8E:
+			return 0x2C8F;
+
+		case 0x2C90:
+			return 0x2C91;
+
+		case 0x2C92:
+			return 0x2C93;
+
+		case 0x2C94:
+			return 0x2C95;
+
+		case 0x2C96:
+			return 0x2C97;
+
+		case 0x2C98:
+			return 0x2C99;
+
+		case 0x2C9A:
+			return 0x2C9B;
+
+		case 0x2C9C:
+			return 0x2C9D;
+
+		case 0x2C9E:
+			return 0x2C9F;
+
+		case 0x2CA0:
+			return 0x2CA1;
+
+		case 0x2CA2:
+			return 0x2CA3;
+
+		case 0x2CA4:
+			return 0x2CA5;
+
+		case 0x2CA6:
+			return 0x2CA7;
+
+		case 0x2CA8:
+			return 0x2CA9;
+
+		case 0x2CAA:
+			return 0x2CAB;
+
+		case 0x2CAC:
+			return 0x2CAD;
+
+		case 0x2CAE:
+			return 0x2CAF;
+
+		case 0x2CB0:
+			return 0x2CB1;
+
+		case 0x2CB2:
+			return 0x2CB3;
+
+		case 0x2CB4:
+			return 0x2CB5;
+
+		case 0x2CB6:
+			return 0x2CB7;
+
+		case 0x2CB8:
+			return 0x2CB9;
+
+		case 0x2CBA:
+			return 0x2CBB;
+
+		case 0x2CBC:
+			return 0x2CBD;
+
+		case 0x2CBE:
+			return 0x2CBF;
+
+		case 0x2CC0:
+			return 0x2CC1;
+
+		case 0x2CC2:
+			return 0x2CC3;
+
+		case 0x2CC4:
+			return 0x2CC5;
+
+		case 0x2CC6:
+			return 0x2CC7;
+
+		case 0x2CC8:
+			return 0x2CC9;
+
+		case 0x2CCA:
+			return 0x2CCB;
+
+		case 0x2CCC:
+			return 0x2CCD;
+
+		case 0x2CCE:
+			return 0x2CCF;
+
+		case 0x2CD0:
+			return 0x2CD1;
+
+		case 0x2CD2:
+			return 0x2CD3;
+
+		case 0x2CD4:
+			return 0x2CD5;
+
+		case 0x2CD6:
+			return 0x2CD7;
+
+		case 0x2CD8:
+			return 0x2CD9;
+
+		case 0x2CDA:
+			return 0x2CDB;
+
+		case 0x2CDC:
+			return 0x2CDD;
+
+		case 0x2CDE:
+			return 0x2CDF;
+
+		case 0x2CE0:
+			return 0x2CE1;
+
+		case 0x2CE2:
+			return 0x2CE3;
+
+		case 0x2CEB:
+			return 0x2CEC;
+
+		case 0x2CED:
+			return 0x2CEE;
+
+		case 0x2CF2:
+			return 0x2CF3;
+
+		case 0xA640:
+			return 0xA641;
+
+		case 0xA642:
+			return 0xA643;
+
+		case 0xA644:
+			return 0xA645;
+
+		case 0xA646:
+			return 0xA647;
+
+		case 0xA648:
+			return 0xA649;
+
+		case 0xA64A:
+			return 0xA64B;
+
+		case 0xA64C:
+			return 0xA64D;
+
+		case 0xA64E:
+			return 0xA64F;
+
+		case 0xA650:
+			return 0xA651;
+
+		case 0xA652:
+			return 0xA653;
+
+		case 0xA654:
+			return 0xA655;
+
+		case 0xA656:
+			return 0xA657;
+
+		case 0xA658:
+			return 0xA659;
+
+		case 0xA65A:
+			return 0xA65B;
+
+		case 0xA65C:
+			return 0xA65D;
+
+		case 0xA65E:
+			return 0xA65F;
+
+		case 0xA660:
+			return 0xA661;
+
+		case 0xA662:
+			return 0xA663;
+
+		case 0xA664:
+			return 0xA665;
+
+		case 0xA666:
+			return 0xA667;
+
+		case 0xA668:
+			return 0xA669;
+
+		case 0xA66A:
+			return 0xA66B;
+
+		case 0xA66C:
+			return 0xA66D;
+
+		case 0xA680:
+			return 0xA681;
+
+		case 0xA682:
+			return 0xA683;
+
+		case 0xA684:
+			return 0xA685;
+
+		case 0xA686:
+			return 0xA687;
+
+		case 0xA688:
+			return 0xA689;
+
+		case 0xA68A:
+			return 0xA68B;
+
+		case 0xA68C:
+			return 0xA68D;
+
+		case 0xA68E:
+			return 0xA68F;
+
+		case 0xA690:
+			return 0xA691;
+
+		case 0xA692:
+			return 0xA693;
+
+		case 0xA694:
+			return 0xA695;
+
+		case 0xA696:
+			return 0xA697;
+
+		case 0xA698:
+			return 0xA699;
+
+		case 0xA69A:
+			return 0xA69B;
+
+		case 0xA722:
+			return 0xA723;
+
+		case 0xA724:
+			return 0xA725;
+
+		case 0xA726:
+			return 0xA727;
+
+		case 0xA728:
+			return 0xA729;
+
+		case 0xA72A:
+			return 0xA72B;
+
+		case 0xA72C:
+			return 0xA72D;
+
+		case 0xA72E:
+			return 0xA72F;
+
+		case 0xA732:
+			return 0xA733;
+
+		case 0xA734:
+			return 0xA735;
+
+		case 0xA736:
+			return 0xA737;
+
+		case 0xA738:
+			return 0xA739;
+
+		case 0xA73A:
+			return 0xA73B;
+
+		case 0xA73C:
+			return 0xA73D;
+
+		case 0xA73E:
+			return 0xA73F;
+
+		case 0xA740:
+			return 0xA741;
+
+		case 0xA742:
+			return 0xA743;
+
+		case 0xA744:
+			return 0xA745;
+
+		case 0xA746:
+			return 0xA747;
+
+		case 0xA748:
+			return 0xA749;
+
+		case 0xA74A:
+			return 0xA74B;
+
+		case 0xA74C:
+			return 0xA74D;
+
+		case 0xA74E:
+			return 0xA74F;
+
+		case 0xA750:
+			return 0xA751;
+
+		case 0xA752:
+			return 0xA753;
+
+		case 0xA754:
+			return 0xA755;
+
+		case 0xA756:
+			return 0xA757;
+
+		case 0xA758:
+			return 0xA759;
+
+		case 0xA75A:
+			return 0xA75B;
+
+		case 0xA75C:
+			return 0xA75D;
+
+		case 0xA75E:
+			return 0xA75F;
+
+		case 0xA760:
+			return 0xA761;
+
+		case 0xA762:
+			return 0xA763;
+
+		case 0xA764:
+			return 0xA765;
+
+		case 0xA766:
+			return 0xA767;
+
+		case 0xA768:
+			return 0xA769;
+
+		case 0xA76A:
+			return 0xA76B;
+
+		case 0xA76C:
+			return 0xA76D;
+
+		case 0xA76E:
+			return 0xA76F;
+
+		case 0xA779:
+			return 0xA77A;
+
+		case 0xA77B:
+			return 0xA77C;
+
+		case 0xA77D:
+			return 0x1D79;
+
+		case 0xA77E:
+			return 0xA77F;
+
+		case 0xA780:
+			return 0xA781;
+
+		case 0xA782:
+			return 0xA783;
+
+		case 0xA784:
+			return 0xA785;
+
+		case 0xA786:
+			return 0xA787;
+
+		case 0xA78B:
+			return 0xA78C;
+
+		case 0xA78D:
+			return 0x0265;
+
+		case 0xA790:
+			return 0xA791;
+
+		case 0xA792:
+			return 0xA793;
+
+		case 0xA796:
+			return 0xA797;
+
+		case 0xA798:
+			return 0xA799;
+
+		case 0xA79A:
+			return 0xA79B;
+
+		case 0xA79C:
+			return 0xA79D;
+
+		case 0xA79E:
+			return 0xA79F;
+
+		case 0xA7A0:
+			return 0xA7A1;
+
+		case 0xA7A2:
+			return 0xA7A3;
+
+		case 0xA7A4:
+			return 0xA7A5;
+
+		case 0xA7A6:
+			return 0xA7A7;
+
+		case 0xA7A8:
+			return 0xA7A9;
+
+		case 0xA7AA:
+			return 0x0266;
+
+		case 0xA7AB:
+			return 0x025C;
+
+		case 0xA7AC:
+			return 0x0261;
+
+		case 0xA7AD:
+			return 0x026C;
+
+		case 0xA7AE:
+			return 0x026A;
+
+		case 0xA7B0:
+			return 0x029E;
+
+		case 0xA7B1:
+			return 0x0287;
+
+		case 0xA7B2:
+			return 0x029D;
+
+		case 0xA7B3:
+			return 0xAB53;
+
+		case 0xA7B4:
+			return 0xA7B5;
+
+		case 0xA7B6:
+			return 0xA7B7;
+
+		case 0xA7B8:
+			return 0xA7B9;
+
+		case 0xA7BA:
+			return 0xA7BB;
+
+		case 0xA7BC:
+			return 0xA7BD;
+
+		case 0xA7BE:
+			return 0xA7BF;
+
+		case 0xA7C0:
+			return 0xA7C1;
+
+		case 0xA7C2:
+			return 0xA7C3;
+
+		case 0xA7C4:
+			return 0xA794;
+
+		case 0xA7C5:
+			return 0x0282;
+
+		case 0xA7C6:
+			return 0x1D8E;
+
+		case 0xA7C7:
+			return 0xA7C8;
+
+		case 0xA7C9:
+			return 0xA7CA;
+
+		case 0xA7D0:
+			return 0xA7D1;
+
+		case 0xA7D6:
+			return 0xA7D7;
+
+		case 0xA7D8:
+			return 0xA7D9;
+
+		case 0xA7F5:
+			return 0xA7F6;
+
+		case 0xFF21:
+			return 0xFF41;
+
+		case 0xFF22:
+			return 0xFF42;
+
+		case 0xFF23:
+			return 0xFF43;
+
+		case 0xFF24:
+			return 0xFF44;
+
+		case 0xFF25:
+			return 0xFF45;
+
+		case 0xFF26:
+			return 0xFF46;
+
+		case 0xFF27:
+			return 0xFF47;
+
+		case 0xFF28:
+			return 0xFF48;
+
+		case 0xFF29:
+			return 0xFF49;
+
+		case 0xFF2A:
+			return 0xFF4A;
+
+		case 0xFF2B:
+			return 0xFF4B;
+
+		case 0xFF2C:
+			return 0xFF4C;
+
+		case 0xFF2D:
+			return 0xFF4D;
+
+		case 0xFF2E:
+			return 0xFF4E;
+
+		case 0xFF2F:
+			return 0xFF4F;
+
+		case 0xFF30:
+			return 0xFF50;
+
+		case 0xFF31:
+			return 0xFF51;
+
+		case 0xFF32:
+			return 0xFF52;
+
+		case 0xFF33:
+			return 0xFF53;
+
+		case 0xFF34:
+			return 0xFF54;
+
+		case 0xFF35:
+			return 0xFF55;
+
+		case 0xFF36:
+			return 0xFF56;
+
+		case 0xFF37:
+			return 0xFF57;
+
+		case 0xFF38:
+			return 0xFF58;
+
+		case 0xFF39:
+			return 0xFF59;
+
+		case 0xFF3A:
+			return 0xFF5A;
+
+		case 0x10400:
+			return 0x10428;
+
+		case 0x10401:
+			return 0x10429;
+
+		case 0x10402:
+			return 0x1042A;
+
+		case 0x10403:
+			return 0x1042B;
+
+		case 0x10404:
+			return 0x1042C;
+
+		case 0x10405:
+			return 0x1042D;
+
+		case 0x10406:
+			return 0x1042E;
+
+		case 0x10407:
+			return 0x1042F;
+
+		case 0x10408:
+			return 0x10430;
+
+		case 0x10409:
+			return 0x10431;
+
+		case 0x1040A:
+			return 0x10432;
+
+		case 0x1040B:
+			return 0x10433;
+
+		case 0x1040C:
+			return 0x10434;
+
+		case 0x1040D:
+			return 0x10435;
+
+		case 0x1040E:
+			return 0x10436;
+
+		case 0x1040F:
+			return 0x10437;
+
+		case 0x10410:
+			return 0x10438;
+
+		case 0x10411:
+			return 0x10439;
+
+		case 0x10412:
+			return 0x1043A;
+
+		case 0x10413:
+			return 0x1043B;
+
+		case 0x10414:
+			return 0x1043C;
+
+		case 0x10415:
+			return 0x1043D;
+
+		case 0x10416:
+			return 0x1043E;
+
+		case 0x10417:
+			return 0x1043F;
+
+		case 0x10418:
+			return 0x10440;
+
+		case 0x10419:
+			return 0x10441;
+
+		case 0x1041A:
+			return 0x10442;
+
+		case 0x1041B:
+			return 0x10443;
+
+		case 0x1041C:
+			return 0x10444;
+
+		case 0x1041D:
+			return 0x10445;
+
+		case 0x1041E:
+			return 0x10446;
+
+		case 0x1041F:
+			return 0x10447;
+
+		case 0x10420:
+			return 0x10448;
+
+		case 0x10421:
+			return 0x10449;
+
+		case 0x10422:
+			return 0x1044A;
+
+		case 0x10423:
+			return 0x1044B;
+
+		case 0x10424:
+			return 0x1044C;
+
+		case 0x10425:
+			return 0x1044D;
+
+		case 0x10426:
+			return 0x1044E;
+
+		case 0x10427:
+			return 0x1044F;
+
+		case 0x104B0:
+			return 0x104D8;
+
+		case 0x104B1:
+			return 0x104D9;
+
+		case 0x104B2:
+			return 0x104DA;
+
+		case 0x104B3:
+			return 0x104DB;
+
+		case 0x104B4:
+			return 0x104DC;
+
+		case 0x104B5:
+			return 0x104DD;
+
+		case 0x104B6:
+			return 0x104DE;
+
+		case 0x104B7:
+			return 0x104DF;
+
+		case 0x104B8:
+			return 0x104E0;
+
+		case 0x104B9:
+			return 0x104E1;
+
+		case 0x104BA:
+			return 0x104E2;
+
+		case 0x104BB:
+			return 0x104E3;
+
+		case 0x104BC:
+			return 0x104E4;
+
+		case 0x104BD:
+			return 0x104E5;
+
+		case 0x104BE:
+			return 0x104E6;
+
+		case 0x104BF:
+			return 0x104E7;
+
+		case 0x104C0:
+			return 0x104E8;
+
+		case 0x104C1:
+			return 0x104E9;
+
+		case 0x104C2:
+			return 0x104EA;
+
+		case 0x104C3:
+			return 0x104EB;
+
+		case 0x104C4:
+			return 0x104EC;
+
+		case 0x104C5:
+			return 0x104ED;
+
+		case 0x104C6:
+			return 0x104EE;
+
+		case 0x104C7:
+			return 0x104EF;
+
+		case 0x104C8:
+			return 0x104F0;
+
+		case 0x104C9:
+			return 0x104F1;
+
+		case 0x104CA:
+			return 0x104F2;
+
+		case 0x104CB:
+			return 0x104F3;
+
+		case 0x104CC:
+			return 0x104F4;
+
+		case 0x104CD:
+			return 0x104F5;
+
+		case 0x104CE:
+			return 0x104F6;
+
+		case 0x104CF:
+			return 0x104F7;
+
+		case 0x104D0:
+			return 0x104F8;
+
+		case 0x104D1:
+			return 0x104F9;
+
+		case 0x104D2:
+			return 0x104FA;
+
+		case 0x104D3:
+			return 0x104FB;
+
+		case 0x10570:
+			return 0x10597;
+
+		case 0x10571:
+			return 0x10598;
+
+		case 0x10572:
+			return 0x10599;
+
+		case 0x10573:
+			return 0x1059A;
+
+		case 0x10574:
+			return 0x1059B;
+
+		case 0x10575:
+			return 0x1059C;
+
+		case 0x10576:
+			return 0x1059D;
+
+		case 0x10577:
+			return 0x1059E;
+
+		case 0x10578:
+			return 0x1059F;
+
+		case 0x10579:
+			return 0x105A0;
+
+		case 0x1057A:
+			return 0x105A1;
+
+		case 0x1057C:
+			return 0x105A3;
+
+		case 0x1057D:
+			return 0x105A4;
+
+		case 0x1057E:
+			return 0x105A5;
+
+		case 0x1057F:
+			return 0x105A6;
+
+		case 0x10580:
+			return 0x105A7;
+
+		case 0x10581:
+			return 0x105A8;
+
+		case 0x10582:
+			return 0x105A9;
+
+		case 0x10583:
+			return 0x105AA;
+
+		case 0x10584:
+			return 0x105AB;
+
+		case 0x10585:
+			return 0x105AC;
+
+		case 0x10586:
+			return 0x105AD;
+
+		case 0x10587:
+			return 0x105AE;
+
+		case 0x10588:
+			return 0x105AF;
+
+		case 0x10589:
+			return 0x105B0;
+
+		case 0x1058A:
+			return 0x105B1;
+
+		case 0x1058C:
+			return 0x105B3;
+
+		case 0x1058D:
+			return 0x105B4;
+
+		case 0x1058E:
+			return 0x105B5;
+
+		case 0x1058F:
+			return 0x105B6;
+
+		case 0x10590:
+			return 0x105B7;
+
+		case 0x10591:
+			return 0x105B8;
+
+		case 0x10592:
+			return 0x105B9;
+
+		case 0x10594:
+			return 0x105BB;
+
+		case 0x10595:
+			return 0x105BC;
+
+		case 0x10C80:
+			return 0x10CC0;
+
+		case 0x10C81:
+			return 0x10CC1;
+
+		case 0x10C82:
+			return 0x10CC2;
+
+		case 0x10C83:
+			return 0x10CC3;
+
+		case 0x10C84:
+			return 0x10CC4;
+
+		case 0x10C85:
+			return 0x10CC5;
+
+		case 0x10C86:
+			return 0x10CC6;
+
+		case 0x10C87:
+			return 0x10CC7;
+
+		case 0x10C88:
+			return 0x10CC8;
+
+		case 0x10C89:
+			return 0x10CC9;
+
+		case 0x10C8A:
+			return 0x10CCA;
+
+		case 0x10C8B:
+			return 0x10CCB;
+
+		case 0x10C8C:
+			return 0x10CCC;
+
+		case 0x10C8D:
+			return 0x10CCD;
+
+		case 0x10C8E:
+			return 0x10CCE;
+
+		case 0x10C8F:
+			return 0x10CCF;
+
+		case 0x10C90:
+			return 0x10CD0;
+
+		case 0x10C91:
+			return 0x10CD1;
+
+		case 0x10C92:
+			return 0x10CD2;
+
+		case 0x10C93:
+			return 0x10CD3;
+
+		case 0x10C94:
+			return 0x10CD4;
+
+		case 0x10C95:
+			return 0x10CD5;
+
+		case 0x10C96:
+			return 0x10CD6;
+
+		case 0x10C97:
+			return 0x10CD7;
+
+		case 0x10C98:
+			return 0x10CD8;
+
+		case 0x10C99:
+			return 0x10CD9;
+
+		case 0x10C9A:
+			return 0x10CDA;
+
+		case 0x10C9B:
+			return 0x10CDB;
+
+		case 0x10C9C:
+			return 0x10CDC;
+
+		case 0x10C9D:
+			return 0x10CDD;
+
+		case 0x10C9E:
+			return 0x10CDE;
+
+		case 0x10C9F:
+			return 0x10CDF;
+
+		case 0x10CA0:
+			return 0x10CE0;
+
+		case 0x10CA1:
+			return 0x10CE1;
+
+		case 0x10CA2:
+			return 0x10CE2;
+
+		case 0x10CA3:
+			return 0x10CE3;
+
+		case 0x10CA4:
+			return 0x10CE4;
+
+		case 0x10CA5:
+			return 0x10CE5;
+
+		case 0x10CA6:
+			return 0x10CE6;
+
+		case 0x10CA7:
+			return 0x10CE7;
+
+		case 0x10CA8:
+			return 0x10CE8;
+
+		case 0x10CA9:
+			return 0x10CE9;
+
+		case 0x10CAA:
+			return 0x10CEA;
+
+		case 0x10CAB:
+			return 0x10CEB;
+
+		case 0x10CAC:
+			return 0x10CEC;
+
+		case 0x10CAD:
+			return 0x10CED;
+
+		case 0x10CAE:
+			return 0x10CEE;
+
+		case 0x10CAF:
+			return 0x10CEF;
+
+		case 0x10CB0:
+			return 0x10CF0;
+
+		case 0x10CB1:
+			return 0x10CF1;
+
+		case 0x10CB2:
+			return 0x10CF2;
+
+		case 0x118A0:
+			return 0x118C0;
+
+		case 0x118A1:
+			return 0x118C1;
+
+		case 0x118A2:
+			return 0x118C2;
+
+		case 0x118A3:
+			return 0x118C3;
+
+		case 0x118A4:
+			return 0x118C4;
+
+		case 0x118A5:
+			return 0x118C5;
+
+		case 0x118A6:
+			return 0x118C6;
+
+		case 0x118A7:
+			return 0x118C7;
+
+		case 0x118A8:
+			return 0x118C8;
+
+		case 0x118A9:
+			return 0x118C9;
+
+		case 0x118AA:
+			return 0x118CA;
+
+		case 0x118AB:
+			return 0x118CB;
+
+		case 0x118AC:
+			return 0x118CC;
+
+		case 0x118AD:
+			return 0x118CD;
+
+		case 0x118AE:
+			return 0x118CE;
+
+		case 0x118AF:
+			return 0x118CF;
+
+		case 0x118B0:
+			return 0x118D0;
+
+		case 0x118B1:
+			return 0x118D1;
+
+		case 0x118B2:
+			return 0x118D2;
+
+		case 0x118B3:
+			return 0x118D3;
+
+		case 0x118B4:
+			return 0x118D4;
+
+		case 0x118B5:
+			return 0x118D5;
+
+		case 0x118B6:
+			return 0x118D6;
+
+		case 0x118B7:
+			return 0x118D7;
+
+		case 0x118B8:
+			return 0x118D8;
+
+		case 0x118B9:
+			return 0x118D9;
+
+		case 0x118BA:
+			return 0x118DA;
+
+		case 0x118BB:
+			return 0x118DB;
+
+		case 0x118BC:
+			return 0x118DC;
+
+		case 0x118BD:
+			return 0x118DD;
+
+		case 0x118BE:
+			return 0x118DE;
+
+		case 0x118BF:
+			return 0x118DF;
+
+		case 0x16E40:
+			return 0x16E60;
+
+		case 0x16E41:
+			return 0x16E61;
+
+		case 0x16E42:
+			return 0x16E62;
+
+		case 0x16E43:
+			return 0x16E63;
+
+		case 0x16E44:
+			return 0x16E64;
+
+		case 0x16E45:
+			return 0x16E65;
+
+		case 0x16E46:
+			return 0x16E66;
+
+		case 0x16E47:
+			return 0x16E67;
+
+		case 0x16E48:
+			return 0x16E68;
+
+		case 0x16E49:
+			return 0x16E69;
+
+		case 0x16E4A:
+			return 0x16E6A;
+
+		case 0x16E4B:
+			return 0x16E6B;
+
+		case 0x16E4C:
+			return 0x16E6C;
+
+		case 0x16E4D:
+			return 0x16E6D;
+
+		case 0x16E4E:
+			return 0x16E6E;
+
+		case 0x16E4F:
+			return 0x16E6F;
+
+		case 0x16E50:
+			return 0x16E70;
+
+		case 0x16E51:
+			return 0x16E71;
+
+		case 0x16E52:
+			return 0x16E72;
+
+		case 0x16E53:
+			return 0x16E73;
+
+		case 0x16E54:
+			return 0x16E74;
+
+		case 0x16E55:
+			return 0x16E75;
+
+		case 0x16E56:
+			return 0x16E76;
+
+		case 0x16E57:
+			return 0x16E77;
+
+		case 0x16E58:
+			return 0x16E78;
+
+		case 0x16E59:
+			return 0x16E79;
+
+		case 0x16E5A:
+			return 0x16E7A;
+
+		case 0x16E5B:
+			return 0x16E7B;
+
+		case 0x16E5C:
+			return 0x16E7C;
+
+		case 0x16E5D:
+			return 0x16E7D;
+
+		case 0x16E5E:
+			return 0x16E7E;
+
+		case 0x16E5F:
+			return 0x16E7F;
+
+		case 0x1E900:
+			return 0x1E922;
+
+		case 0x1E901:
+			return 0x1E923;
+
+		case 0x1E902:
+			return 0x1E924;
+
+		case 0x1E903:
+			return 0x1E925;
+
+		case 0x1E904:
+			return 0x1E926;
+
+		case 0x1E905:
+			return 0x1E927;
+
+		case 0x1E906:
+			return 0x1E928;
+
+		case 0x1E907:
+			return 0x1E929;
+
+		case 0x1E908:
+			return 0x1E92A;
+
+		case 0x1E909:
+			return 0x1E92B;
+
+		case 0x1E90A:
+			return 0x1E92C;
+
+		case 0x1E90B:
+			return 0x1E92D;
+
+		case 0x1E90C:
+			return 0x1E92E;
+
+		case 0x1E90D:
+			return 0x1E92F;
+
+		case 0x1E90E:
+			return 0x1E930;
+
+		case 0x1E90F:
+			return 0x1E931;
+
+		case 0x1E910:
+			return 0x1E932;
+
+		case 0x1E911:
+			return 0x1E933;
+
+		case 0x1E912:
+			return 0x1E934;
+
+		case 0x1E913:
+			return 0x1E935;
+
+		case 0x1E914:
+			return 0x1E936;
+
+		case 0x1E915:
+			return 0x1E937;
+
+		case 0x1E916:
+			return 0x1E938;
+
+		case 0x1E917:
+			return 0x1E939;
+
+		case 0x1E918:
+			return 0x1E93A;
+
+		case 0x1E919:
+			return 0x1E93B;
+
+		case 0x1E91A:
+			return 0x1E93C;
+
+		case 0x1E91B:
+			return 0x1E93D;
+
+		case 0x1E91C:
+			return 0x1E93E;
+
+		case 0x1E91D:
+			return 0x1E93F;
+
+		case 0x1E91E:
+			return 0x1E940;
+
+		case 0x1E91F:
+			return 0x1E941;
+
+		case 0x1E920:
+			return 0x1E942;
+
+		case 0x1E921:
+			return 0x1E943;
 
 		default:
 			return c;
@@ -5815,4091 +9046,123 @@ uc32_t uc32_to_upper(uc32_t c) {
 	}
 }
 
-uc32_t uc32_to_lower(uc32_t c) {
-	switch (c) {
-		case 0x0041:
-			return 0x0061;
+uc16_to_case_func_t uc16_to_case_func_from_ucase(ucase_t ca) {
+    assert(ucase_valid(ca));
 
-		case 0x0042:
-			return 0x0062;
+    switch (ca) {
+        case UCASE_LOWER:
+            return uc16_to_lower;
 
-		case 0x0043:
-			return 0x0063;
+        case UCASE_UPPER:
+            return uc16_to_upper;
 
-		case 0x0044:
-			return 0x0064;
+        default:
+            return uc16_from_uc16;
+    }
+}
 
-		case 0x0045:
-			return 0x0065;
+unsigned uc16_to_case(UNULLABLE uc16_t *to, const uc16_t *from, ucase_t ca) {
+    assert(ucase_valid(ca));
 
-		case 0x0046:
-			return 0x0066;
+    switch (ca) {
+        case UCASE_LOWER:
+            return uc16_to_lower(to, from);
 
-		case 0x0047:
-			return 0x0067;
+        case UCASE_UPPER:
+            return uc16_to_upper(to, from);
 
-		case 0x0048:
-			return 0x0068;
+        default:
+            return uc16_from_uc16(to, from);
+    }
+}
 
-		case 0x0049:
-			return 0x0069;
+unsigned uc16_to_lower(UNULLABLE uc16_t *to, const uc16_t *from) {
+    return uc16_from_uc32(to, uc32_to_lower(uc32_from_uc16(from)));
+}
 
-		case 0x004A:
-			return 0x006A;
+unsigned uc16_to_upper(UNULLABLE uc16_t *to, const uc16_t *from) {
+    return uc16_from_uc32(to, uc32_to_upper(uc32_from_uc16(from)));
+}
 
-		case 0x004B:
-			return 0x006B;
+uc8_to_case_func_t uc8_to_case_func_from_ucase(ucase_t ca) {
+    assert(ucase_valid(ca));
 
-		case 0x004C:
-			return 0x006C;
+    switch (ca) {
+        case UCASE_LOWER:
+            return uc8_to_lower;
 
-		case 0x004D:
-			return 0x006D;
+        case UCASE_UPPER:
+            return uc8_to_upper;
 
-		case 0x004E:
-			return 0x006E;
+        default:
+            return uc8_from_uc8;
+    }
+}
 
-		case 0x004F:
-			return 0x006F;
+unsigned uc8_to_case(UNULLABLE uc8_t *to, const uc8_t *from, ucase_t ca) {
+    assert(ucase_valid(ca));
 
-		case 0x0050:
-			return 0x0070;
+    switch (ca) {
+        case UCASE_LOWER:
+            return uc8_to_lower(to, from);
 
-		case 0x0051:
-			return 0x0071;
+        case UCASE_UPPER:
+            return uc8_to_upper(to, from);
 
-		case 0x0052:
-			return 0x0072;
+        default:
+            return uc8_from_uc8(to, from);
+    }
+}
 
-		case 0x0053:
-			return 0x0073;
+unsigned uc8_to_lower(UNULLABLE uc8_t *to, const uc8_t *from) {
+    return uc8_from_uc32(to, uc32_to_lower(uc32_from_uc8(from)));
+}
 
-		case 0x0054:
-			return 0x0074;
+unsigned uc8_to_upper(UNULLABLE uc8_t *to, const uc8_t *from) {
+    return uc8_from_uc32(to, uc32_to_upper(uc32_from_uc8(from)));
+}
 
-		case 0x0055:
-			return 0x0075;
+static unsigned uc8_len_p_(const uc8_t *c) {
+    assert(c);
+    return uc8_len(*c);
+}
 
-		case 0x0056:
-			return 0x0076;
+uc8_case_len_func_t uc8_case_len_func_from_ucase(ucase_t ca) {
+    assert(ucase_valid(ca));
 
-		case 0x0057:
-			return 0x0077;
+    switch (ca) {
+        case UCASE_LOWER:
+            return uc8_lower_len;
 
-		case 0x0058:
-			return 0x0078;
+        case UCASE_UPPER:
+            return uc8_upper_len;
 
-		case 0x0059:
-			return 0x0079;
+        default:
+            return uc8_len_p_;
+    }
+}
 
-		case 0x005A:
-			return 0x007A;
+unsigned uc8_case_len(const uc8_t *c, ucase_t ca) {
+    assert(c && ucase_valid(ca));
 
-		case 0x00C0:
-			return 0x00E0;
-
-		case 0x00C1:
-			return 0x00E1;
-
-		case 0x00C2:
-			return 0x00E2;
-
-		case 0x00C3:
-			return 0x00E3;
-
-		case 0x00C4:
-			return 0x00E4;
-
-		case 0x00C5:
-			return 0x00E5;
-
-		case 0x00C6:
-			return 0x00E6;
-
-		case 0x00C7:
-			return 0x00E7;
-
-		case 0x00C8:
-			return 0x00E8;
-
-		case 0x00C9:
-			return 0x00E9;
-
-		case 0x00CA:
-			return 0x00EA;
-
-		case 0x00CB:
-			return 0x00EB;
-
-		case 0x00CC:
-			return 0x00EC;
-
-		case 0x00CD:
-			return 0x00ED;
-
-		case 0x00CE:
-			return 0x00EE;
-
-		case 0x00CF:
-			return 0x00EF;
-
-		case 0x00D0:
-			return 0x00F0;
-
-		case 0x00D1:
-			return 0x00F1;
-
-		case 0x00D2:
-			return 0x00F2;
-
-		case 0x00D3:
-			return 0x00F3;
-
-		case 0x00D4:
-			return 0x00F4;
-
-		case 0x00D5:
-			return 0x00F5;
-
-		case 0x00D6:
-			return 0x00F6;
-
-		case 0x00D8:
-			return 0x00F8;
-
-		case 0x00D9:
-			return 0x00F9;
-
-		case 0x00DA:
-			return 0x00FA;
-
-		case 0x00DB:
-			return 0x00FB;
-
-		case 0x00DC:
-			return 0x00FC;
-
-		case 0x00DD:
-			return 0x00FD;
-
-		case 0x00DE:
-			return 0x00FE;
-
-		case 0x0100:
-			return 0x0101;
-
-		case 0x0102:
-			return 0x0103;
-
-		case 0x0104:
-			return 0x0105;
-
-		case 0x0106:
-			return 0x0107;
-
-		case 0x0108:
-			return 0x0109;
-
-		case 0x010A:
-			return 0x010B;
-
-		case 0x010C:
-			return 0x010D;
-
-		case 0x010E:
-			return 0x010F;
-
-		case 0x0110:
-			return 0x0111;
-
-		case 0x0112:
-			return 0x0113;
-
-		case 0x0114:
-			return 0x0115;
-
-		case 0x0116:
-			return 0x0117;
-
-		case 0x0118:
-			return 0x0119;
-
-		case 0x011A:
-			return 0x011B;
-
-		case 0x011C:
-			return 0x011D;
-
-		case 0x011E:
-			return 0x011F;
-
-		case 0x0120:
-			return 0x0121;
-
-		case 0x0122:
-			return 0x0123;
-
-		case 0x0124:
-			return 0x0125;
-
-		case 0x0126:
-			return 0x0127;
-
-		case 0x0128:
-			return 0x0129;
-
-		case 0x012A:
-			return 0x012B;
-
-		case 0x012C:
-			return 0x012D;
-
-		case 0x012E:
-			return 0x012F;
-
-		case 0x0130:
-			return 0x0069;
-
-		case 0x0132:
-			return 0x0133;
-
-		case 0x0134:
-			return 0x0135;
-
-		case 0x0136:
-			return 0x0137;
-
-		case 0x0139:
-			return 0x013A;
-
-		case 0x013B:
-			return 0x013C;
-
-		case 0x013D:
-			return 0x013E;
-
-		case 0x013F:
-			return 0x0140;
-
-		case 0x0141:
-			return 0x0142;
-
-		case 0x0143:
-			return 0x0144;
-
-		case 0x0145:
-			return 0x0146;
-
-		case 0x0147:
-			return 0x0148;
-
-		case 0x014A:
-			return 0x014B;
-
-		case 0x014C:
-			return 0x014D;
-
-		case 0x014E:
-			return 0x014F;
-
-		case 0x0150:
-			return 0x0151;
-
-		case 0x0152:
-			return 0x0153;
-
-		case 0x0154:
-			return 0x0155;
-
-		case 0x0156:
-			return 0x0157;
-
-		case 0x0158:
-			return 0x0159;
-
-		case 0x015A:
-			return 0x015B;
-
-		case 0x015C:
-			return 0x015D;
-
-		case 0x015E:
-			return 0x015F;
-
-		case 0x0160:
-			return 0x0161;
-
-		case 0x0162:
-			return 0x0163;
-
-		case 0x0164:
-			return 0x0165;
-
-		case 0x0166:
-			return 0x0167;
-
-		case 0x0168:
-			return 0x0169;
-
-		case 0x016A:
-			return 0x016B;
-
-		case 0x016C:
-			return 0x016D;
-
-		case 0x016E:
-			return 0x016F;
-
-		case 0x0170:
-			return 0x0171;
-
-		case 0x0172:
-			return 0x0173;
-
-		case 0x0174:
-			return 0x0175;
-
-		case 0x0176:
-			return 0x0177;
-
-		case 0x0178:
-			return 0x00FF;
-
-		case 0x0179:
-			return 0x017A;
-
-		case 0x017B:
-			return 0x017C;
-
-		case 0x017D:
-			return 0x017E;
-
-		case 0x0181:
-			return 0x0253;
-
-		case 0x0182:
-			return 0x0183;
-
-		case 0x0184:
-			return 0x0185;
-
-		case 0x0186:
-			return 0x0254;
-
-		case 0x0187:
-			return 0x0188;
-
-		case 0x0189:
-			return 0x0256;
-
-		case 0x018A:
-			return 0x0257;
-
-		case 0x018B:
-			return 0x018C;
-
-		case 0x018E:
-			return 0x01DD;
-
-		case 0x018F:
-			return 0x0259;
-
-		case 0x0190:
-			return 0x025B;
-
-		case 0x0191:
-			return 0x0192;
-
-		case 0x0193:
-			return 0x0260;
-
-		case 0x0194:
-			return 0x0263;
-
-		case 0x0196:
-			return 0x0269;
-
-		case 0x0197:
-			return 0x0268;
-
-		case 0x0198:
-			return 0x0199;
-
-		case 0x019C:
-			return 0x026F;
-
-		case 0x019D:
-			return 0x0272;
-
-		case 0x019F:
-			return 0x0275;
-
-		case 0x01A0:
-			return 0x01A1;
-
-		case 0x01A2:
-			return 0x01A3;
-
-		case 0x01A4:
-			return 0x01A5;
-
-		case 0x01A6:
-			return 0x0280;
-
-		case 0x01A7:
-			return 0x01A8;
-
-		case 0x01A9:
-			return 0x0283;
-
-		case 0x01AC:
-			return 0x01AD;
-
-		case 0x01AE:
-			return 0x0288;
-
-		case 0x01AF:
-			return 0x01B0;
-
-		case 0x01B1:
-			return 0x028A;
-
-		case 0x01B2:
-			return 0x028B;
-
-		case 0x01B3:
-			return 0x01B4;
-
-		case 0x01B5:
-			return 0x01B6;
-
-		case 0x01B7:
-			return 0x0292;
-
-		case 0x01B8:
-			return 0x01B9;
-
-		case 0x01BC:
-			return 0x01BD;
-
-		case 0x01C4:
-			return 0x01C6;
-
-		case 0x01C7:
-			return 0x01C9;
-
-		case 0x01CA:
-			return 0x01CC;
-
-		case 0x01CD:
-			return 0x01CE;
-
-		case 0x01CF:
-			return 0x01D0;
-
-		case 0x01D1:
-			return 0x01D2;
-
-		case 0x01D3:
-			return 0x01D4;
-
-		case 0x01D5:
-			return 0x01D6;
-
-		case 0x01D7:
-			return 0x01D8;
-
-		case 0x01D9:
-			return 0x01DA;
-
-		case 0x01DB:
-			return 0x01DC;
-
-		case 0x01DE:
-			return 0x01DF;
-
-		case 0x01E0:
-			return 0x01E1;
-
-		case 0x01E2:
-			return 0x01E3;
-
-		case 0x01E4:
-			return 0x01E5;
-
-		case 0x01E6:
-			return 0x01E7;
-
-		case 0x01E8:
-			return 0x01E9;
-
-		case 0x01EA:
-			return 0x01EB;
-
-		case 0x01EC:
-			return 0x01ED;
-
-		case 0x01EE:
-			return 0x01EF;
-
-		case 0x01F1:
-			return 0x01F3;
-
-		case 0x01F4:
-			return 0x01F5;
-
-		case 0x01F6:
-			return 0x0195;
-
-		case 0x01F7:
-			return 0x01BF;
-
-		case 0x01F8:
-			return 0x01F9;
-
-		case 0x01FA:
-			return 0x01FB;
-
-		case 0x01FC:
-			return 0x01FD;
-
-		case 0x01FE:
-			return 0x01FF;
-
-		case 0x0200:
-			return 0x0201;
-
-		case 0x0202:
-			return 0x0203;
-
-		case 0x0204:
-			return 0x0205;
-
-		case 0x0206:
-			return 0x0207;
-
-		case 0x0208:
-			return 0x0209;
-
-		case 0x020A:
-			return 0x020B;
-
-		case 0x020C:
-			return 0x020D;
-
-		case 0x020E:
-			return 0x020F;
-
-		case 0x0210:
-			return 0x0211;
-
-		case 0x0212:
-			return 0x0213;
-
-		case 0x0214:
-			return 0x0215;
-
-		case 0x0216:
-			return 0x0217;
-
-		case 0x0218:
-			return 0x0219;
-
-		case 0x021A:
-			return 0x021B;
-
-		case 0x021C:
-			return 0x021D;
-
-		case 0x021E:
-			return 0x021F;
-
-		case 0x0220:
-			return 0x019E;
-
-		case 0x0222:
-			return 0x0223;
-
-		case 0x0224:
-			return 0x0225;
-
-		case 0x0226:
-			return 0x0227;
-
-		case 0x0228:
-			return 0x0229;
-
-		case 0x022A:
-			return 0x022B;
-
-		case 0x022C:
-			return 0x022D;
-
-		case 0x022E:
-			return 0x022F;
-
-		case 0x0230:
-			return 0x0231;
-
-		case 0x0232:
-			return 0x0233;
-
-		case 0x023A:
-			return 0x2C65;
-
-		case 0x023B:
-			return 0x023C;
-
-		case 0x023D:
-			return 0x019A;
-
-		case 0x023E:
-			return 0x2C66;
-
-		case 0x0241:
-			return 0x0242;
-
-		case 0x0243:
-			return 0x0180;
-
-		case 0x0244:
-			return 0x0289;
-
-		case 0x0245:
-			return 0x028C;
-
-		case 0x0246:
-			return 0x0247;
-
-		case 0x0248:
-			return 0x0249;
-
-		case 0x024A:
-			return 0x024B;
-
-		case 0x024C:
-			return 0x024D;
-
-		case 0x024E:
-			return 0x024F;
-
-		case 0x0370:
-			return 0x0371;
-
-		case 0x0372:
-			return 0x0373;
-
-		case 0x0376:
-			return 0x0377;
-
-		case 0x037F:
-			return 0x03F3;
-
-		case 0x0386:
-			return 0x03AC;
-
-		case 0x0388:
-			return 0x03AD;
-
-		case 0x0389:
-			return 0x03AE;
-
-		case 0x038A:
-			return 0x03AF;
-
-		case 0x038C:
-			return 0x03CC;
-
-		case 0x038E:
-			return 0x03CD;
-
-		case 0x038F:
-			return 0x03CE;
-
-		case 0x0391:
-			return 0x03B1;
-
-		case 0x0392:
-			return 0x03B2;
-
-		case 0x0393:
-			return 0x03B3;
-
-		case 0x0394:
-			return 0x03B4;
-
-		case 0x0395:
-			return 0x03B5;
-
-		case 0x0396:
-			return 0x03B6;
-
-		case 0x0397:
-			return 0x03B7;
-
-		case 0x0398:
-			return 0x03B8;
-
-		case 0x0399:
-			return 0x03B9;
-
-		case 0x039A:
-			return 0x03BA;
-
-		case 0x039B:
-			return 0x03BB;
-
-		case 0x039C:
-			return 0x03BC;
-
-		case 0x039D:
-			return 0x03BD;
-
-		case 0x039E:
-			return 0x03BE;
-
-		case 0x039F:
-			return 0x03BF;
-
-		case 0x03A0:
-			return 0x03C0;
-
-		case 0x03A1:
-			return 0x03C1;
-
-		case 0x03A3:
-			return 0x03C3;
-
-		case 0x03A4:
-			return 0x03C4;
-
-		case 0x03A5:
-			return 0x03C5;
-
-		case 0x03A6:
-			return 0x03C6;
-
-		case 0x03A7:
-			return 0x03C7;
-
-		case 0x03A8:
-			return 0x03C8;
-
-		case 0x03A9:
-			return 0x03C9;
-
-		case 0x03AA:
-			return 0x03CA;
-
-		case 0x03AB:
-			return 0x03CB;
-
-		case 0x03CF:
-			return 0x03D7;
-
-		case 0x03D8:
-			return 0x03D9;
-
-		case 0x03DA:
-			return 0x03DB;
-
-		case 0x03DC:
-			return 0x03DD;
-
-		case 0x03DE:
-			return 0x03DF;
-
-		case 0x03E0:
-			return 0x03E1;
-
-		case 0x03E2:
-			return 0x03E3;
-
-		case 0x03E4:
-			return 0x03E5;
-
-		case 0x03E6:
-			return 0x03E7;
-
-		case 0x03E8:
-			return 0x03E9;
-
-		case 0x03EA:
-			return 0x03EB;
-
-		case 0x03EC:
-			return 0x03ED;
-
-		case 0x03EE:
-			return 0x03EF;
-
-		case 0x03F4:
-			return 0x03B8;
-
-		case 0x03F7:
-			return 0x03F8;
-
-		case 0x03F9:
-			return 0x03F2;
-
-		case 0x03FA:
-			return 0x03FB;
-
-		case 0x03FD:
-			return 0x037B;
-
-		case 0x03FE:
-			return 0x037C;
-
-		case 0x03FF:
-			return 0x037D;
-
-		case 0x0400:
-			return 0x0450;
-
-		case 0x0401:
-			return 0x0451;
-
-		case 0x0402:
-			return 0x0452;
-
-		case 0x0403:
-			return 0x0453;
-
-		case 0x0404:
-			return 0x0454;
-
-		case 0x0405:
-			return 0x0455;
-
-		case 0x0406:
-			return 0x0456;
-
-		case 0x0407:
-			return 0x0457;
-
-		case 0x0408:
-			return 0x0458;
-
-		case 0x0409:
-			return 0x0459;
-
-		case 0x040A:
-			return 0x045A;
-
-		case 0x040B:
-			return 0x045B;
-
-		case 0x040C:
-			return 0x045C;
-
-		case 0x040D:
-			return 0x045D;
-
-		case 0x040E:
-			return 0x045E;
-
-		case 0x040F:
-			return 0x045F;
-
-		case 0x0410:
-			return 0x0430;
-
-		case 0x0411:
-			return 0x0431;
-
-		case 0x0412:
-			return 0x0432;
-
-		case 0x0413:
-			return 0x0433;
-
-		case 0x0414:
-			return 0x0434;
-
-		case 0x0415:
-			return 0x0435;
-
-		case 0x0416:
-			return 0x0436;
-
-		case 0x0417:
-			return 0x0437;
-
-		case 0x0418:
-			return 0x0438;
-
-		case 0x0419:
-			return 0x0439;
-
-		case 0x041A:
-			return 0x043A;
-
-		case 0x041B:
-			return 0x043B;
-
-		case 0x041C:
-			return 0x043C;
-
-		case 0x041D:
-			return 0x043D;
-
-		case 0x041E:
-			return 0x043E;
-
-		case 0x041F:
-			return 0x043F;
-
-		case 0x0420:
-			return 0x0440;
-
-		case 0x0421:
-			return 0x0441;
-
-		case 0x0422:
-			return 0x0442;
-
-		case 0x0423:
-			return 0x0443;
-
-		case 0x0424:
-			return 0x0444;
-
-		case 0x0425:
-			return 0x0445;
-
-		case 0x0426:
-			return 0x0446;
-
-		case 0x0427:
-			return 0x0447;
-
-		case 0x0428:
-			return 0x0448;
-
-		case 0x0429:
-			return 0x0449;
-
-		case 0x042A:
-			return 0x044A;
-
-		case 0x042B:
-			return 0x044B;
-
-		case 0x042C:
-			return 0x044C;
-
-		case 0x042D:
-			return 0x044D;
-
-		case 0x042E:
-			return 0x044E;
-
-		case 0x042F:
-			return 0x044F;
-
-		case 0x0460:
-			return 0x0461;
-
-		case 0x0462:
-			return 0x0463;
-
-		case 0x0464:
-			return 0x0465;
-
-		case 0x0466:
-			return 0x0467;
-
-		case 0x0468:
-			return 0x0469;
-
-		case 0x046A:
-			return 0x046B;
-
-		case 0x046C:
-			return 0x046D;
-
-		case 0x046E:
-			return 0x046F;
-
-		case 0x0470:
-			return 0x0471;
-
-		case 0x0472:
-			return 0x0473;
-
-		case 0x0474:
-			return 0x0475;
-
-		case 0x0476:
-			return 0x0477;
-
-		case 0x0478:
-			return 0x0479;
-
-		case 0x047A:
-			return 0x047B;
-
-		case 0x047C:
-			return 0x047D;
-
-		case 0x047E:
-			return 0x047F;
-
-		case 0x0480:
-			return 0x0481;
-
-		case 0x048A:
-			return 0x048B;
-
-		case 0x048C:
-			return 0x048D;
-
-		case 0x048E:
-			return 0x048F;
-
-		case 0x0490:
-			return 0x0491;
-
-		case 0x0492:
-			return 0x0493;
-
-		case 0x0494:
-			return 0x0495;
-
-		case 0x0496:
-			return 0x0497;
-
-		case 0x0498:
-			return 0x0499;
-
-		case 0x049A:
-			return 0x049B;
-
-		case 0x049C:
-			return 0x049D;
-
-		case 0x049E:
-			return 0x049F;
-
-		case 0x04A0:
-			return 0x04A1;
-
-		case 0x04A2:
-			return 0x04A3;
-
-		case 0x04A4:
-			return 0x04A5;
-
-		case 0x04A6:
-			return 0x04A7;
-
-		case 0x04A8:
-			return 0x04A9;
-
-		case 0x04AA:
-			return 0x04AB;
-
-		case 0x04AC:
-			return 0x04AD;
-
-		case 0x04AE:
-			return 0x04AF;
-
-		case 0x04B0:
-			return 0x04B1;
-
-		case 0x04B2:
-			return 0x04B3;
-
-		case 0x04B4:
-			return 0x04B5;
-
-		case 0x04B6:
-			return 0x04B7;
-
-		case 0x04B8:
-			return 0x04B9;
-
-		case 0x04BA:
-			return 0x04BB;
-
-		case 0x04BC:
-			return 0x04BD;
-
-		case 0x04BE:
-			return 0x04BF;
-
-		case 0x04C0:
-			return 0x04CF;
-
-		case 0x04C1:
-			return 0x04C2;
-
-		case 0x04C3:
-			return 0x04C4;
-
-		case 0x04C5:
-			return 0x04C6;
-
-		case 0x04C7:
-			return 0x04C8;
-
-		case 0x04C9:
-			return 0x04CA;
-
-		case 0x04CB:
-			return 0x04CC;
-
-		case 0x04CD:
-			return 0x04CE;
-
-		case 0x04D0:
-			return 0x04D1;
-
-		case 0x04D2:
-			return 0x04D3;
-
-		case 0x04D4:
-			return 0x04D5;
-
-		case 0x04D6:
-			return 0x04D7;
-
-		case 0x04D8:
-			return 0x04D9;
-
-		case 0x04DA:
-			return 0x04DB;
-
-		case 0x04DC:
-			return 0x04DD;
-
-		case 0x04DE:
-			return 0x04DF;
-
-		case 0x04E0:
-			return 0x04E1;
-
-		case 0x04E2:
-			return 0x04E3;
-
-		case 0x04E4:
-			return 0x04E5;
-
-		case 0x04E6:
-			return 0x04E7;
-
-		case 0x04E8:
-			return 0x04E9;
-
-		case 0x04EA:
-			return 0x04EB;
-
-		case 0x04EC:
-			return 0x04ED;
-
-		case 0x04EE:
-			return 0x04EF;
-
-		case 0x04F0:
-			return 0x04F1;
-
-		case 0x04F2:
-			return 0x04F3;
-
-		case 0x04F4:
-			return 0x04F5;
-
-		case 0x04F6:
-			return 0x04F7;
-
-		case 0x04F8:
-			return 0x04F9;
-
-		case 0x04FA:
-			return 0x04FB;
-
-		case 0x04FC:
-			return 0x04FD;
-
-		case 0x04FE:
-			return 0x04FF;
-
-		case 0x0500:
-			return 0x0501;
-
-		case 0x0502:
-			return 0x0503;
-
-		case 0x0504:
-			return 0x0505;
-
-		case 0x0506:
-			return 0x0507;
-
-		case 0x0508:
-			return 0x0509;
-
-		case 0x050A:
-			return 0x050B;
-
-		case 0x050C:
-			return 0x050D;
-
-		case 0x050E:
-			return 0x050F;
-
-		case 0x0510:
-			return 0x0511;
-
-		case 0x0512:
-			return 0x0513;
-
-		case 0x0514:
-			return 0x0515;
-
-		case 0x0516:
-			return 0x0517;
-
-		case 0x0518:
-			return 0x0519;
-
-		case 0x051A:
-			return 0x051B;
-
-		case 0x051C:
-			return 0x051D;
-
-		case 0x051E:
-			return 0x051F;
-
-		case 0x0520:
-			return 0x0521;
-
-		case 0x0522:
-			return 0x0523;
-
-		case 0x0524:
-			return 0x0525;
-
-		case 0x0526:
-			return 0x0527;
-
-		case 0x0528:
-			return 0x0529;
-
-		case 0x052A:
-			return 0x052B;
-
-		case 0x052C:
-			return 0x052D;
-
-		case 0x052E:
-			return 0x052F;
-
-		case 0x0531:
-			return 0x0561;
-
-		case 0x0532:
-			return 0x0562;
-
-		case 0x0533:
-			return 0x0563;
-
-		case 0x0534:
-			return 0x0564;
-
-		case 0x0535:
-			return 0x0565;
-
-		case 0x0536:
-			return 0x0566;
-
-		case 0x0537:
-			return 0x0567;
-
-		case 0x0538:
-			return 0x0568;
-
-		case 0x0539:
-			return 0x0569;
-
-		case 0x053A:
-			return 0x056A;
-
-		case 0x053B:
-			return 0x056B;
-
-		case 0x053C:
-			return 0x056C;
-
-		case 0x053D:
-			return 0x056D;
-
-		case 0x053E:
-			return 0x056E;
-
-		case 0x053F:
-			return 0x056F;
-
-		case 0x0540:
-			return 0x0570;
-
-		case 0x0541:
-			return 0x0571;
-
-		case 0x0542:
-			return 0x0572;
-
-		case 0x0543:
-			return 0x0573;
-
-		case 0x0544:
-			return 0x0574;
-
-		case 0x0545:
-			return 0x0575;
-
-		case 0x0546:
-			return 0x0576;
-
-		case 0x0547:
-			return 0x0577;
-
-		case 0x0548:
-			return 0x0578;
-
-		case 0x0549:
-			return 0x0579;
-
-		case 0x054A:
-			return 0x057A;
-
-		case 0x054B:
-			return 0x057B;
-
-		case 0x054C:
-			return 0x057C;
-
-		case 0x054D:
-			return 0x057D;
-
-		case 0x054E:
-			return 0x057E;
-
-		case 0x054F:
-			return 0x057F;
-
-		case 0x0550:
-			return 0x0580;
-
-		case 0x0551:
-			return 0x0581;
-
-		case 0x0552:
-			return 0x0582;
-
-		case 0x0553:
-			return 0x0583;
-
-		case 0x0554:
-			return 0x0584;
-
-		case 0x0555:
-			return 0x0585;
-
-		case 0x0556:
-			return 0x0586;
-
-		case 0x10A0:
-			return 0x2D00;
-
-		case 0x10A1:
-			return 0x2D01;
-
-		case 0x10A2:
-			return 0x2D02;
-
-		case 0x10A3:
-			return 0x2D03;
-
-		case 0x10A4:
-			return 0x2D04;
-
-		case 0x10A5:
-			return 0x2D05;
-
-		case 0x10A6:
-			return 0x2D06;
-
-		case 0x10A7:
-			return 0x2D07;
-
-		case 0x10A8:
-			return 0x2D08;
-
-		case 0x10A9:
-			return 0x2D09;
-
-		case 0x10AA:
-			return 0x2D0A;
-
-		case 0x10AB:
-			return 0x2D0B;
-
-		case 0x10AC:
-			return 0x2D0C;
-
-		case 0x10AD:
-			return 0x2D0D;
-
-		case 0x10AE:
-			return 0x2D0E;
-
-		case 0x10AF:
-			return 0x2D0F;
-
-		case 0x10B0:
-			return 0x2D10;
-
-		case 0x10B1:
-			return 0x2D11;
-
-		case 0x10B2:
-			return 0x2D12;
-
-		case 0x10B3:
-			return 0x2D13;
-
-		case 0x10B4:
-			return 0x2D14;
-
-		case 0x10B5:
-			return 0x2D15;
-
-		case 0x10B6:
-			return 0x2D16;
-
-		case 0x10B7:
-			return 0x2D17;
-
-		case 0x10B8:
-			return 0x2D18;
-
-		case 0x10B9:
-			return 0x2D19;
-
-		case 0x10BA:
-			return 0x2D1A;
-
-		case 0x10BB:
-			return 0x2D1B;
-
-		case 0x10BC:
-			return 0x2D1C;
-
-		case 0x10BD:
-			return 0x2D1D;
-
-		case 0x10BE:
-			return 0x2D1E;
-
-		case 0x10BF:
-			return 0x2D1F;
-
-		case 0x10C0:
-			return 0x2D20;
-
-		case 0x10C1:
-			return 0x2D21;
-
-		case 0x10C2:
-			return 0x2D22;
-
-		case 0x10C3:
-			return 0x2D23;
-
-		case 0x10C4:
-			return 0x2D24;
-
-		case 0x10C5:
-			return 0x2D25;
-
-		case 0x10C7:
-			return 0x2D27;
-
-		case 0x10CD:
-			return 0x2D2D;
-
-		case 0x13A0:
-			return 0xAB70;
-
-		case 0x13A1:
-			return 0xAB71;
-
-		case 0x13A2:
-			return 0xAB72;
-
-		case 0x13A3:
-			return 0xAB73;
-
-		case 0x13A4:
-			return 0xAB74;
-
-		case 0x13A5:
-			return 0xAB75;
-
-		case 0x13A6:
-			return 0xAB76;
-
-		case 0x13A7:
-			return 0xAB77;
-
-		case 0x13A8:
-			return 0xAB78;
-
-		case 0x13A9:
-			return 0xAB79;
-
-		case 0x13AA:
-			return 0xAB7A;
-
-		case 0x13AB:
-			return 0xAB7B;
-
-		case 0x13AC:
-			return 0xAB7C;
-
-		case 0x13AD:
-			return 0xAB7D;
-
-		case 0x13AE:
-			return 0xAB7E;
-
-		case 0x13AF:
-			return 0xAB7F;
-
-		case 0x13B0:
-			return 0xAB80;
-
-		case 0x13B1:
-			return 0xAB81;
-
-		case 0x13B2:
-			return 0xAB82;
-
-		case 0x13B3:
-			return 0xAB83;
-
-		case 0x13B4:
-			return 0xAB84;
-
-		case 0x13B5:
-			return 0xAB85;
-
-		case 0x13B6:
-			return 0xAB86;
-
-		case 0x13B7:
-			return 0xAB87;
-
-		case 0x13B8:
-			return 0xAB88;
-
-		case 0x13B9:
-			return 0xAB89;
-
-		case 0x13BA:
-			return 0xAB8A;
-
-		case 0x13BB:
-			return 0xAB8B;
-
-		case 0x13BC:
-			return 0xAB8C;
-
-		case 0x13BD:
-			return 0xAB8D;
-
-		case 0x13BE:
-			return 0xAB8E;
-
-		case 0x13BF:
-			return 0xAB8F;
-
-		case 0x13C0:
-			return 0xAB90;
-
-		case 0x13C1:
-			return 0xAB91;
-
-		case 0x13C2:
-			return 0xAB92;
-
-		case 0x13C3:
-			return 0xAB93;
-
-		case 0x13C4:
-			return 0xAB94;
-
-		case 0x13C5:
-			return 0xAB95;
-
-		case 0x13C6:
-			return 0xAB96;
-
-		case 0x13C7:
-			return 0xAB97;
-
-		case 0x13C8:
-			return 0xAB98;
-
-		case 0x13C9:
-			return 0xAB99;
-
-		case 0x13CA:
-			return 0xAB9A;
-
-		case 0x13CB:
-			return 0xAB9B;
-
-		case 0x13CC:
-			return 0xAB9C;
-
-		case 0x13CD:
-			return 0xAB9D;
-
-		case 0x13CE:
-			return 0xAB9E;
-
-		case 0x13CF:
-			return 0xAB9F;
-
-		case 0x13D0:
-			return 0xABA0;
-
-		case 0x13D1:
-			return 0xABA1;
-
-		case 0x13D2:
-			return 0xABA2;
-
-		case 0x13D3:
-			return 0xABA3;
-
-		case 0x13D4:
-			return 0xABA4;
-
-		case 0x13D5:
-			return 0xABA5;
-
-		case 0x13D6:
-			return 0xABA6;
-
-		case 0x13D7:
-			return 0xABA7;
-
-		case 0x13D8:
-			return 0xABA8;
-
-		case 0x13D9:
-			return 0xABA9;
-
-		case 0x13DA:
-			return 0xABAA;
-
-		case 0x13DB:
-			return 0xABAB;
-
-		case 0x13DC:
-			return 0xABAC;
-
-		case 0x13DD:
-			return 0xABAD;
-
-		case 0x13DE:
-			return 0xABAE;
-
-		case 0x13DF:
-			return 0xABAF;
-
-		case 0x13E0:
-			return 0xABB0;
-
-		case 0x13E1:
-			return 0xABB1;
-
-		case 0x13E2:
-			return 0xABB2;
-
-		case 0x13E3:
-			return 0xABB3;
-
-		case 0x13E4:
-			return 0xABB4;
-
-		case 0x13E5:
-			return 0xABB5;
-
-		case 0x13E6:
-			return 0xABB6;
-
-		case 0x13E7:
-			return 0xABB7;
-
-		case 0x13E8:
-			return 0xABB8;
-
-		case 0x13E9:
-			return 0xABB9;
-
-		case 0x13EA:
-			return 0xABBA;
-
-		case 0x13EB:
-			return 0xABBB;
-
-		case 0x13EC:
-			return 0xABBC;
-
-		case 0x13ED:
-			return 0xABBD;
-
-		case 0x13EE:
-			return 0xABBE;
-
-		case 0x13EF:
-			return 0xABBF;
-
-		case 0x13F0:
-			return 0x13F8;
-
-		case 0x13F1:
-			return 0x13F9;
-
-		case 0x13F2:
-			return 0x13FA;
-
-		case 0x13F3:
-			return 0x13FB;
-
-		case 0x13F4:
-			return 0x13FC;
-
-		case 0x13F5:
-			return 0x13FD;
-
-		case 0x1C90:
-			return 0x10D0;
-
-		case 0x1C91:
-			return 0x10D1;
-
-		case 0x1C92:
-			return 0x10D2;
-
-		case 0x1C93:
-			return 0x10D3;
-
-		case 0x1C94:
-			return 0x10D4;
-
-		case 0x1C95:
-			return 0x10D5;
-
-		case 0x1C96:
-			return 0x10D6;
-
-		case 0x1C97:
-			return 0x10D7;
-
-		case 0x1C98:
-			return 0x10D8;
-
-		case 0x1C99:
-			return 0x10D9;
-
-		case 0x1C9A:
-			return 0x10DA;
-
-		case 0x1C9B:
-			return 0x10DB;
-
-		case 0x1C9C:
-			return 0x10DC;
-
-		case 0x1C9D:
-			return 0x10DD;
-
-		case 0x1C9E:
-			return 0x10DE;
-
-		case 0x1C9F:
-			return 0x10DF;
-
-		case 0x1CA0:
-			return 0x10E0;
-
-		case 0x1CA1:
-			return 0x10E1;
-
-		case 0x1CA2:
-			return 0x10E2;
-
-		case 0x1CA3:
-			return 0x10E3;
-
-		case 0x1CA4:
-			return 0x10E4;
-
-		case 0x1CA5:
-			return 0x10E5;
-
-		case 0x1CA6:
-			return 0x10E6;
-
-		case 0x1CA7:
-			return 0x10E7;
-
-		case 0x1CA8:
-			return 0x10E8;
-
-		case 0x1CA9:
-			return 0x10E9;
-
-		case 0x1CAA:
-			return 0x10EA;
-
-		case 0x1CAB:
-			return 0x10EB;
-
-		case 0x1CAC:
-			return 0x10EC;
-
-		case 0x1CAD:
-			return 0x10ED;
-
-		case 0x1CAE:
-			return 0x10EE;
-
-		case 0x1CAF:
-			return 0x10EF;
-
-		case 0x1CB0:
-			return 0x10F0;
-
-		case 0x1CB1:
-			return 0x10F1;
-
-		case 0x1CB2:
-			return 0x10F2;
-
-		case 0x1CB3:
-			return 0x10F3;
-
-		case 0x1CB4:
-			return 0x10F4;
-
-		case 0x1CB5:
-			return 0x10F5;
-
-		case 0x1CB6:
-			return 0x10F6;
-
-		case 0x1CB7:
-			return 0x10F7;
-
-		case 0x1CB8:
-			return 0x10F8;
-
-		case 0x1CB9:
-			return 0x10F9;
-
-		case 0x1CBA:
-			return 0x10FA;
-
-		case 0x1CBD:
-			return 0x10FD;
-
-		case 0x1CBE:
-			return 0x10FE;
-
-		case 0x1CBF:
-			return 0x10FF;
-
-		case 0x1E00:
-			return 0x1E01;
-
-		case 0x1E02:
-			return 0x1E03;
-
-		case 0x1E04:
-			return 0x1E05;
-
-		case 0x1E06:
-			return 0x1E07;
-
-		case 0x1E08:
-			return 0x1E09;
-
-		case 0x1E0A:
-			return 0x1E0B;
-
-		case 0x1E0C:
-			return 0x1E0D;
-
-		case 0x1E0E:
-			return 0x1E0F;
-
-		case 0x1E10:
-			return 0x1E11;
-
-		case 0x1E12:
-			return 0x1E13;
-
-		case 0x1E14:
-			return 0x1E15;
-
-		case 0x1E16:
-			return 0x1E17;
-
-		case 0x1E18:
-			return 0x1E19;
-
-		case 0x1E1A:
-			return 0x1E1B;
-
-		case 0x1E1C:
-			return 0x1E1D;
-
-		case 0x1E1E:
-			return 0x1E1F;
-
-		case 0x1E20:
-			return 0x1E21;
-
-		case 0x1E22:
-			return 0x1E23;
-
-		case 0x1E24:
-			return 0x1E25;
-
-		case 0x1E26:
-			return 0x1E27;
-
-		case 0x1E28:
-			return 0x1E29;
-
-		case 0x1E2A:
-			return 0x1E2B;
-
-		case 0x1E2C:
-			return 0x1E2D;
-
-		case 0x1E2E:
-			return 0x1E2F;
-
-		case 0x1E30:
-			return 0x1E31;
-
-		case 0x1E32:
-			return 0x1E33;
-
-		case 0x1E34:
-			return 0x1E35;
-
-		case 0x1E36:
-			return 0x1E37;
-
-		case 0x1E38:
-			return 0x1E39;
-
-		case 0x1E3A:
-			return 0x1E3B;
-
-		case 0x1E3C:
-			return 0x1E3D;
-
-		case 0x1E3E:
-			return 0x1E3F;
-
-		case 0x1E40:
-			return 0x1E41;
-
-		case 0x1E42:
-			return 0x1E43;
-
-		case 0x1E44:
-			return 0x1E45;
-
-		case 0x1E46:
-			return 0x1E47;
-
-		case 0x1E48:
-			return 0x1E49;
-
-		case 0x1E4A:
-			return 0x1E4B;
-
-		case 0x1E4C:
-			return 0x1E4D;
-
-		case 0x1E4E:
-			return 0x1E4F;
-
-		case 0x1E50:
-			return 0x1E51;
-
-		case 0x1E52:
-			return 0x1E53;
-
-		case 0x1E54:
-			return 0x1E55;
-
-		case 0x1E56:
-			return 0x1E57;
-
-		case 0x1E58:
-			return 0x1E59;
-
-		case 0x1E5A:
-			return 0x1E5B;
-
-		case 0x1E5C:
-			return 0x1E5D;
-
-		case 0x1E5E:
-			return 0x1E5F;
-
-		case 0x1E60:
-			return 0x1E61;
-
-		case 0x1E62:
-			return 0x1E63;
-
-		case 0x1E64:
-			return 0x1E65;
-
-		case 0x1E66:
-			return 0x1E67;
-
-		case 0x1E68:
-			return 0x1E69;
-
-		case 0x1E6A:
-			return 0x1E6B;
-
-		case 0x1E6C:
-			return 0x1E6D;
-
-		case 0x1E6E:
-			return 0x1E6F;
-
-		case 0x1E70:
-			return 0x1E71;
-
-		case 0x1E72:
-			return 0x1E73;
-
-		case 0x1E74:
-			return 0x1E75;
-
-		case 0x1E76:
-			return 0x1E77;
-
-		case 0x1E78:
-			return 0x1E79;
-
-		case 0x1E7A:
-			return 0x1E7B;
-
-		case 0x1E7C:
-			return 0x1E7D;
-
-		case 0x1E7E:
-			return 0x1E7F;
-
-		case 0x1E80:
-			return 0x1E81;
-
-		case 0x1E82:
-			return 0x1E83;
-
-		case 0x1E84:
-			return 0x1E85;
-
-		case 0x1E86:
-			return 0x1E87;
-
-		case 0x1E88:
-			return 0x1E89;
-
-		case 0x1E8A:
-			return 0x1E8B;
-
-		case 0x1E8C:
-			return 0x1E8D;
-
-		case 0x1E8E:
-			return 0x1E8F;
-
-		case 0x1E90:
-			return 0x1E91;
-
-		case 0x1E92:
-			return 0x1E93;
-
-		case 0x1E94:
-			return 0x1E95;
-
-		case 0x1E9E:
-			return 0x00DF;
-
-		case 0x1EA0:
-			return 0x1EA1;
-
-		case 0x1EA2:
-			return 0x1EA3;
-
-		case 0x1EA4:
-			return 0x1EA5;
-
-		case 0x1EA6:
-			return 0x1EA7;
-
-		case 0x1EA8:
-			return 0x1EA9;
-
-		case 0x1EAA:
-			return 0x1EAB;
-
-		case 0x1EAC:
-			return 0x1EAD;
-
-		case 0x1EAE:
-			return 0x1EAF;
-
-		case 0x1EB0:
-			return 0x1EB1;
-
-		case 0x1EB2:
-			return 0x1EB3;
-
-		case 0x1EB4:
-			return 0x1EB5;
-
-		case 0x1EB6:
-			return 0x1EB7;
-
-		case 0x1EB8:
-			return 0x1EB9;
-
-		case 0x1EBA:
-			return 0x1EBB;
-
-		case 0x1EBC:
-			return 0x1EBD;
-
-		case 0x1EBE:
-			return 0x1EBF;
-
-		case 0x1EC0:
-			return 0x1EC1;
-
-		case 0x1EC2:
-			return 0x1EC3;
-
-		case 0x1EC4:
-			return 0x1EC5;
-
-		case 0x1EC6:
-			return 0x1EC7;
-
-		case 0x1EC8:
-			return 0x1EC9;
-
-		case 0x1ECA:
-			return 0x1ECB;
-
-		case 0x1ECC:
-			return 0x1ECD;
-
-		case 0x1ECE:
-			return 0x1ECF;
-
-		case 0x1ED0:
-			return 0x1ED1;
-
-		case 0x1ED2:
-			return 0x1ED3;
-
-		case 0x1ED4:
-			return 0x1ED5;
-
-		case 0x1ED6:
-			return 0x1ED7;
-
-		case 0x1ED8:
-			return 0x1ED9;
-
-		case 0x1EDA:
-			return 0x1EDB;
-
-		case 0x1EDC:
-			return 0x1EDD;
-
-		case 0x1EDE:
-			return 0x1EDF;
-
-		case 0x1EE0:
-			return 0x1EE1;
-
-		case 0x1EE2:
-			return 0x1EE3;
-
-		case 0x1EE4:
-			return 0x1EE5;
-
-		case 0x1EE6:
-			return 0x1EE7;
-
-		case 0x1EE8:
-			return 0x1EE9;
-
-		case 0x1EEA:
-			return 0x1EEB;
-
-		case 0x1EEC:
-			return 0x1EED;
-
-		case 0x1EEE:
-			return 0x1EEF;
-
-		case 0x1EF0:
-			return 0x1EF1;
-
-		case 0x1EF2:
-			return 0x1EF3;
-
-		case 0x1EF4:
-			return 0x1EF5;
-
-		case 0x1EF6:
-			return 0x1EF7;
-
-		case 0x1EF8:
-			return 0x1EF9;
-
-		case 0x1EFA:
-			return 0x1EFB;
-
-		case 0x1EFC:
-			return 0x1EFD;
-
-		case 0x1EFE:
-			return 0x1EFF;
-
-		case 0x1F08:
-			return 0x1F00;
-
-		case 0x1F09:
-			return 0x1F01;
-
-		case 0x1F0A:
-			return 0x1F02;
-
-		case 0x1F0B:
-			return 0x1F03;
-
-		case 0x1F0C:
-			return 0x1F04;
-
-		case 0x1F0D:
-			return 0x1F05;
-
-		case 0x1F0E:
-			return 0x1F06;
-
-		case 0x1F0F:
-			return 0x1F07;
-
-		case 0x1F18:
-			return 0x1F10;
-
-		case 0x1F19:
-			return 0x1F11;
-
-		case 0x1F1A:
-			return 0x1F12;
-
-		case 0x1F1B:
-			return 0x1F13;
-
-		case 0x1F1C:
-			return 0x1F14;
-
-		case 0x1F1D:
-			return 0x1F15;
-
-		case 0x1F28:
-			return 0x1F20;
-
-		case 0x1F29:
-			return 0x1F21;
-
-		case 0x1F2A:
-			return 0x1F22;
-
-		case 0x1F2B:
-			return 0x1F23;
-
-		case 0x1F2C:
-			return 0x1F24;
-
-		case 0x1F2D:
-			return 0x1F25;
-
-		case 0x1F2E:
-			return 0x1F26;
-
-		case 0x1F2F:
-			return 0x1F27;
-
-		case 0x1F38:
-			return 0x1F30;
-
-		case 0x1F39:
-			return 0x1F31;
-
-		case 0x1F3A:
-			return 0x1F32;
-
-		case 0x1F3B:
-			return 0x1F33;
-
-		case 0x1F3C:
-			return 0x1F34;
-
-		case 0x1F3D:
-			return 0x1F35;
-
-		case 0x1F3E:
-			return 0x1F36;
-
-		case 0x1F3F:
-			return 0x1F37;
-
-		case 0x1F48:
-			return 0x1F40;
-
-		case 0x1F49:
-			return 0x1F41;
-
-		case 0x1F4A:
-			return 0x1F42;
-
-		case 0x1F4B:
-			return 0x1F43;
-
-		case 0x1F4C:
-			return 0x1F44;
-
-		case 0x1F4D:
-			return 0x1F45;
-
-		case 0x1F59:
-			return 0x1F51;
-
-		case 0x1F5B:
-			return 0x1F53;
-
-		case 0x1F5D:
-			return 0x1F55;
-
-		case 0x1F5F:
-			return 0x1F57;
-
-		case 0x1F68:
-			return 0x1F60;
-
-		case 0x1F69:
-			return 0x1F61;
-
-		case 0x1F6A:
-			return 0x1F62;
-
-		case 0x1F6B:
-			return 0x1F63;
-
-		case 0x1F6C:
-			return 0x1F64;
-
-		case 0x1F6D:
-			return 0x1F65;
-
-		case 0x1F6E:
-			return 0x1F66;
-
-		case 0x1F6F:
-			return 0x1F67;
-
-		case 0x1FB8:
-			return 0x1FB0;
-
-		case 0x1FB9:
-			return 0x1FB1;
-
-		case 0x1FBA:
-			return 0x1F70;
-
-		case 0x1FBB:
-			return 0x1F71;
-
-		case 0x1FC8:
-			return 0x1F72;
-
-		case 0x1FC9:
-			return 0x1F73;
-
-		case 0x1FCA:
-			return 0x1F74;
-
-		case 0x1FCB:
-			return 0x1F75;
-
-		case 0x1FD8:
-			return 0x1FD0;
-
-		case 0x1FD9:
-			return 0x1FD1;
-
-		case 0x1FDA:
-			return 0x1F76;
-
-		case 0x1FDB:
-			return 0x1F77;
-
-		case 0x1FE8:
-			return 0x1FE0;
-
-		case 0x1FE9:
-			return 0x1FE1;
-
-		case 0x1FEA:
-			return 0x1F7A;
-
-		case 0x1FEB:
-			return 0x1F7B;
-
-		case 0x1FEC:
-			return 0x1FE5;
-
-		case 0x1FF8:
-			return 0x1F78;
-
-		case 0x1FF9:
-			return 0x1F79;
-
-		case 0x1FFA:
-			return 0x1F7C;
-
-		case 0x1FFB:
-			return 0x1F7D;
-
-		case 0x2126:
-			return 0x03C9;
-
-		case 0x212A:
-			return 0x006B;
-
-		case 0x212B:
-			return 0x00E5;
-
-		case 0x2132:
-			return 0x214E;
-
-		case 0x2183:
-			return 0x2184;
-
-		case 0x2C00:
-			return 0x2C30;
-
-		case 0x2C01:
-			return 0x2C31;
-
-		case 0x2C02:
-			return 0x2C32;
-
-		case 0x2C03:
-			return 0x2C33;
-
-		case 0x2C04:
-			return 0x2C34;
-
-		case 0x2C05:
-			return 0x2C35;
-
-		case 0x2C06:
-			return 0x2C36;
-
-		case 0x2C07:
-			return 0x2C37;
-
-		case 0x2C08:
-			return 0x2C38;
-
-		case 0x2C09:
-			return 0x2C39;
-
-		case 0x2C0A:
-			return 0x2C3A;
-
-		case 0x2C0B:
-			return 0x2C3B;
-
-		case 0x2C0C:
-			return 0x2C3C;
-
-		case 0x2C0D:
-			return 0x2C3D;
-
-		case 0x2C0E:
-			return 0x2C3E;
-
-		case 0x2C0F:
-			return 0x2C3F;
-
-		case 0x2C10:
-			return 0x2C40;
-
-		case 0x2C11:
-			return 0x2C41;
-
-		case 0x2C12:
-			return 0x2C42;
-
-		case 0x2C13:
-			return 0x2C43;
-
-		case 0x2C14:
-			return 0x2C44;
-
-		case 0x2C15:
-			return 0x2C45;
-
-		case 0x2C16:
-			return 0x2C46;
-
-		case 0x2C17:
-			return 0x2C47;
-
-		case 0x2C18:
-			return 0x2C48;
-
-		case 0x2C19:
-			return 0x2C49;
-
-		case 0x2C1A:
-			return 0x2C4A;
-
-		case 0x2C1B:
-			return 0x2C4B;
-
-		case 0x2C1C:
-			return 0x2C4C;
-
-		case 0x2C1D:
-			return 0x2C4D;
-
-		case 0x2C1E:
-			return 0x2C4E;
-
-		case 0x2C1F:
-			return 0x2C4F;
-
-		case 0x2C20:
-			return 0x2C50;
-
-		case 0x2C21:
-			return 0x2C51;
-
-		case 0x2C22:
-			return 0x2C52;
-
-		case 0x2C23:
-			return 0x2C53;
-
-		case 0x2C24:
-			return 0x2C54;
-
-		case 0x2C25:
-			return 0x2C55;
-
-		case 0x2C26:
-			return 0x2C56;
-
-		case 0x2C27:
-			return 0x2C57;
-
-		case 0x2C28:
-			return 0x2C58;
-
-		case 0x2C29:
-			return 0x2C59;
-
-		case 0x2C2A:
-			return 0x2C5A;
-
-		case 0x2C2B:
-			return 0x2C5B;
-
-		case 0x2C2C:
-			return 0x2C5C;
-
-		case 0x2C2D:
-			return 0x2C5D;
-
-		case 0x2C2E:
-			return 0x2C5E;
-
-		case 0x2C2F:
-			return 0x2C5F;
-
-		case 0x2C60:
-			return 0x2C61;
-
-		case 0x2C62:
-			return 0x026B;
-
-		case 0x2C63:
-			return 0x1D7D;
-
-		case 0x2C64:
-			return 0x027D;
-
-		case 0x2C67:
-			return 0x2C68;
-
-		case 0x2C69:
-			return 0x2C6A;
-
-		case 0x2C6B:
-			return 0x2C6C;
-
-		case 0x2C6D:
-			return 0x0251;
-
-		case 0x2C6E:
-			return 0x0271;
-
-		case 0x2C6F:
-			return 0x0250;
-
-		case 0x2C70:
-			return 0x0252;
-
-		case 0x2C72:
-			return 0x2C73;
-
-		case 0x2C75:
-			return 0x2C76;
-
-		case 0x2C7E:
-			return 0x023F;
-
-		case 0x2C7F:
-			return 0x0240;
-
-		case 0x2C80:
-			return 0x2C81;
-
-		case 0x2C82:
-			return 0x2C83;
-
-		case 0x2C84:
-			return 0x2C85;
-
-		case 0x2C86:
-			return 0x2C87;
-
-		case 0x2C88:
-			return 0x2C89;
-
-		case 0x2C8A:
-			return 0x2C8B;
-
-		case 0x2C8C:
-			return 0x2C8D;
-
-		case 0x2C8E:
-			return 0x2C8F;
-
-		case 0x2C90:
-			return 0x2C91;
-
-		case 0x2C92:
-			return 0x2C93;
-
-		case 0x2C94:
-			return 0x2C95;
-
-		case 0x2C96:
-			return 0x2C97;
-
-		case 0x2C98:
-			return 0x2C99;
-
-		case 0x2C9A:
-			return 0x2C9B;
-
-		case 0x2C9C:
-			return 0x2C9D;
-
-		case 0x2C9E:
-			return 0x2C9F;
-
-		case 0x2CA0:
-			return 0x2CA1;
-
-		case 0x2CA2:
-			return 0x2CA3;
-
-		case 0x2CA4:
-			return 0x2CA5;
-
-		case 0x2CA6:
-			return 0x2CA7;
-
-		case 0x2CA8:
-			return 0x2CA9;
-
-		case 0x2CAA:
-			return 0x2CAB;
-
-		case 0x2CAC:
-			return 0x2CAD;
-
-		case 0x2CAE:
-			return 0x2CAF;
-
-		case 0x2CB0:
-			return 0x2CB1;
-
-		case 0x2CB2:
-			return 0x2CB3;
-
-		case 0x2CB4:
-			return 0x2CB5;
-
-		case 0x2CB6:
-			return 0x2CB7;
-
-		case 0x2CB8:
-			return 0x2CB9;
-
-		case 0x2CBA:
-			return 0x2CBB;
-
-		case 0x2CBC:
-			return 0x2CBD;
-
-		case 0x2CBE:
-			return 0x2CBF;
-
-		case 0x2CC0:
-			return 0x2CC1;
-
-		case 0x2CC2:
-			return 0x2CC3;
-
-		case 0x2CC4:
-			return 0x2CC5;
-
-		case 0x2CC6:
-			return 0x2CC7;
-
-		case 0x2CC8:
-			return 0x2CC9;
-
-		case 0x2CCA:
-			return 0x2CCB;
-
-		case 0x2CCC:
-			return 0x2CCD;
-
-		case 0x2CCE:
-			return 0x2CCF;
-
-		case 0x2CD0:
-			return 0x2CD1;
-
-		case 0x2CD2:
-			return 0x2CD3;
-
-		case 0x2CD4:
-			return 0x2CD5;
-
-		case 0x2CD6:
-			return 0x2CD7;
-
-		case 0x2CD8:
-			return 0x2CD9;
-
-		case 0x2CDA:
-			return 0x2CDB;
-
-		case 0x2CDC:
-			return 0x2CDD;
-
-		case 0x2CDE:
-			return 0x2CDF;
-
-		case 0x2CE0:
-			return 0x2CE1;
-
-		case 0x2CE2:
-			return 0x2CE3;
-
-		case 0x2CEB:
-			return 0x2CEC;
-
-		case 0x2CED:
-			return 0x2CEE;
-
-		case 0x2CF2:
-			return 0x2CF3;
-
-		case 0xA640:
-			return 0xA641;
-
-		case 0xA642:
-			return 0xA643;
-
-		case 0xA644:
-			return 0xA645;
-
-		case 0xA646:
-			return 0xA647;
-
-		case 0xA648:
-			return 0xA649;
-
-		case 0xA64A:
-			return 0xA64B;
-
-		case 0xA64C:
-			return 0xA64D;
-
-		case 0xA64E:
-			return 0xA64F;
-
-		case 0xA650:
-			return 0xA651;
-
-		case 0xA652:
-			return 0xA653;
-
-		case 0xA654:
-			return 0xA655;
-
-		case 0xA656:
-			return 0xA657;
-
-		case 0xA658:
-			return 0xA659;
-
-		case 0xA65A:
-			return 0xA65B;
-
-		case 0xA65C:
-			return 0xA65D;
-
-		case 0xA65E:
-			return 0xA65F;
-
-		case 0xA660:
-			return 0xA661;
-
-		case 0xA662:
-			return 0xA663;
-
-		case 0xA664:
-			return 0xA665;
-
-		case 0xA666:
-			return 0xA667;
-
-		case 0xA668:
-			return 0xA669;
-
-		case 0xA66A:
-			return 0xA66B;
-
-		case 0xA66C:
-			return 0xA66D;
-
-		case 0xA680:
-			return 0xA681;
-
-		case 0xA682:
-			return 0xA683;
-
-		case 0xA684:
-			return 0xA685;
-
-		case 0xA686:
-			return 0xA687;
-
-		case 0xA688:
-			return 0xA689;
-
-		case 0xA68A:
-			return 0xA68B;
-
-		case 0xA68C:
-			return 0xA68D;
-
-		case 0xA68E:
-			return 0xA68F;
-
-		case 0xA690:
-			return 0xA691;
-
-		case 0xA692:
-			return 0xA693;
-
-		case 0xA694:
-			return 0xA695;
-
-		case 0xA696:
-			return 0xA697;
-
-		case 0xA698:
-			return 0xA699;
-
-		case 0xA69A:
-			return 0xA69B;
-
-		case 0xA722:
-			return 0xA723;
-
-		case 0xA724:
-			return 0xA725;
-
-		case 0xA726:
-			return 0xA727;
-
-		case 0xA728:
-			return 0xA729;
-
-		case 0xA72A:
-			return 0xA72B;
-
-		case 0xA72C:
-			return 0xA72D;
-
-		case 0xA72E:
-			return 0xA72F;
-
-		case 0xA732:
-			return 0xA733;
-
-		case 0xA734:
-			return 0xA735;
-
-		case 0xA736:
-			return 0xA737;
-
-		case 0xA738:
-			return 0xA739;
-
-		case 0xA73A:
-			return 0xA73B;
-
-		case 0xA73C:
-			return 0xA73D;
-
-		case 0xA73E:
-			return 0xA73F;
-
-		case 0xA740:
-			return 0xA741;
-
-		case 0xA742:
-			return 0xA743;
-
-		case 0xA744:
-			return 0xA745;
-
-		case 0xA746:
-			return 0xA747;
-
-		case 0xA748:
-			return 0xA749;
-
-		case 0xA74A:
-			return 0xA74B;
-
-		case 0xA74C:
-			return 0xA74D;
-
-		case 0xA74E:
-			return 0xA74F;
-
-		case 0xA750:
-			return 0xA751;
-
-		case 0xA752:
-			return 0xA753;
-
-		case 0xA754:
-			return 0xA755;
-
-		case 0xA756:
-			return 0xA757;
-
-		case 0xA758:
-			return 0xA759;
-
-		case 0xA75A:
-			return 0xA75B;
-
-		case 0xA75C:
-			return 0xA75D;
-
-		case 0xA75E:
-			return 0xA75F;
-
-		case 0xA760:
-			return 0xA761;
-
-		case 0xA762:
-			return 0xA763;
-
-		case 0xA764:
-			return 0xA765;
-
-		case 0xA766:
-			return 0xA767;
-
-		case 0xA768:
-			return 0xA769;
-
-		case 0xA76A:
-			return 0xA76B;
-
-		case 0xA76C:
-			return 0xA76D;
-
-		case 0xA76E:
-			return 0xA76F;
-
-		case 0xA779:
-			return 0xA77A;
-
-		case 0xA77B:
-			return 0xA77C;
-
-		case 0xA77D:
-			return 0x1D79;
-
-		case 0xA77E:
-			return 0xA77F;
-
-		case 0xA780:
-			return 0xA781;
-
-		case 0xA782:
-			return 0xA783;
-
-		case 0xA784:
-			return 0xA785;
-
-		case 0xA786:
-			return 0xA787;
-
-		case 0xA78B:
-			return 0xA78C;
-
-		case 0xA78D:
-			return 0x0265;
-
-		case 0xA790:
-			return 0xA791;
-
-		case 0xA792:
-			return 0xA793;
-
-		case 0xA796:
-			return 0xA797;
-
-		case 0xA798:
-			return 0xA799;
-
-		case 0xA79A:
-			return 0xA79B;
-
-		case 0xA79C:
-			return 0xA79D;
-
-		case 0xA79E:
-			return 0xA79F;
-
-		case 0xA7A0:
-			return 0xA7A1;
-
-		case 0xA7A2:
-			return 0xA7A3;
-
-		case 0xA7A4:
-			return 0xA7A5;
-
-		case 0xA7A6:
-			return 0xA7A7;
-
-		case 0xA7A8:
-			return 0xA7A9;
-
-		case 0xA7AA:
-			return 0x0266;
-
-		case 0xA7AB:
-			return 0x025C;
-
-		case 0xA7AC:
-			return 0x0261;
-
-		case 0xA7AD:
-			return 0x026C;
-
-		case 0xA7AE:
-			return 0x026A;
-
-		case 0xA7B0:
-			return 0x029E;
-
-		case 0xA7B1:
-			return 0x0287;
-
-		case 0xA7B2:
-			return 0x029D;
-
-		case 0xA7B3:
-			return 0xAB53;
-
-		case 0xA7B4:
-			return 0xA7B5;
-
-		case 0xA7B6:
-			return 0xA7B7;
-
-		case 0xA7B8:
-			return 0xA7B9;
-
-		case 0xA7BA:
-			return 0xA7BB;
-
-		case 0xA7BC:
-			return 0xA7BD;
-
-		case 0xA7BE:
-			return 0xA7BF;
-
-		case 0xA7C0:
-			return 0xA7C1;
-
-		case 0xA7C2:
-			return 0xA7C3;
-
-		case 0xA7C4:
-			return 0xA794;
-
-		case 0xA7C5:
-			return 0x0282;
-
-		case 0xA7C6:
-			return 0x1D8E;
-
-		case 0xA7C7:
-			return 0xA7C8;
-
-		case 0xA7C9:
-			return 0xA7CA;
-
-		case 0xA7D0:
-			return 0xA7D1;
-
-		case 0xA7D6:
-			return 0xA7D7;
-
-		case 0xA7D8:
-			return 0xA7D9;
-
-		case 0xA7F5:
-			return 0xA7F6;
-
-		case 0xFF21:
-			return 0xFF41;
-
-		case 0xFF22:
-			return 0xFF42;
-
-		case 0xFF23:
-			return 0xFF43;
-
-		case 0xFF24:
-			return 0xFF44;
-
-		case 0xFF25:
-			return 0xFF45;
-
-		case 0xFF26:
-			return 0xFF46;
-
-		case 0xFF27:
-			return 0xFF47;
-
-		case 0xFF28:
-			return 0xFF48;
-
-		case 0xFF29:
-			return 0xFF49;
-
-		case 0xFF2A:
-			return 0xFF4A;
-
-		case 0xFF2B:
-			return 0xFF4B;
-
-		case 0xFF2C:
-			return 0xFF4C;
-
-		case 0xFF2D:
-			return 0xFF4D;
-
-		case 0xFF2E:
-			return 0xFF4E;
-
-		case 0xFF2F:
-			return 0xFF4F;
-
-		case 0xFF30:
-			return 0xFF50;
-
-		case 0xFF31:
-			return 0xFF51;
-
-		case 0xFF32:
-			return 0xFF52;
-
-		case 0xFF33:
-			return 0xFF53;
-
-		case 0xFF34:
-			return 0xFF54;
-
-		case 0xFF35:
-			return 0xFF55;
-
-		case 0xFF36:
-			return 0xFF56;
-
-		case 0xFF37:
-			return 0xFF57;
-
-		case 0xFF38:
-			return 0xFF58;
-
-		case 0xFF39:
-			return 0xFF59;
-
-		case 0xFF3A:
-			return 0xFF5A;
-
-		case 0x10400:
-			return 0x10428;
-
-		case 0x10401:
-			return 0x10429;
-
-		case 0x10402:
-			return 0x1042A;
-
-		case 0x10403:
-			return 0x1042B;
-
-		case 0x10404:
-			return 0x1042C;
-
-		case 0x10405:
-			return 0x1042D;
-
-		case 0x10406:
-			return 0x1042E;
-
-		case 0x10407:
-			return 0x1042F;
-
-		case 0x10408:
-			return 0x10430;
-
-		case 0x10409:
-			return 0x10431;
-
-		case 0x1040A:
-			return 0x10432;
-
-		case 0x1040B:
-			return 0x10433;
-
-		case 0x1040C:
-			return 0x10434;
-
-		case 0x1040D:
-			return 0x10435;
-
-		case 0x1040E:
-			return 0x10436;
-
-		case 0x1040F:
-			return 0x10437;
-
-		case 0x10410:
-			return 0x10438;
-
-		case 0x10411:
-			return 0x10439;
-
-		case 0x10412:
-			return 0x1043A;
-
-		case 0x10413:
-			return 0x1043B;
-
-		case 0x10414:
-			return 0x1043C;
-
-		case 0x10415:
-			return 0x1043D;
-
-		case 0x10416:
-			return 0x1043E;
-
-		case 0x10417:
-			return 0x1043F;
-
-		case 0x10418:
-			return 0x10440;
-
-		case 0x10419:
-			return 0x10441;
-
-		case 0x1041A:
-			return 0x10442;
-
-		case 0x1041B:
-			return 0x10443;
-
-		case 0x1041C:
-			return 0x10444;
-
-		case 0x1041D:
-			return 0x10445;
-
-		case 0x1041E:
-			return 0x10446;
-
-		case 0x1041F:
-			return 0x10447;
-
-		case 0x10420:
-			return 0x10448;
-
-		case 0x10421:
-			return 0x10449;
-
-		case 0x10422:
-			return 0x1044A;
-
-		case 0x10423:
-			return 0x1044B;
-
-		case 0x10424:
-			return 0x1044C;
-
-		case 0x10425:
-			return 0x1044D;
-
-		case 0x10426:
-			return 0x1044E;
-
-		case 0x10427:
-			return 0x1044F;
-
-		case 0x104B0:
-			return 0x104D8;
-
-		case 0x104B1:
-			return 0x104D9;
-
-		case 0x104B2:
-			return 0x104DA;
-
-		case 0x104B3:
-			return 0x104DB;
-
-		case 0x104B4:
-			return 0x104DC;
-
-		case 0x104B5:
-			return 0x104DD;
-
-		case 0x104B6:
-			return 0x104DE;
-
-		case 0x104B7:
-			return 0x104DF;
-
-		case 0x104B8:
-			return 0x104E0;
-
-		case 0x104B9:
-			return 0x104E1;
-
-		case 0x104BA:
-			return 0x104E2;
-
-		case 0x104BB:
-			return 0x104E3;
-
-		case 0x104BC:
-			return 0x104E4;
-
-		case 0x104BD:
-			return 0x104E5;
-
-		case 0x104BE:
-			return 0x104E6;
-
-		case 0x104BF:
-			return 0x104E7;
-
-		case 0x104C0:
-			return 0x104E8;
-
-		case 0x104C1:
-			return 0x104E9;
-
-		case 0x104C2:
-			return 0x104EA;
-
-		case 0x104C3:
-			return 0x104EB;
-
-		case 0x104C4:
-			return 0x104EC;
-
-		case 0x104C5:
-			return 0x104ED;
-
-		case 0x104C6:
-			return 0x104EE;
-
-		case 0x104C7:
-			return 0x104EF;
-
-		case 0x104C8:
-			return 0x104F0;
-
-		case 0x104C9:
-			return 0x104F1;
-
-		case 0x104CA:
-			return 0x104F2;
-
-		case 0x104CB:
-			return 0x104F3;
-
-		case 0x104CC:
-			return 0x104F4;
-
-		case 0x104CD:
-			return 0x104F5;
-
-		case 0x104CE:
-			return 0x104F6;
-
-		case 0x104CF:
-			return 0x104F7;
-
-		case 0x104D0:
-			return 0x104F8;
-
-		case 0x104D1:
-			return 0x104F9;
-
-		case 0x104D2:
-			return 0x104FA;
-
-		case 0x104D3:
-			return 0x104FB;
-
-		case 0x10570:
-			return 0x10597;
-
-		case 0x10571:
-			return 0x10598;
-
-		case 0x10572:
-			return 0x10599;
-
-		case 0x10573:
-			return 0x1059A;
-
-		case 0x10574:
-			return 0x1059B;
-
-		case 0x10575:
-			return 0x1059C;
-
-		case 0x10576:
-			return 0x1059D;
-
-		case 0x10577:
-			return 0x1059E;
-
-		case 0x10578:
-			return 0x1059F;
-
-		case 0x10579:
-			return 0x105A0;
-
-		case 0x1057A:
-			return 0x105A1;
-
-		case 0x1057C:
-			return 0x105A3;
-
-		case 0x1057D:
-			return 0x105A4;
-
-		case 0x1057E:
-			return 0x105A5;
-
-		case 0x1057F:
-			return 0x105A6;
-
-		case 0x10580:
-			return 0x105A7;
-
-		case 0x10581:
-			return 0x105A8;
-
-		case 0x10582:
-			return 0x105A9;
-
-		case 0x10583:
-			return 0x105AA;
-
-		case 0x10584:
-			return 0x105AB;
-
-		case 0x10585:
-			return 0x105AC;
-
-		case 0x10586:
-			return 0x105AD;
-
-		case 0x10587:
-			return 0x105AE;
-
-		case 0x10588:
-			return 0x105AF;
-
-		case 0x10589:
-			return 0x105B0;
-
-		case 0x1058A:
-			return 0x105B1;
-
-		case 0x1058C:
-			return 0x105B3;
-
-		case 0x1058D:
-			return 0x105B4;
-
-		case 0x1058E:
-			return 0x105B5;
-
-		case 0x1058F:
-			return 0x105B6;
-
-		case 0x10590:
-			return 0x105B7;
-
-		case 0x10591:
-			return 0x105B8;
-
-		case 0x10592:
-			return 0x105B9;
-
-		case 0x10594:
-			return 0x105BB;
-
-		case 0x10595:
-			return 0x105BC;
-
-		case 0x10C80:
-			return 0x10CC0;
-
-		case 0x10C81:
-			return 0x10CC1;
-
-		case 0x10C82:
-			return 0x10CC2;
-
-		case 0x10C83:
-			return 0x10CC3;
-
-		case 0x10C84:
-			return 0x10CC4;
-
-		case 0x10C85:
-			return 0x10CC5;
-
-		case 0x10C86:
-			return 0x10CC6;
-
-		case 0x10C87:
-			return 0x10CC7;
-
-		case 0x10C88:
-			return 0x10CC8;
-
-		case 0x10C89:
-			return 0x10CC9;
-
-		case 0x10C8A:
-			return 0x10CCA;
-
-		case 0x10C8B:
-			return 0x10CCB;
-
-		case 0x10C8C:
-			return 0x10CCC;
-
-		case 0x10C8D:
-			return 0x10CCD;
-
-		case 0x10C8E:
-			return 0x10CCE;
-
-		case 0x10C8F:
-			return 0x10CCF;
-
-		case 0x10C90:
-			return 0x10CD0;
-
-		case 0x10C91:
-			return 0x10CD1;
-
-		case 0x10C92:
-			return 0x10CD2;
-
-		case 0x10C93:
-			return 0x10CD3;
-
-		case 0x10C94:
-			return 0x10CD4;
-
-		case 0x10C95:
-			return 0x10CD5;
-
-		case 0x10C96:
-			return 0x10CD6;
-
-		case 0x10C97:
-			return 0x10CD7;
-
-		case 0x10C98:
-			return 0x10CD8;
-
-		case 0x10C99:
-			return 0x10CD9;
-
-		case 0x10C9A:
-			return 0x10CDA;
-
-		case 0x10C9B:
-			return 0x10CDB;
-
-		case 0x10C9C:
-			return 0x10CDC;
-
-		case 0x10C9D:
-			return 0x10CDD;
-
-		case 0x10C9E:
-			return 0x10CDE;
-
-		case 0x10C9F:
-			return 0x10CDF;
-
-		case 0x10CA0:
-			return 0x10CE0;
-
-		case 0x10CA1:
-			return 0x10CE1;
-
-		case 0x10CA2:
-			return 0x10CE2;
-
-		case 0x10CA3:
-			return 0x10CE3;
-
-		case 0x10CA4:
-			return 0x10CE4;
-
-		case 0x10CA5:
-			return 0x10CE5;
-
-		case 0x10CA6:
-			return 0x10CE6;
-
-		case 0x10CA7:
-			return 0x10CE7;
-
-		case 0x10CA8:
-			return 0x10CE8;
-
-		case 0x10CA9:
-			return 0x10CE9;
-
-		case 0x10CAA:
-			return 0x10CEA;
-
-		case 0x10CAB:
-			return 0x10CEB;
-
-		case 0x10CAC:
-			return 0x10CEC;
-
-		case 0x10CAD:
-			return 0x10CED;
-
-		case 0x10CAE:
-			return 0x10CEE;
-
-		case 0x10CAF:
-			return 0x10CEF;
-
-		case 0x10CB0:
-			return 0x10CF0;
-
-		case 0x10CB1:
-			return 0x10CF1;
-
-		case 0x10CB2:
-			return 0x10CF2;
-
-		case 0x118A0:
-			return 0x118C0;
-
-		case 0x118A1:
-			return 0x118C1;
-
-		case 0x118A2:
-			return 0x118C2;
-
-		case 0x118A3:
-			return 0x118C3;
-
-		case 0x118A4:
-			return 0x118C4;
-
-		case 0x118A5:
-			return 0x118C5;
-
-		case 0x118A6:
-			return 0x118C6;
-
-		case 0x118A7:
-			return 0x118C7;
-
-		case 0x118A8:
-			return 0x118C8;
-
-		case 0x118A9:
-			return 0x118C9;
-
-		case 0x118AA:
-			return 0x118CA;
-
-		case 0x118AB:
-			return 0x118CB;
-
-		case 0x118AC:
-			return 0x118CC;
-
-		case 0x118AD:
-			return 0x118CD;
-
-		case 0x118AE:
-			return 0x118CE;
-
-		case 0x118AF:
-			return 0x118CF;
-
-		case 0x118B0:
-			return 0x118D0;
-
-		case 0x118B1:
-			return 0x118D1;
-
-		case 0x118B2:
-			return 0x118D2;
-
-		case 0x118B3:
-			return 0x118D3;
-
-		case 0x118B4:
-			return 0x118D4;
-
-		case 0x118B5:
-			return 0x118D5;
-
-		case 0x118B6:
-			return 0x118D6;
-
-		case 0x118B7:
-			return 0x118D7;
-
-		case 0x118B8:
-			return 0x118D8;
-
-		case 0x118B9:
-			return 0x118D9;
-
-		case 0x118BA:
-			return 0x118DA;
-
-		case 0x118BB:
-			return 0x118DB;
-
-		case 0x118BC:
-			return 0x118DC;
-
-		case 0x118BD:
-			return 0x118DD;
-
-		case 0x118BE:
-			return 0x118DE;
-
-		case 0x118BF:
-			return 0x118DF;
-
-		case 0x16E40:
-			return 0x16E60;
-
-		case 0x16E41:
-			return 0x16E61;
-
-		case 0x16E42:
-			return 0x16E62;
-
-		case 0x16E43:
-			return 0x16E63;
-
-		case 0x16E44:
-			return 0x16E64;
-
-		case 0x16E45:
-			return 0x16E65;
-
-		case 0x16E46:
-			return 0x16E66;
-
-		case 0x16E47:
-			return 0x16E67;
-
-		case 0x16E48:
-			return 0x16E68;
-
-		case 0x16E49:
-			return 0x16E69;
-
-		case 0x16E4A:
-			return 0x16E6A;
-
-		case 0x16E4B:
-			return 0x16E6B;
-
-		case 0x16E4C:
-			return 0x16E6C;
-
-		case 0x16E4D:
-			return 0x16E6D;
-
-		case 0x16E4E:
-			return 0x16E6E;
-
-		case 0x16E4F:
-			return 0x16E6F;
-
-		case 0x16E50:
-			return 0x16E70;
-
-		case 0x16E51:
-			return 0x16E71;
-
-		case 0x16E52:
-			return 0x16E72;
-
-		case 0x16E53:
-			return 0x16E73;
-
-		case 0x16E54:
-			return 0x16E74;
-
-		case 0x16E55:
-			return 0x16E75;
-
-		case 0x16E56:
-			return 0x16E76;
-
-		case 0x16E57:
-			return 0x16E77;
-
-		case 0x16E58:
-			return 0x16E78;
-
-		case 0x16E59:
-			return 0x16E79;
-
-		case 0x16E5A:
-			return 0x16E7A;
-
-		case 0x16E5B:
-			return 0x16E7B;
-
-		case 0x16E5C:
-			return 0x16E7C;
-
-		case 0x16E5D:
-			return 0x16E7D;
-
-		case 0x16E5E:
-			return 0x16E7E;
-
-		case 0x16E5F:
-			return 0x16E7F;
-
-		case 0x1E900:
-			return 0x1E922;
-
-		case 0x1E901:
-			return 0x1E923;
-
-		case 0x1E902:
-			return 0x1E924;
-
-		case 0x1E903:
-			return 0x1E925;
-
-		case 0x1E904:
-			return 0x1E926;
-
-		case 0x1E905:
-			return 0x1E927;
-
-		case 0x1E906:
-			return 0x1E928;
-
-		case 0x1E907:
-			return 0x1E929;
-
-		case 0x1E908:
-			return 0x1E92A;
-
-		case 0x1E909:
-			return 0x1E92B;
-
-		case 0x1E90A:
-			return 0x1E92C;
-
-		case 0x1E90B:
-			return 0x1E92D;
-
-		case 0x1E90C:
-			return 0x1E92E;
-
-		case 0x1E90D:
-			return 0x1E92F;
-
-		case 0x1E90E:
-			return 0x1E930;
-
-		case 0x1E90F:
-			return 0x1E931;
-
-		case 0x1E910:
-			return 0x1E932;
-
-		case 0x1E911:
-			return 0x1E933;
-
-		case 0x1E912:
-			return 0x1E934;
-
-		case 0x1E913:
-			return 0x1E935;
-
-		case 0x1E914:
-			return 0x1E936;
-
-		case 0x1E915:
-			return 0x1E937;
-
-		case 0x1E916:
-			return 0x1E938;
-
-		case 0x1E917:
-			return 0x1E939;
-
-		case 0x1E918:
-			return 0x1E93A;
-
-		case 0x1E919:
-			return 0x1E93B;
-
-		case 0x1E91A:
-			return 0x1E93C;
-
-		case 0x1E91B:
-			return 0x1E93D;
-
-		case 0x1E91C:
-			return 0x1E93E;
-
-		case 0x1E91D:
-			return 0x1E93F;
-
-		case 0x1E91E:
-			return 0x1E940;
-
-		case 0x1E91F:
-			return 0x1E941;
-
-		case 0x1E920:
-			return 0x1E942;
-
-		case 0x1E921:
-			return 0x1E943;
-
-		default:
-			return c;
-	}
+    switch (ca) {
+        case UCASE_LOWER:
+            return uc8_lower_len(c);
+
+        case UCASE_UPPER:
+            return uc8_upper_len(c);
+
+        default:
+            return uc8_len(*c);
+    }
+}
+
+unsigned uc8_lower_len(const uc8_t *c) {
+    return uc32_8_len(uc32_to_lower(uc32_from_uc8(c)));
+}
+
+unsigned uc8_upper_len(const uc8_t *c) {
+    return uc32_8_len(uc32_to_upper(uc32_from_uc8(c)));
 }
 
 bool uc32_letter(uc32_t c) {
@@ -9910,1844 +9173,19 @@ bool uc32_letter(uc32_t c) {
 		|| uc32_oletter(c));
 }
 
-bool uc32_upper(uc32_t c) {
-	switch (c) {
-		case 0x00041:
-		case 0x00042:
-		case 0x00043:
-		case 0x00044:
-		case 0x00045:
-		case 0x00046:
-		case 0x00047:
-		case 0x00048:
-		case 0x00049:
-		case 0x0004A:
-		case 0x0004B:
-		case 0x0004C:
-		case 0x0004D:
-		case 0x0004E:
-		case 0x0004F:
-		case 0x00050:
-		case 0x00051:
-		case 0x00052:
-		case 0x00053:
-		case 0x00054:
-		case 0x00055:
-		case 0x00056:
-		case 0x00057:
-		case 0x00058:
-		case 0x00059:
-		case 0x0005A:
-		case 0x000C0:
-		case 0x000C1:
-		case 0x000C2:
-		case 0x000C3:
-		case 0x000C4:
-		case 0x000C5:
-		case 0x000C6:
-		case 0x000C7:
-		case 0x000C8:
-		case 0x000C9:
-		case 0x000CA:
-		case 0x000CB:
-		case 0x000CC:
-		case 0x000CD:
-		case 0x000CE:
-		case 0x000CF:
-		case 0x000D0:
-		case 0x000D1:
-		case 0x000D2:
-		case 0x000D3:
-		case 0x000D4:
-		case 0x000D5:
-		case 0x000D6:
-		case 0x000D8:
-		case 0x000D9:
-		case 0x000DA:
-		case 0x000DB:
-		case 0x000DC:
-		case 0x000DD:
-		case 0x000DE:
-		case 0x00100:
-		case 0x00102:
-		case 0x00104:
-		case 0x00106:
-		case 0x00108:
-		case 0x0010A:
-		case 0x0010C:
-		case 0x0010E:
-		case 0x00110:
-		case 0x00112:
-		case 0x00114:
-		case 0x00116:
-		case 0x00118:
-		case 0x0011A:
-		case 0x0011C:
-		case 0x0011E:
-		case 0x00120:
-		case 0x00122:
-		case 0x00124:
-		case 0x00126:
-		case 0x00128:
-		case 0x0012A:
-		case 0x0012C:
-		case 0x0012E:
-		case 0x00130:
-		case 0x00132:
-		case 0x00134:
-		case 0x00136:
-		case 0x00139:
-		case 0x0013B:
-		case 0x0013D:
-		case 0x0013F:
-		case 0x00141:
-		case 0x00143:
-		case 0x00145:
-		case 0x00147:
-		case 0x0014A:
-		case 0x0014C:
-		case 0x0014E:
-		case 0x00150:
-		case 0x00152:
-		case 0x00154:
-		case 0x00156:
-		case 0x00158:
-		case 0x0015A:
-		case 0x0015C:
-		case 0x0015E:
-		case 0x00160:
-		case 0x00162:
-		case 0x00164:
-		case 0x00166:
-		case 0x00168:
-		case 0x0016A:
-		case 0x0016C:
-		case 0x0016E:
-		case 0x00170:
-		case 0x00172:
-		case 0x00174:
-		case 0x00176:
-		case 0x00178:
-		case 0x00179:
-		case 0x0017B:
-		case 0x0017D:
-		case 0x00181:
-		case 0x00182:
-		case 0x00184:
-		case 0x00186:
-		case 0x00187:
-		case 0x00189:
-		case 0x0018A:
-		case 0x0018B:
-		case 0x0018E:
-		case 0x0018F:
-		case 0x00190:
-		case 0x00191:
-		case 0x00193:
-		case 0x00194:
-		case 0x00196:
-		case 0x00197:
-		case 0x00198:
-		case 0x0019C:
-		case 0x0019D:
-		case 0x0019F:
-		case 0x001A0:
-		case 0x001A2:
-		case 0x001A4:
-		case 0x001A6:
-		case 0x001A7:
-		case 0x001A9:
-		case 0x001AC:
-		case 0x001AE:
-		case 0x001AF:
-		case 0x001B1:
-		case 0x001B2:
-		case 0x001B3:
-		case 0x001B5:
-		case 0x001B7:
-		case 0x001B8:
-		case 0x001BC:
-		case 0x001C4:
-		case 0x001C7:
-		case 0x001CA:
-		case 0x001CD:
-		case 0x001CF:
-		case 0x001D1:
-		case 0x001D3:
-		case 0x001D5:
-		case 0x001D7:
-		case 0x001D9:
-		case 0x001DB:
-		case 0x001DE:
-		case 0x001E0:
-		case 0x001E2:
-		case 0x001E4:
-		case 0x001E6:
-		case 0x001E8:
-		case 0x001EA:
-		case 0x001EC:
-		case 0x001EE:
-		case 0x001F1:
-		case 0x001F4:
-		case 0x001F6:
-		case 0x001F7:
-		case 0x001F8:
-		case 0x001FA:
-		case 0x001FC:
-		case 0x001FE:
-		case 0x00200:
-		case 0x00202:
-		case 0x00204:
-		case 0x00206:
-		case 0x00208:
-		case 0x0020A:
-		case 0x0020C:
-		case 0x0020E:
-		case 0x00210:
-		case 0x00212:
-		case 0x00214:
-		case 0x00216:
-		case 0x00218:
-		case 0x0021A:
-		case 0x0021C:
-		case 0x0021E:
-		case 0x00220:
-		case 0x00222:
-		case 0x00224:
-		case 0x00226:
-		case 0x00228:
-		case 0x0022A:
-		case 0x0022C:
-		case 0x0022E:
-		case 0x00230:
-		case 0x00232:
-		case 0x0023A:
-		case 0x0023B:
-		case 0x0023D:
-		case 0x0023E:
-		case 0x00241:
-		case 0x00243:
-		case 0x00244:
-		case 0x00245:
-		case 0x00246:
-		case 0x00248:
-		case 0x0024A:
-		case 0x0024C:
-		case 0x0024E:
-		case 0x00370:
-		case 0x00372:
-		case 0x00376:
-		case 0x0037F:
-		case 0x00386:
-		case 0x00388:
-		case 0x00389:
-		case 0x0038A:
-		case 0x0038C:
-		case 0x0038E:
-		case 0x0038F:
-		case 0x00391:
-		case 0x00392:
-		case 0x00393:
-		case 0x00394:
-		case 0x00395:
-		case 0x00396:
-		case 0x00397:
-		case 0x00398:
-		case 0x00399:
-		case 0x0039A:
-		case 0x0039B:
-		case 0x0039C:
-		case 0x0039D:
-		case 0x0039E:
-		case 0x0039F:
-		case 0x003A0:
-		case 0x003A1:
-		case 0x003A3:
-		case 0x003A4:
-		case 0x003A5:
-		case 0x003A6:
-		case 0x003A7:
-		case 0x003A8:
-		case 0x003A9:
-		case 0x003AA:
-		case 0x003AB:
-		case 0x003CF:
-		case 0x003D2:
-		case 0x003D3:
-		case 0x003D4:
-		case 0x003D8:
-		case 0x003DA:
-		case 0x003DC:
-		case 0x003DE:
-		case 0x003E0:
-		case 0x003E2:
-		case 0x003E4:
-		case 0x003E6:
-		case 0x003E8:
-		case 0x003EA:
-		case 0x003EC:
-		case 0x003EE:
-		case 0x003F4:
-		case 0x003F7:
-		case 0x003F9:
-		case 0x003FA:
-		case 0x003FD:
-		case 0x003FE:
-		case 0x003FF:
-		case 0x00400:
-		case 0x00401:
-		case 0x00402:
-		case 0x00403:
-		case 0x00404:
-		case 0x00405:
-		case 0x00406:
-		case 0x00407:
-		case 0x00408:
-		case 0x00409:
-		case 0x0040A:
-		case 0x0040B:
-		case 0x0040C:
-		case 0x0040D:
-		case 0x0040E:
-		case 0x0040F:
-		case 0x00410:
-		case 0x00411:
-		case 0x00412:
-		case 0x00413:
-		case 0x00414:
-		case 0x00415:
-		case 0x00416:
-		case 0x00417:
-		case 0x00418:
-		case 0x00419:
-		case 0x0041A:
-		case 0x0041B:
-		case 0x0041C:
-		case 0x0041D:
-		case 0x0041E:
-		case 0x0041F:
-		case 0x00420:
-		case 0x00421:
-		case 0x00422:
-		case 0x00423:
-		case 0x00424:
-		case 0x00425:
-		case 0x00426:
-		case 0x00427:
-		case 0x00428:
-		case 0x00429:
-		case 0x0042A:
-		case 0x0042B:
-		case 0x0042C:
-		case 0x0042D:
-		case 0x0042E:
-		case 0x0042F:
-		case 0x00460:
-		case 0x00462:
-		case 0x00464:
-		case 0x00466:
-		case 0x00468:
-		case 0x0046A:
-		case 0x0046C:
-		case 0x0046E:
-		case 0x00470:
-		case 0x00472:
-		case 0x00474:
-		case 0x00476:
-		case 0x00478:
-		case 0x0047A:
-		case 0x0047C:
-		case 0x0047E:
-		case 0x00480:
-		case 0x0048A:
-		case 0x0048C:
-		case 0x0048E:
-		case 0x00490:
-		case 0x00492:
-		case 0x00494:
-		case 0x00496:
-		case 0x00498:
-		case 0x0049A:
-		case 0x0049C:
-		case 0x0049E:
-		case 0x004A0:
-		case 0x004A2:
-		case 0x004A4:
-		case 0x004A6:
-		case 0x004A8:
-		case 0x004AA:
-		case 0x004AC:
-		case 0x004AE:
-		case 0x004B0:
-		case 0x004B2:
-		case 0x004B4:
-		case 0x004B6:
-		case 0x004B8:
-		case 0x004BA:
-		case 0x004BC:
-		case 0x004BE:
-		case 0x004C0:
-		case 0x004C1:
-		case 0x004C3:
-		case 0x004C5:
-		case 0x004C7:
-		case 0x004C9:
-		case 0x004CB:
-		case 0x004CD:
-		case 0x004D0:
-		case 0x004D2:
-		case 0x004D4:
-		case 0x004D6:
-		case 0x004D8:
-		case 0x004DA:
-		case 0x004DC:
-		case 0x004DE:
-		case 0x004E0:
-		case 0x004E2:
-		case 0x004E4:
-		case 0x004E6:
-		case 0x004E8:
-		case 0x004EA:
-		case 0x004EC:
-		case 0x004EE:
-		case 0x004F0:
-		case 0x004F2:
-		case 0x004F4:
-		case 0x004F6:
-		case 0x004F8:
-		case 0x004FA:
-		case 0x004FC:
-		case 0x004FE:
-		case 0x00500:
-		case 0x00502:
-		case 0x00504:
-		case 0x00506:
-		case 0x00508:
-		case 0x0050A:
-		case 0x0050C:
-		case 0x0050E:
-		case 0x00510:
-		case 0x00512:
-		case 0x00514:
-		case 0x00516:
-		case 0x00518:
-		case 0x0051A:
-		case 0x0051C:
-		case 0x0051E:
-		case 0x00520:
-		case 0x00522:
-		case 0x00524:
-		case 0x00526:
-		case 0x00528:
-		case 0x0052A:
-		case 0x0052C:
-		case 0x0052E:
-		case 0x00531:
-		case 0x00532:
-		case 0x00533:
-		case 0x00534:
-		case 0x00535:
-		case 0x00536:
-		case 0x00537:
-		case 0x00538:
-		case 0x00539:
-		case 0x0053A:
-		case 0x0053B:
-		case 0x0053C:
-		case 0x0053D:
-		case 0x0053E:
-		case 0x0053F:
-		case 0x00540:
-		case 0x00541:
-		case 0x00542:
-		case 0x00543:
-		case 0x00544:
-		case 0x00545:
-		case 0x00546:
-		case 0x00547:
-		case 0x00548:
-		case 0x00549:
-		case 0x0054A:
-		case 0x0054B:
-		case 0x0054C:
-		case 0x0054D:
-		case 0x0054E:
-		case 0x0054F:
-		case 0x00550:
-		case 0x00551:
-		case 0x00552:
-		case 0x00553:
-		case 0x00554:
-		case 0x00555:
-		case 0x00556:
-		case 0x010A0:
-		case 0x010A1:
-		case 0x010A2:
-		case 0x010A3:
-		case 0x010A4:
-		case 0x010A5:
-		case 0x010A6:
-		case 0x010A7:
-		case 0x010A8:
-		case 0x010A9:
-		case 0x010AA:
-		case 0x010AB:
-		case 0x010AC:
-		case 0x010AD:
-		case 0x010AE:
-		case 0x010AF:
-		case 0x010B0:
-		case 0x010B1:
-		case 0x010B2:
-		case 0x010B3:
-		case 0x010B4:
-		case 0x010B5:
-		case 0x010B6:
-		case 0x010B7:
-		case 0x010B8:
-		case 0x010B9:
-		case 0x010BA:
-		case 0x010BB:
-		case 0x010BC:
-		case 0x010BD:
-		case 0x010BE:
-		case 0x010BF:
-		case 0x010C0:
-		case 0x010C1:
-		case 0x010C2:
-		case 0x010C3:
-		case 0x010C4:
-		case 0x010C5:
-		case 0x010C7:
-		case 0x010CD:
-		case 0x013A0:
-		case 0x013A1:
-		case 0x013A2:
-		case 0x013A3:
-		case 0x013A4:
-		case 0x013A5:
-		case 0x013A6:
-		case 0x013A7:
-		case 0x013A8:
-		case 0x013A9:
-		case 0x013AA:
-		case 0x013AB:
-		case 0x013AC:
-		case 0x013AD:
-		case 0x013AE:
-		case 0x013AF:
-		case 0x013B0:
-		case 0x013B1:
-		case 0x013B2:
-		case 0x013B3:
-		case 0x013B4:
-		case 0x013B5:
-		case 0x013B6:
-		case 0x013B7:
-		case 0x013B8:
-		case 0x013B9:
-		case 0x013BA:
-		case 0x013BB:
-		case 0x013BC:
-		case 0x013BD:
-		case 0x013BE:
-		case 0x013BF:
-		case 0x013C0:
-		case 0x013C1:
-		case 0x013C2:
-		case 0x013C3:
-		case 0x013C4:
-		case 0x013C5:
-		case 0x013C6:
-		case 0x013C7:
-		case 0x013C8:
-		case 0x013C9:
-		case 0x013CA:
-		case 0x013CB:
-		case 0x013CC:
-		case 0x013CD:
-		case 0x013CE:
-		case 0x013CF:
-		case 0x013D0:
-		case 0x013D1:
-		case 0x013D2:
-		case 0x013D3:
-		case 0x013D4:
-		case 0x013D5:
-		case 0x013D6:
-		case 0x013D7:
-		case 0x013D8:
-		case 0x013D9:
-		case 0x013DA:
-		case 0x013DB:
-		case 0x013DC:
-		case 0x013DD:
-		case 0x013DE:
-		case 0x013DF:
-		case 0x013E0:
-		case 0x013E1:
-		case 0x013E2:
-		case 0x013E3:
-		case 0x013E4:
-		case 0x013E5:
-		case 0x013E6:
-		case 0x013E7:
-		case 0x013E8:
-		case 0x013E9:
-		case 0x013EA:
-		case 0x013EB:
-		case 0x013EC:
-		case 0x013ED:
-		case 0x013EE:
-		case 0x013EF:
-		case 0x013F0:
-		case 0x013F1:
-		case 0x013F2:
-		case 0x013F3:
-		case 0x013F4:
-		case 0x013F5:
-		case 0x01C90:
-		case 0x01C91:
-		case 0x01C92:
-		case 0x01C93:
-		case 0x01C94:
-		case 0x01C95:
-		case 0x01C96:
-		case 0x01C97:
-		case 0x01C98:
-		case 0x01C99:
-		case 0x01C9A:
-		case 0x01C9B:
-		case 0x01C9C:
-		case 0x01C9D:
-		case 0x01C9E:
-		case 0x01C9F:
-		case 0x01CA0:
-		case 0x01CA1:
-		case 0x01CA2:
-		case 0x01CA3:
-		case 0x01CA4:
-		case 0x01CA5:
-		case 0x01CA6:
-		case 0x01CA7:
-		case 0x01CA8:
-		case 0x01CA9:
-		case 0x01CAA:
-		case 0x01CAB:
-		case 0x01CAC:
-		case 0x01CAD:
-		case 0x01CAE:
-		case 0x01CAF:
-		case 0x01CB0:
-		case 0x01CB1:
-		case 0x01CB2:
-		case 0x01CB3:
-		case 0x01CB4:
-		case 0x01CB5:
-		case 0x01CB6:
-		case 0x01CB7:
-		case 0x01CB8:
-		case 0x01CB9:
-		case 0x01CBA:
-		case 0x01CBD:
-		case 0x01CBE:
-		case 0x01CBF:
-		case 0x01E00:
-		case 0x01E02:
-		case 0x01E04:
-		case 0x01E06:
-		case 0x01E08:
-		case 0x01E0A:
-		case 0x01E0C:
-		case 0x01E0E:
-		case 0x01E10:
-		case 0x01E12:
-		case 0x01E14:
-		case 0x01E16:
-		case 0x01E18:
-		case 0x01E1A:
-		case 0x01E1C:
-		case 0x01E1E:
-		case 0x01E20:
-		case 0x01E22:
-		case 0x01E24:
-		case 0x01E26:
-		case 0x01E28:
-		case 0x01E2A:
-		case 0x01E2C:
-		case 0x01E2E:
-		case 0x01E30:
-		case 0x01E32:
-		case 0x01E34:
-		case 0x01E36:
-		case 0x01E38:
-		case 0x01E3A:
-		case 0x01E3C:
-		case 0x01E3E:
-		case 0x01E40:
-		case 0x01E42:
-		case 0x01E44:
-		case 0x01E46:
-		case 0x01E48:
-		case 0x01E4A:
-		case 0x01E4C:
-		case 0x01E4E:
-		case 0x01E50:
-		case 0x01E52:
-		case 0x01E54:
-		case 0x01E56:
-		case 0x01E58:
-		case 0x01E5A:
-		case 0x01E5C:
-		case 0x01E5E:
-		case 0x01E60:
-		case 0x01E62:
-		case 0x01E64:
-		case 0x01E66:
-		case 0x01E68:
-		case 0x01E6A:
-		case 0x01E6C:
-		case 0x01E6E:
-		case 0x01E70:
-		case 0x01E72:
-		case 0x01E74:
-		case 0x01E76:
-		case 0x01E78:
-		case 0x01E7A:
-		case 0x01E7C:
-		case 0x01E7E:
-		case 0x01E80:
-		case 0x01E82:
-		case 0x01E84:
-		case 0x01E86:
-		case 0x01E88:
-		case 0x01E8A:
-		case 0x01E8C:
-		case 0x01E8E:
-		case 0x01E90:
-		case 0x01E92:
-		case 0x01E94:
-		case 0x01E9E:
-		case 0x01EA0:
-		case 0x01EA2:
-		case 0x01EA4:
-		case 0x01EA6:
-		case 0x01EA8:
-		case 0x01EAA:
-		case 0x01EAC:
-		case 0x01EAE:
-		case 0x01EB0:
-		case 0x01EB2:
-		case 0x01EB4:
-		case 0x01EB6:
-		case 0x01EB8:
-		case 0x01EBA:
-		case 0x01EBC:
-		case 0x01EBE:
-		case 0x01EC0:
-		case 0x01EC2:
-		case 0x01EC4:
-		case 0x01EC6:
-		case 0x01EC8:
-		case 0x01ECA:
-		case 0x01ECC:
-		case 0x01ECE:
-		case 0x01ED0:
-		case 0x01ED2:
-		case 0x01ED4:
-		case 0x01ED6:
-		case 0x01ED8:
-		case 0x01EDA:
-		case 0x01EDC:
-		case 0x01EDE:
-		case 0x01EE0:
-		case 0x01EE2:
-		case 0x01EE4:
-		case 0x01EE6:
-		case 0x01EE8:
-		case 0x01EEA:
-		case 0x01EEC:
-		case 0x01EEE:
-		case 0x01EF0:
-		case 0x01EF2:
-		case 0x01EF4:
-		case 0x01EF6:
-		case 0x01EF8:
-		case 0x01EFA:
-		case 0x01EFC:
-		case 0x01EFE:
-		case 0x01F08:
-		case 0x01F09:
-		case 0x01F0A:
-		case 0x01F0B:
-		case 0x01F0C:
-		case 0x01F0D:
-		case 0x01F0E:
-		case 0x01F0F:
-		case 0x01F18:
-		case 0x01F19:
-		case 0x01F1A:
-		case 0x01F1B:
-		case 0x01F1C:
-		case 0x01F1D:
-		case 0x01F28:
-		case 0x01F29:
-		case 0x01F2A:
-		case 0x01F2B:
-		case 0x01F2C:
-		case 0x01F2D:
-		case 0x01F2E:
-		case 0x01F2F:
-		case 0x01F38:
-		case 0x01F39:
-		case 0x01F3A:
-		case 0x01F3B:
-		case 0x01F3C:
-		case 0x01F3D:
-		case 0x01F3E:
-		case 0x01F3F:
-		case 0x01F48:
-		case 0x01F49:
-		case 0x01F4A:
-		case 0x01F4B:
-		case 0x01F4C:
-		case 0x01F4D:
-		case 0x01F59:
-		case 0x01F5B:
-		case 0x01F5D:
-		case 0x01F5F:
-		case 0x01F68:
-		case 0x01F69:
-		case 0x01F6A:
-		case 0x01F6B:
-		case 0x01F6C:
-		case 0x01F6D:
-		case 0x01F6E:
-		case 0x01F6F:
-		case 0x01FB8:
-		case 0x01FB9:
-		case 0x01FBA:
-		case 0x01FBB:
-		case 0x01FC8:
-		case 0x01FC9:
-		case 0x01FCA:
-		case 0x01FCB:
-		case 0x01FD8:
-		case 0x01FD9:
-		case 0x01FDA:
-		case 0x01FDB:
-		case 0x01FE8:
-		case 0x01FE9:
-		case 0x01FEA:
-		case 0x01FEB:
-		case 0x01FEC:
-		case 0x01FF8:
-		case 0x01FF9:
-		case 0x01FFA:
-		case 0x01FFB:
-		case 0x02102:
-		case 0x02107:
-		case 0x0210B:
-		case 0x0210C:
-		case 0x0210D:
-		case 0x02110:
-		case 0x02111:
-		case 0x02112:
-		case 0x02115:
-		case 0x02119:
-		case 0x0211A:
-		case 0x0211B:
-		case 0x0211C:
-		case 0x0211D:
-		case 0x02124:
-		case 0x02126:
-		case 0x02128:
-		case 0x0212A:
-		case 0x0212B:
-		case 0x0212C:
-		case 0x0212D:
-		case 0x02130:
-		case 0x02131:
-		case 0x02132:
-		case 0x02133:
-		case 0x0213E:
-		case 0x0213F:
-		case 0x02145:
-		case 0x02183:
-		case 0x02C00:
-		case 0x02C01:
-		case 0x02C02:
-		case 0x02C03:
-		case 0x02C04:
-		case 0x02C05:
-		case 0x02C06:
-		case 0x02C07:
-		case 0x02C08:
-		case 0x02C09:
-		case 0x02C0A:
-		case 0x02C0B:
-		case 0x02C0C:
-		case 0x02C0D:
-		case 0x02C0E:
-		case 0x02C0F:
-		case 0x02C10:
-		case 0x02C11:
-		case 0x02C12:
-		case 0x02C13:
-		case 0x02C14:
-		case 0x02C15:
-		case 0x02C16:
-		case 0x02C17:
-		case 0x02C18:
-		case 0x02C19:
-		case 0x02C1A:
-		case 0x02C1B:
-		case 0x02C1C:
-		case 0x02C1D:
-		case 0x02C1E:
-		case 0x02C1F:
-		case 0x02C20:
-		case 0x02C21:
-		case 0x02C22:
-		case 0x02C23:
-		case 0x02C24:
-		case 0x02C25:
-		case 0x02C26:
-		case 0x02C27:
-		case 0x02C28:
-		case 0x02C29:
-		case 0x02C2A:
-		case 0x02C2B:
-		case 0x02C2C:
-		case 0x02C2D:
-		case 0x02C2E:
-		case 0x02C2F:
-		case 0x02C60:
-		case 0x02C62:
-		case 0x02C63:
-		case 0x02C64:
-		case 0x02C67:
-		case 0x02C69:
-		case 0x02C6B:
-		case 0x02C6D:
-		case 0x02C6E:
-		case 0x02C6F:
-		case 0x02C70:
-		case 0x02C72:
-		case 0x02C75:
-		case 0x02C7E:
-		case 0x02C7F:
-		case 0x02C80:
-		case 0x02C82:
-		case 0x02C84:
-		case 0x02C86:
-		case 0x02C88:
-		case 0x02C8A:
-		case 0x02C8C:
-		case 0x02C8E:
-		case 0x02C90:
-		case 0x02C92:
-		case 0x02C94:
-		case 0x02C96:
-		case 0x02C98:
-		case 0x02C9A:
-		case 0x02C9C:
-		case 0x02C9E:
-		case 0x02CA0:
-		case 0x02CA2:
-		case 0x02CA4:
-		case 0x02CA6:
-		case 0x02CA8:
-		case 0x02CAA:
-		case 0x02CAC:
-		case 0x02CAE:
-		case 0x02CB0:
-		case 0x02CB2:
-		case 0x02CB4:
-		case 0x02CB6:
-		case 0x02CB8:
-		case 0x02CBA:
-		case 0x02CBC:
-		case 0x02CBE:
-		case 0x02CC0:
-		case 0x02CC2:
-		case 0x02CC4:
-		case 0x02CC6:
-		case 0x02CC8:
-		case 0x02CCA:
-		case 0x02CCC:
-		case 0x02CCE:
-		case 0x02CD0:
-		case 0x02CD2:
-		case 0x02CD4:
-		case 0x02CD6:
-		case 0x02CD8:
-		case 0x02CDA:
-		case 0x02CDC:
-		case 0x02CDE:
-		case 0x02CE0:
-		case 0x02CE2:
-		case 0x02CEB:
-		case 0x02CED:
-		case 0x02CF2:
-		case 0x0A640:
-		case 0x0A642:
-		case 0x0A644:
-		case 0x0A646:
-		case 0x0A648:
-		case 0x0A64A:
-		case 0x0A64C:
-		case 0x0A64E:
-		case 0x0A650:
-		case 0x0A652:
-		case 0x0A654:
-		case 0x0A656:
-		case 0x0A658:
-		case 0x0A65A:
-		case 0x0A65C:
-		case 0x0A65E:
-		case 0x0A660:
-		case 0x0A662:
-		case 0x0A664:
-		case 0x0A666:
-		case 0x0A668:
-		case 0x0A66A:
-		case 0x0A66C:
-		case 0x0A680:
-		case 0x0A682:
-		case 0x0A684:
-		case 0x0A686:
-		case 0x0A688:
-		case 0x0A68A:
-		case 0x0A68C:
-		case 0x0A68E:
-		case 0x0A690:
-		case 0x0A692:
-		case 0x0A694:
-		case 0x0A696:
-		case 0x0A698:
-		case 0x0A69A:
-		case 0x0A722:
-		case 0x0A724:
-		case 0x0A726:
-		case 0x0A728:
-		case 0x0A72A:
-		case 0x0A72C:
-		case 0x0A72E:
-		case 0x0A732:
-		case 0x0A734:
-		case 0x0A736:
-		case 0x0A738:
-		case 0x0A73A:
-		case 0x0A73C:
-		case 0x0A73E:
-		case 0x0A740:
-		case 0x0A742:
-		case 0x0A744:
-		case 0x0A746:
-		case 0x0A748:
-		case 0x0A74A:
-		case 0x0A74C:
-		case 0x0A74E:
-		case 0x0A750:
-		case 0x0A752:
-		case 0x0A754:
-		case 0x0A756:
-		case 0x0A758:
-		case 0x0A75A:
-		case 0x0A75C:
-		case 0x0A75E:
-		case 0x0A760:
-		case 0x0A762:
-		case 0x0A764:
-		case 0x0A766:
-		case 0x0A768:
-		case 0x0A76A:
-		case 0x0A76C:
-		case 0x0A76E:
-		case 0x0A779:
-		case 0x0A77B:
-		case 0x0A77D:
-		case 0x0A77E:
-		case 0x0A780:
-		case 0x0A782:
-		case 0x0A784:
-		case 0x0A786:
-		case 0x0A78B:
-		case 0x0A78D:
-		case 0x0A790:
-		case 0x0A792:
-		case 0x0A796:
-		case 0x0A798:
-		case 0x0A79A:
-		case 0x0A79C:
-		case 0x0A79E:
-		case 0x0A7A0:
-		case 0x0A7A2:
-		case 0x0A7A4:
-		case 0x0A7A6:
-		case 0x0A7A8:
-		case 0x0A7AA:
-		case 0x0A7AB:
-		case 0x0A7AC:
-		case 0x0A7AD:
-		case 0x0A7AE:
-		case 0x0A7B0:
-		case 0x0A7B1:
-		case 0x0A7B2:
-		case 0x0A7B3:
-		case 0x0A7B4:
-		case 0x0A7B6:
-		case 0x0A7B8:
-		case 0x0A7BA:
-		case 0x0A7BC:
-		case 0x0A7BE:
-		case 0x0A7C0:
-		case 0x0A7C2:
-		case 0x0A7C4:
-		case 0x0A7C5:
-		case 0x0A7C6:
-		case 0x0A7C7:
-		case 0x0A7C9:
-		case 0x0A7D0:
-		case 0x0A7D6:
-		case 0x0A7D8:
-		case 0x0A7F5:
-		case 0x0FF21:
-		case 0x0FF22:
-		case 0x0FF23:
-		case 0x0FF24:
-		case 0x0FF25:
-		case 0x0FF26:
-		case 0x0FF27:
-		case 0x0FF28:
-		case 0x0FF29:
-		case 0x0FF2A:
-		case 0x0FF2B:
-		case 0x0FF2C:
-		case 0x0FF2D:
-		case 0x0FF2E:
-		case 0x0FF2F:
-		case 0x0FF30:
-		case 0x0FF31:
-		case 0x0FF32:
-		case 0x0FF33:
-		case 0x0FF34:
-		case 0x0FF35:
-		case 0x0FF36:
-		case 0x0FF37:
-		case 0x0FF38:
-		case 0x0FF39:
-		case 0x0FF3A:
-		case 0x10400:
-		case 0x10401:
-		case 0x10402:
-		case 0x10403:
-		case 0x10404:
-		case 0x10405:
-		case 0x10406:
-		case 0x10407:
-		case 0x10408:
-		case 0x10409:
-		case 0x1040A:
-		case 0x1040B:
-		case 0x1040C:
-		case 0x1040D:
-		case 0x1040E:
-		case 0x1040F:
-		case 0x10410:
-		case 0x10411:
-		case 0x10412:
-		case 0x10413:
-		case 0x10414:
-		case 0x10415:
-		case 0x10416:
-		case 0x10417:
-		case 0x10418:
-		case 0x10419:
-		case 0x1041A:
-		case 0x1041B:
-		case 0x1041C:
-		case 0x1041D:
-		case 0x1041E:
-		case 0x1041F:
-		case 0x10420:
-		case 0x10421:
-		case 0x10422:
-		case 0x10423:
-		case 0x10424:
-		case 0x10425:
-		case 0x10426:
-		case 0x10427:
-		case 0x104B0:
-		case 0x104B1:
-		case 0x104B2:
-		case 0x104B3:
-		case 0x104B4:
-		case 0x104B5:
-		case 0x104B6:
-		case 0x104B7:
-		case 0x104B8:
-		case 0x104B9:
-		case 0x104BA:
-		case 0x104BB:
-		case 0x104BC:
-		case 0x104BD:
-		case 0x104BE:
-		case 0x104BF:
-		case 0x104C0:
-		case 0x104C1:
-		case 0x104C2:
-		case 0x104C3:
-		case 0x104C4:
-		case 0x104C5:
-		case 0x104C6:
-		case 0x104C7:
-		case 0x104C8:
-		case 0x104C9:
-		case 0x104CA:
-		case 0x104CB:
-		case 0x104CC:
-		case 0x104CD:
-		case 0x104CE:
-		case 0x104CF:
-		case 0x104D0:
-		case 0x104D1:
-		case 0x104D2:
-		case 0x104D3:
-		case 0x10570:
-		case 0x10571:
-		case 0x10572:
-		case 0x10573:
-		case 0x10574:
-		case 0x10575:
-		case 0x10576:
-		case 0x10577:
-		case 0x10578:
-		case 0x10579:
-		case 0x1057A:
-		case 0x1057C:
-		case 0x1057D:
-		case 0x1057E:
-		case 0x1057F:
-		case 0x10580:
-		case 0x10581:
-		case 0x10582:
-		case 0x10583:
-		case 0x10584:
-		case 0x10585:
-		case 0x10586:
-		case 0x10587:
-		case 0x10588:
-		case 0x10589:
-		case 0x1058A:
-		case 0x1058C:
-		case 0x1058D:
-		case 0x1058E:
-		case 0x1058F:
-		case 0x10590:
-		case 0x10591:
-		case 0x10592:
-		case 0x10594:
-		case 0x10595:
-		case 0x10C80:
-		case 0x10C81:
-		case 0x10C82:
-		case 0x10C83:
-		case 0x10C84:
-		case 0x10C85:
-		case 0x10C86:
-		case 0x10C87:
-		case 0x10C88:
-		case 0x10C89:
-		case 0x10C8A:
-		case 0x10C8B:
-		case 0x10C8C:
-		case 0x10C8D:
-		case 0x10C8E:
-		case 0x10C8F:
-		case 0x10C90:
-		case 0x10C91:
-		case 0x10C92:
-		case 0x10C93:
-		case 0x10C94:
-		case 0x10C95:
-		case 0x10C96:
-		case 0x10C97:
-		case 0x10C98:
-		case 0x10C99:
-		case 0x10C9A:
-		case 0x10C9B:
-		case 0x10C9C:
-		case 0x10C9D:
-		case 0x10C9E:
-		case 0x10C9F:
-		case 0x10CA0:
-		case 0x10CA1:
-		case 0x10CA2:
-		case 0x10CA3:
-		case 0x10CA4:
-		case 0x10CA5:
-		case 0x10CA6:
-		case 0x10CA7:
-		case 0x10CA8:
-		case 0x10CA9:
-		case 0x10CAA:
-		case 0x10CAB:
-		case 0x10CAC:
-		case 0x10CAD:
-		case 0x10CAE:
-		case 0x10CAF:
-		case 0x10CB0:
-		case 0x10CB1:
-		case 0x10CB2:
-		case 0x118A0:
-		case 0x118A1:
-		case 0x118A2:
-		case 0x118A3:
-		case 0x118A4:
-		case 0x118A5:
-		case 0x118A6:
-		case 0x118A7:
-		case 0x118A8:
-		case 0x118A9:
-		case 0x118AA:
-		case 0x118AB:
-		case 0x118AC:
-		case 0x118AD:
-		case 0x118AE:
-		case 0x118AF:
-		case 0x118B0:
-		case 0x118B1:
-		case 0x118B2:
-		case 0x118B3:
-		case 0x118B4:
-		case 0x118B5:
-		case 0x118B6:
-		case 0x118B7:
-		case 0x118B8:
-		case 0x118B9:
-		case 0x118BA:
-		case 0x118BB:
-		case 0x118BC:
-		case 0x118BD:
-		case 0x118BE:
-		case 0x118BF:
-		case 0x16E40:
-		case 0x16E41:
-		case 0x16E42:
-		case 0x16E43:
-		case 0x16E44:
-		case 0x16E45:
-		case 0x16E46:
-		case 0x16E47:
-		case 0x16E48:
-		case 0x16E49:
-		case 0x16E4A:
-		case 0x16E4B:
-		case 0x16E4C:
-		case 0x16E4D:
-		case 0x16E4E:
-		case 0x16E4F:
-		case 0x16E50:
-		case 0x16E51:
-		case 0x16E52:
-		case 0x16E53:
-		case 0x16E54:
-		case 0x16E55:
-		case 0x16E56:
-		case 0x16E57:
-		case 0x16E58:
-		case 0x16E59:
-		case 0x16E5A:
-		case 0x16E5B:
-		case 0x16E5C:
-		case 0x16E5D:
-		case 0x16E5E:
-		case 0x16E5F:
-		case 0x1D400:
-		case 0x1D401:
-		case 0x1D402:
-		case 0x1D403:
-		case 0x1D404:
-		case 0x1D405:
-		case 0x1D406:
-		case 0x1D407:
-		case 0x1D408:
-		case 0x1D409:
-		case 0x1D40A:
-		case 0x1D40B:
-		case 0x1D40C:
-		case 0x1D40D:
-		case 0x1D40E:
-		case 0x1D40F:
-		case 0x1D410:
-		case 0x1D411:
-		case 0x1D412:
-		case 0x1D413:
-		case 0x1D414:
-		case 0x1D415:
-		case 0x1D416:
-		case 0x1D417:
-		case 0x1D418:
-		case 0x1D419:
-		case 0x1D434:
-		case 0x1D435:
-		case 0x1D436:
-		case 0x1D437:
-		case 0x1D438:
-		case 0x1D439:
-		case 0x1D43A:
-		case 0x1D43B:
-		case 0x1D43C:
-		case 0x1D43D:
-		case 0x1D43E:
-		case 0x1D43F:
-		case 0x1D440:
-		case 0x1D441:
-		case 0x1D442:
-		case 0x1D443:
-		case 0x1D444:
-		case 0x1D445:
-		case 0x1D446:
-		case 0x1D447:
-		case 0x1D448:
-		case 0x1D449:
-		case 0x1D44A:
-		case 0x1D44B:
-		case 0x1D44C:
-		case 0x1D44D:
-		case 0x1D468:
-		case 0x1D469:
-		case 0x1D46A:
-		case 0x1D46B:
-		case 0x1D46C:
-		case 0x1D46D:
-		case 0x1D46E:
-		case 0x1D46F:
-		case 0x1D470:
-		case 0x1D471:
-		case 0x1D472:
-		case 0x1D473:
-		case 0x1D474:
-		case 0x1D475:
-		case 0x1D476:
-		case 0x1D477:
-		case 0x1D478:
-		case 0x1D479:
-		case 0x1D47A:
-		case 0x1D47B:
-		case 0x1D47C:
-		case 0x1D47D:
-		case 0x1D47E:
-		case 0x1D47F:
-		case 0x1D480:
-		case 0x1D481:
-		case 0x1D49C:
-		case 0x1D49E:
-		case 0x1D49F:
-		case 0x1D4A2:
-		case 0x1D4A5:
-		case 0x1D4A6:
-		case 0x1D4A9:
-		case 0x1D4AA:
-		case 0x1D4AB:
-		case 0x1D4AC:
-		case 0x1D4AE:
-		case 0x1D4AF:
-		case 0x1D4B0:
-		case 0x1D4B1:
-		case 0x1D4B2:
-		case 0x1D4B3:
-		case 0x1D4B4:
-		case 0x1D4B5:
-		case 0x1D4D0:
-		case 0x1D4D1:
-		case 0x1D4D2:
-		case 0x1D4D3:
-		case 0x1D4D4:
-		case 0x1D4D5:
-		case 0x1D4D6:
-		case 0x1D4D7:
-		case 0x1D4D8:
-		case 0x1D4D9:
-		case 0x1D4DA:
-		case 0x1D4DB:
-		case 0x1D4DC:
-		case 0x1D4DD:
-		case 0x1D4DE:
-		case 0x1D4DF:
-		case 0x1D4E0:
-		case 0x1D4E1:
-		case 0x1D4E2:
-		case 0x1D4E3:
-		case 0x1D4E4:
-		case 0x1D4E5:
-		case 0x1D4E6:
-		case 0x1D4E7:
-		case 0x1D4E8:
-		case 0x1D4E9:
-		case 0x1D504:
-		case 0x1D505:
-		case 0x1D507:
-		case 0x1D508:
-		case 0x1D509:
-		case 0x1D50A:
-		case 0x1D50D:
-		case 0x1D50E:
-		case 0x1D50F:
-		case 0x1D510:
-		case 0x1D511:
-		case 0x1D512:
-		case 0x1D513:
-		case 0x1D514:
-		case 0x1D516:
-		case 0x1D517:
-		case 0x1D518:
-		case 0x1D519:
-		case 0x1D51A:
-		case 0x1D51B:
-		case 0x1D51C:
-		case 0x1D538:
-		case 0x1D539:
-		case 0x1D53B:
-		case 0x1D53C:
-		case 0x1D53D:
-		case 0x1D53E:
-		case 0x1D540:
-		case 0x1D541:
-		case 0x1D542:
-		case 0x1D543:
-		case 0x1D544:
-		case 0x1D546:
-		case 0x1D54A:
-		case 0x1D54B:
-		case 0x1D54C:
-		case 0x1D54D:
-		case 0x1D54E:
-		case 0x1D54F:
-		case 0x1D550:
-		case 0x1D56C:
-		case 0x1D56D:
-		case 0x1D56E:
-		case 0x1D56F:
-		case 0x1D570:
-		case 0x1D571:
-		case 0x1D572:
-		case 0x1D573:
-		case 0x1D574:
-		case 0x1D575:
-		case 0x1D576:
-		case 0x1D577:
-		case 0x1D578:
-		case 0x1D579:
-		case 0x1D57A:
-		case 0x1D57B:
-		case 0x1D57C:
-		case 0x1D57D:
-		case 0x1D57E:
-		case 0x1D57F:
-		case 0x1D580:
-		case 0x1D581:
-		case 0x1D582:
-		case 0x1D583:
-		case 0x1D584:
-		case 0x1D585:
-		case 0x1D5A0:
-		case 0x1D5A1:
-		case 0x1D5A2:
-		case 0x1D5A3:
-		case 0x1D5A4:
-		case 0x1D5A5:
-		case 0x1D5A6:
-		case 0x1D5A7:
-		case 0x1D5A8:
-		case 0x1D5A9:
-		case 0x1D5AA:
-		case 0x1D5AB:
-		case 0x1D5AC:
-		case 0x1D5AD:
-		case 0x1D5AE:
-		case 0x1D5AF:
-		case 0x1D5B0:
-		case 0x1D5B1:
-		case 0x1D5B2:
-		case 0x1D5B3:
-		case 0x1D5B4:
-		case 0x1D5B5:
-		case 0x1D5B6:
-		case 0x1D5B7:
-		case 0x1D5B8:
-		case 0x1D5B9:
-		case 0x1D5D4:
-		case 0x1D5D5:
-		case 0x1D5D6:
-		case 0x1D5D7:
-		case 0x1D5D8:
-		case 0x1D5D9:
-		case 0x1D5DA:
-		case 0x1D5DB:
-		case 0x1D5DC:
-		case 0x1D5DD:
-		case 0x1D5DE:
-		case 0x1D5DF:
-		case 0x1D5E0:
-		case 0x1D5E1:
-		case 0x1D5E2:
-		case 0x1D5E3:
-		case 0x1D5E4:
-		case 0x1D5E5:
-		case 0x1D5E6:
-		case 0x1D5E7:
-		case 0x1D5E8:
-		case 0x1D5E9:
-		case 0x1D5EA:
-		case 0x1D5EB:
-		case 0x1D5EC:
-		case 0x1D5ED:
-		case 0x1D608:
-		case 0x1D609:
-		case 0x1D60A:
-		case 0x1D60B:
-		case 0x1D60C:
-		case 0x1D60D:
-		case 0x1D60E:
-		case 0x1D60F:
-		case 0x1D610:
-		case 0x1D611:
-		case 0x1D612:
-		case 0x1D613:
-		case 0x1D614:
-		case 0x1D615:
-		case 0x1D616:
-		case 0x1D617:
-		case 0x1D618:
-		case 0x1D619:
-		case 0x1D61A:
-		case 0x1D61B:
-		case 0x1D61C:
-		case 0x1D61D:
-		case 0x1D61E:
-		case 0x1D61F:
-		case 0x1D620:
-		case 0x1D621:
-		case 0x1D63C:
-		case 0x1D63D:
-		case 0x1D63E:
-		case 0x1D63F:
-		case 0x1D640:
-		case 0x1D641:
-		case 0x1D642:
-		case 0x1D643:
-		case 0x1D644:
-		case 0x1D645:
-		case 0x1D646:
-		case 0x1D647:
-		case 0x1D648:
-		case 0x1D649:
-		case 0x1D64A:
-		case 0x1D64B:
-		case 0x1D64C:
-		case 0x1D64D:
-		case 0x1D64E:
-		case 0x1D64F:
-		case 0x1D650:
-		case 0x1D651:
-		case 0x1D652:
-		case 0x1D653:
-		case 0x1D654:
-		case 0x1D655:
-		case 0x1D670:
-		case 0x1D671:
-		case 0x1D672:
-		case 0x1D673:
-		case 0x1D674:
-		case 0x1D675:
-		case 0x1D676:
-		case 0x1D677:
-		case 0x1D678:
-		case 0x1D679:
-		case 0x1D67A:
-		case 0x1D67B:
-		case 0x1D67C:
-		case 0x1D67D:
-		case 0x1D67E:
-		case 0x1D67F:
-		case 0x1D680:
-		case 0x1D681:
-		case 0x1D682:
-		case 0x1D683:
-		case 0x1D684:
-		case 0x1D685:
-		case 0x1D686:
-		case 0x1D687:
-		case 0x1D688:
-		case 0x1D689:
-		case 0x1D6A8:
-		case 0x1D6A9:
-		case 0x1D6AA:
-		case 0x1D6AB:
-		case 0x1D6AC:
-		case 0x1D6AD:
-		case 0x1D6AE:
-		case 0x1D6AF:
-		case 0x1D6B0:
-		case 0x1D6B1:
-		case 0x1D6B2:
-		case 0x1D6B3:
-		case 0x1D6B4:
-		case 0x1D6B5:
-		case 0x1D6B6:
-		case 0x1D6B7:
-		case 0x1D6B8:
-		case 0x1D6B9:
-		case 0x1D6BA:
-		case 0x1D6BB:
-		case 0x1D6BC:
-		case 0x1D6BD:
-		case 0x1D6BE:
-		case 0x1D6BF:
-		case 0x1D6C0:
-		case 0x1D6E2:
-		case 0x1D6E3:
-		case 0x1D6E4:
-		case 0x1D6E5:
-		case 0x1D6E6:
-		case 0x1D6E7:
-		case 0x1D6E8:
-		case 0x1D6E9:
-		case 0x1D6EA:
-		case 0x1D6EB:
-		case 0x1D6EC:
-		case 0x1D6ED:
-		case 0x1D6EE:
-		case 0x1D6EF:
-		case 0x1D6F0:
-		case 0x1D6F1:
-		case 0x1D6F2:
-		case 0x1D6F3:
-		case 0x1D6F4:
-		case 0x1D6F5:
-		case 0x1D6F6:
-		case 0x1D6F7:
-		case 0x1D6F8:
-		case 0x1D6F9:
-		case 0x1D6FA:
-		case 0x1D71C:
-		case 0x1D71D:
-		case 0x1D71E:
-		case 0x1D71F:
-		case 0x1D720:
-		case 0x1D721:
-		case 0x1D722:
-		case 0x1D723:
-		case 0x1D724:
-		case 0x1D725:
-		case 0x1D726:
-		case 0x1D727:
-		case 0x1D728:
-		case 0x1D729:
-		case 0x1D72A:
-		case 0x1D72B:
-		case 0x1D72C:
-		case 0x1D72D:
-		case 0x1D72E:
-		case 0x1D72F:
-		case 0x1D730:
-		case 0x1D731:
-		case 0x1D732:
-		case 0x1D733:
-		case 0x1D734:
-		case 0x1D756:
-		case 0x1D757:
-		case 0x1D758:
-		case 0x1D759:
-		case 0x1D75A:
-		case 0x1D75B:
-		case 0x1D75C:
-		case 0x1D75D:
-		case 0x1D75E:
-		case 0x1D75F:
-		case 0x1D760:
-		case 0x1D761:
-		case 0x1D762:
-		case 0x1D763:
-		case 0x1D764:
-		case 0x1D765:
-		case 0x1D766:
-		case 0x1D767:
-		case 0x1D768:
-		case 0x1D769:
-		case 0x1D76A:
-		case 0x1D76B:
-		case 0x1D76C:
-		case 0x1D76D:
-		case 0x1D76E:
-		case 0x1D790:
-		case 0x1D791:
-		case 0x1D792:
-		case 0x1D793:
-		case 0x1D794:
-		case 0x1D795:
-		case 0x1D796:
-		case 0x1D797:
-		case 0x1D798:
-		case 0x1D799:
-		case 0x1D79A:
-		case 0x1D79B:
-		case 0x1D79C:
-		case 0x1D79D:
-		case 0x1D79E:
-		case 0x1D79F:
-		case 0x1D7A0:
-		case 0x1D7A1:
-		case 0x1D7A2:
-		case 0x1D7A3:
-		case 0x1D7A4:
-		case 0x1D7A5:
-		case 0x1D7A6:
-		case 0x1D7A7:
-		case 0x1D7A8:
-		case 0x1D7CA:
-		case 0x1E900:
-		case 0x1E901:
-		case 0x1E902:
-		case 0x1E903:
-		case 0x1E904:
-		case 0x1E905:
-		case 0x1E906:
-		case 0x1E907:
-		case 0x1E908:
-		case 0x1E909:
-		case 0x1E90A:
-		case 0x1E90B:
-		case 0x1E90C:
-		case 0x1E90D:
-		case 0x1E90E:
-		case 0x1E90F:
-		case 0x1E910:
-		case 0x1E911:
-		case 0x1E912:
-		case 0x1E913:
-		case 0x1E914:
-		case 0x1E915:
-		case 0x1E916:
-		case 0x1E917:
-		case 0x1E918:
-		case 0x1E919:
-		case 0x1E91A:
-		case 0x1E91B:
-		case 0x1E91C:
-		case 0x1E91D:
-		case 0x1E91E:
-		case 0x1E91F:
-		case 0x1E920:
-		case 0x1E921:
-			return true;
+bool uc32_case(uc32_t c, ucase_t ca) {
+    assert(ucase_valid(ca));
 
-		default:
-			return false;
-	}
+    switch (ca) {
+        case UCASE_LOWER:
+            return uc32_lower(c);
+
+        case UCASE_UPPER:
+            return uc32_upper(c);
+
+        default:
+            return uc32_lower(c) || uc32_upper(c);
+    }
 }
 
 bool uc32_lower(uc32_t c) {
@@ -13985,6 +11423,1846 @@ bool uc32_lower(uc32_t c) {
 		case 0x1E941:
 		case 0x1E942:
 		case 0x1E943:
+			return true;
+
+		default:
+			return false;
+	}
+}
+
+bool uc32_upper(uc32_t c) {
+	switch (c) {
+		case 0x00041:
+		case 0x00042:
+		case 0x00043:
+		case 0x00044:
+		case 0x00045:
+		case 0x00046:
+		case 0x00047:
+		case 0x00048:
+		case 0x00049:
+		case 0x0004A:
+		case 0x0004B:
+		case 0x0004C:
+		case 0x0004D:
+		case 0x0004E:
+		case 0x0004F:
+		case 0x00050:
+		case 0x00051:
+		case 0x00052:
+		case 0x00053:
+		case 0x00054:
+		case 0x00055:
+		case 0x00056:
+		case 0x00057:
+		case 0x00058:
+		case 0x00059:
+		case 0x0005A:
+		case 0x000C0:
+		case 0x000C1:
+		case 0x000C2:
+		case 0x000C3:
+		case 0x000C4:
+		case 0x000C5:
+		case 0x000C6:
+		case 0x000C7:
+		case 0x000C8:
+		case 0x000C9:
+		case 0x000CA:
+		case 0x000CB:
+		case 0x000CC:
+		case 0x000CD:
+		case 0x000CE:
+		case 0x000CF:
+		case 0x000D0:
+		case 0x000D1:
+		case 0x000D2:
+		case 0x000D3:
+		case 0x000D4:
+		case 0x000D5:
+		case 0x000D6:
+		case 0x000D8:
+		case 0x000D9:
+		case 0x000DA:
+		case 0x000DB:
+		case 0x000DC:
+		case 0x000DD:
+		case 0x000DE:
+		case 0x00100:
+		case 0x00102:
+		case 0x00104:
+		case 0x00106:
+		case 0x00108:
+		case 0x0010A:
+		case 0x0010C:
+		case 0x0010E:
+		case 0x00110:
+		case 0x00112:
+		case 0x00114:
+		case 0x00116:
+		case 0x00118:
+		case 0x0011A:
+		case 0x0011C:
+		case 0x0011E:
+		case 0x00120:
+		case 0x00122:
+		case 0x00124:
+		case 0x00126:
+		case 0x00128:
+		case 0x0012A:
+		case 0x0012C:
+		case 0x0012E:
+		case 0x00130:
+		case 0x00132:
+		case 0x00134:
+		case 0x00136:
+		case 0x00139:
+		case 0x0013B:
+		case 0x0013D:
+		case 0x0013F:
+		case 0x00141:
+		case 0x00143:
+		case 0x00145:
+		case 0x00147:
+		case 0x0014A:
+		case 0x0014C:
+		case 0x0014E:
+		case 0x00150:
+		case 0x00152:
+		case 0x00154:
+		case 0x00156:
+		case 0x00158:
+		case 0x0015A:
+		case 0x0015C:
+		case 0x0015E:
+		case 0x00160:
+		case 0x00162:
+		case 0x00164:
+		case 0x00166:
+		case 0x00168:
+		case 0x0016A:
+		case 0x0016C:
+		case 0x0016E:
+		case 0x00170:
+		case 0x00172:
+		case 0x00174:
+		case 0x00176:
+		case 0x00178:
+		case 0x00179:
+		case 0x0017B:
+		case 0x0017D:
+		case 0x00181:
+		case 0x00182:
+		case 0x00184:
+		case 0x00186:
+		case 0x00187:
+		case 0x00189:
+		case 0x0018A:
+		case 0x0018B:
+		case 0x0018E:
+		case 0x0018F:
+		case 0x00190:
+		case 0x00191:
+		case 0x00193:
+		case 0x00194:
+		case 0x00196:
+		case 0x00197:
+		case 0x00198:
+		case 0x0019C:
+		case 0x0019D:
+		case 0x0019F:
+		case 0x001A0:
+		case 0x001A2:
+		case 0x001A4:
+		case 0x001A6:
+		case 0x001A7:
+		case 0x001A9:
+		case 0x001AC:
+		case 0x001AE:
+		case 0x001AF:
+		case 0x001B1:
+		case 0x001B2:
+		case 0x001B3:
+		case 0x001B5:
+		case 0x001B7:
+		case 0x001B8:
+		case 0x001BC:
+		case 0x001C4:
+		case 0x001C7:
+		case 0x001CA:
+		case 0x001CD:
+		case 0x001CF:
+		case 0x001D1:
+		case 0x001D3:
+		case 0x001D5:
+		case 0x001D7:
+		case 0x001D9:
+		case 0x001DB:
+		case 0x001DE:
+		case 0x001E0:
+		case 0x001E2:
+		case 0x001E4:
+		case 0x001E6:
+		case 0x001E8:
+		case 0x001EA:
+		case 0x001EC:
+		case 0x001EE:
+		case 0x001F1:
+		case 0x001F4:
+		case 0x001F6:
+		case 0x001F7:
+		case 0x001F8:
+		case 0x001FA:
+		case 0x001FC:
+		case 0x001FE:
+		case 0x00200:
+		case 0x00202:
+		case 0x00204:
+		case 0x00206:
+		case 0x00208:
+		case 0x0020A:
+		case 0x0020C:
+		case 0x0020E:
+		case 0x00210:
+		case 0x00212:
+		case 0x00214:
+		case 0x00216:
+		case 0x00218:
+		case 0x0021A:
+		case 0x0021C:
+		case 0x0021E:
+		case 0x00220:
+		case 0x00222:
+		case 0x00224:
+		case 0x00226:
+		case 0x00228:
+		case 0x0022A:
+		case 0x0022C:
+		case 0x0022E:
+		case 0x00230:
+		case 0x00232:
+		case 0x0023A:
+		case 0x0023B:
+		case 0x0023D:
+		case 0x0023E:
+		case 0x00241:
+		case 0x00243:
+		case 0x00244:
+		case 0x00245:
+		case 0x00246:
+		case 0x00248:
+		case 0x0024A:
+		case 0x0024C:
+		case 0x0024E:
+		case 0x00370:
+		case 0x00372:
+		case 0x00376:
+		case 0x0037F:
+		case 0x00386:
+		case 0x00388:
+		case 0x00389:
+		case 0x0038A:
+		case 0x0038C:
+		case 0x0038E:
+		case 0x0038F:
+		case 0x00391:
+		case 0x00392:
+		case 0x00393:
+		case 0x00394:
+		case 0x00395:
+		case 0x00396:
+		case 0x00397:
+		case 0x00398:
+		case 0x00399:
+		case 0x0039A:
+		case 0x0039B:
+		case 0x0039C:
+		case 0x0039D:
+		case 0x0039E:
+		case 0x0039F:
+		case 0x003A0:
+		case 0x003A1:
+		case 0x003A3:
+		case 0x003A4:
+		case 0x003A5:
+		case 0x003A6:
+		case 0x003A7:
+		case 0x003A8:
+		case 0x003A9:
+		case 0x003AA:
+		case 0x003AB:
+		case 0x003CF:
+		case 0x003D2:
+		case 0x003D3:
+		case 0x003D4:
+		case 0x003D8:
+		case 0x003DA:
+		case 0x003DC:
+		case 0x003DE:
+		case 0x003E0:
+		case 0x003E2:
+		case 0x003E4:
+		case 0x003E6:
+		case 0x003E8:
+		case 0x003EA:
+		case 0x003EC:
+		case 0x003EE:
+		case 0x003F4:
+		case 0x003F7:
+		case 0x003F9:
+		case 0x003FA:
+		case 0x003FD:
+		case 0x003FE:
+		case 0x003FF:
+		case 0x00400:
+		case 0x00401:
+		case 0x00402:
+		case 0x00403:
+		case 0x00404:
+		case 0x00405:
+		case 0x00406:
+		case 0x00407:
+		case 0x00408:
+		case 0x00409:
+		case 0x0040A:
+		case 0x0040B:
+		case 0x0040C:
+		case 0x0040D:
+		case 0x0040E:
+		case 0x0040F:
+		case 0x00410:
+		case 0x00411:
+		case 0x00412:
+		case 0x00413:
+		case 0x00414:
+		case 0x00415:
+		case 0x00416:
+		case 0x00417:
+		case 0x00418:
+		case 0x00419:
+		case 0x0041A:
+		case 0x0041B:
+		case 0x0041C:
+		case 0x0041D:
+		case 0x0041E:
+		case 0x0041F:
+		case 0x00420:
+		case 0x00421:
+		case 0x00422:
+		case 0x00423:
+		case 0x00424:
+		case 0x00425:
+		case 0x00426:
+		case 0x00427:
+		case 0x00428:
+		case 0x00429:
+		case 0x0042A:
+		case 0x0042B:
+		case 0x0042C:
+		case 0x0042D:
+		case 0x0042E:
+		case 0x0042F:
+		case 0x00460:
+		case 0x00462:
+		case 0x00464:
+		case 0x00466:
+		case 0x00468:
+		case 0x0046A:
+		case 0x0046C:
+		case 0x0046E:
+		case 0x00470:
+		case 0x00472:
+		case 0x00474:
+		case 0x00476:
+		case 0x00478:
+		case 0x0047A:
+		case 0x0047C:
+		case 0x0047E:
+		case 0x00480:
+		case 0x0048A:
+		case 0x0048C:
+		case 0x0048E:
+		case 0x00490:
+		case 0x00492:
+		case 0x00494:
+		case 0x00496:
+		case 0x00498:
+		case 0x0049A:
+		case 0x0049C:
+		case 0x0049E:
+		case 0x004A0:
+		case 0x004A2:
+		case 0x004A4:
+		case 0x004A6:
+		case 0x004A8:
+		case 0x004AA:
+		case 0x004AC:
+		case 0x004AE:
+		case 0x004B0:
+		case 0x004B2:
+		case 0x004B4:
+		case 0x004B6:
+		case 0x004B8:
+		case 0x004BA:
+		case 0x004BC:
+		case 0x004BE:
+		case 0x004C0:
+		case 0x004C1:
+		case 0x004C3:
+		case 0x004C5:
+		case 0x004C7:
+		case 0x004C9:
+		case 0x004CB:
+		case 0x004CD:
+		case 0x004D0:
+		case 0x004D2:
+		case 0x004D4:
+		case 0x004D6:
+		case 0x004D8:
+		case 0x004DA:
+		case 0x004DC:
+		case 0x004DE:
+		case 0x004E0:
+		case 0x004E2:
+		case 0x004E4:
+		case 0x004E6:
+		case 0x004E8:
+		case 0x004EA:
+		case 0x004EC:
+		case 0x004EE:
+		case 0x004F0:
+		case 0x004F2:
+		case 0x004F4:
+		case 0x004F6:
+		case 0x004F8:
+		case 0x004FA:
+		case 0x004FC:
+		case 0x004FE:
+		case 0x00500:
+		case 0x00502:
+		case 0x00504:
+		case 0x00506:
+		case 0x00508:
+		case 0x0050A:
+		case 0x0050C:
+		case 0x0050E:
+		case 0x00510:
+		case 0x00512:
+		case 0x00514:
+		case 0x00516:
+		case 0x00518:
+		case 0x0051A:
+		case 0x0051C:
+		case 0x0051E:
+		case 0x00520:
+		case 0x00522:
+		case 0x00524:
+		case 0x00526:
+		case 0x00528:
+		case 0x0052A:
+		case 0x0052C:
+		case 0x0052E:
+		case 0x00531:
+		case 0x00532:
+		case 0x00533:
+		case 0x00534:
+		case 0x00535:
+		case 0x00536:
+		case 0x00537:
+		case 0x00538:
+		case 0x00539:
+		case 0x0053A:
+		case 0x0053B:
+		case 0x0053C:
+		case 0x0053D:
+		case 0x0053E:
+		case 0x0053F:
+		case 0x00540:
+		case 0x00541:
+		case 0x00542:
+		case 0x00543:
+		case 0x00544:
+		case 0x00545:
+		case 0x00546:
+		case 0x00547:
+		case 0x00548:
+		case 0x00549:
+		case 0x0054A:
+		case 0x0054B:
+		case 0x0054C:
+		case 0x0054D:
+		case 0x0054E:
+		case 0x0054F:
+		case 0x00550:
+		case 0x00551:
+		case 0x00552:
+		case 0x00553:
+		case 0x00554:
+		case 0x00555:
+		case 0x00556:
+		case 0x010A0:
+		case 0x010A1:
+		case 0x010A2:
+		case 0x010A3:
+		case 0x010A4:
+		case 0x010A5:
+		case 0x010A6:
+		case 0x010A7:
+		case 0x010A8:
+		case 0x010A9:
+		case 0x010AA:
+		case 0x010AB:
+		case 0x010AC:
+		case 0x010AD:
+		case 0x010AE:
+		case 0x010AF:
+		case 0x010B0:
+		case 0x010B1:
+		case 0x010B2:
+		case 0x010B3:
+		case 0x010B4:
+		case 0x010B5:
+		case 0x010B6:
+		case 0x010B7:
+		case 0x010B8:
+		case 0x010B9:
+		case 0x010BA:
+		case 0x010BB:
+		case 0x010BC:
+		case 0x010BD:
+		case 0x010BE:
+		case 0x010BF:
+		case 0x010C0:
+		case 0x010C1:
+		case 0x010C2:
+		case 0x010C3:
+		case 0x010C4:
+		case 0x010C5:
+		case 0x010C7:
+		case 0x010CD:
+		case 0x013A0:
+		case 0x013A1:
+		case 0x013A2:
+		case 0x013A3:
+		case 0x013A4:
+		case 0x013A5:
+		case 0x013A6:
+		case 0x013A7:
+		case 0x013A8:
+		case 0x013A9:
+		case 0x013AA:
+		case 0x013AB:
+		case 0x013AC:
+		case 0x013AD:
+		case 0x013AE:
+		case 0x013AF:
+		case 0x013B0:
+		case 0x013B1:
+		case 0x013B2:
+		case 0x013B3:
+		case 0x013B4:
+		case 0x013B5:
+		case 0x013B6:
+		case 0x013B7:
+		case 0x013B8:
+		case 0x013B9:
+		case 0x013BA:
+		case 0x013BB:
+		case 0x013BC:
+		case 0x013BD:
+		case 0x013BE:
+		case 0x013BF:
+		case 0x013C0:
+		case 0x013C1:
+		case 0x013C2:
+		case 0x013C3:
+		case 0x013C4:
+		case 0x013C5:
+		case 0x013C6:
+		case 0x013C7:
+		case 0x013C8:
+		case 0x013C9:
+		case 0x013CA:
+		case 0x013CB:
+		case 0x013CC:
+		case 0x013CD:
+		case 0x013CE:
+		case 0x013CF:
+		case 0x013D0:
+		case 0x013D1:
+		case 0x013D2:
+		case 0x013D3:
+		case 0x013D4:
+		case 0x013D5:
+		case 0x013D6:
+		case 0x013D7:
+		case 0x013D8:
+		case 0x013D9:
+		case 0x013DA:
+		case 0x013DB:
+		case 0x013DC:
+		case 0x013DD:
+		case 0x013DE:
+		case 0x013DF:
+		case 0x013E0:
+		case 0x013E1:
+		case 0x013E2:
+		case 0x013E3:
+		case 0x013E4:
+		case 0x013E5:
+		case 0x013E6:
+		case 0x013E7:
+		case 0x013E8:
+		case 0x013E9:
+		case 0x013EA:
+		case 0x013EB:
+		case 0x013EC:
+		case 0x013ED:
+		case 0x013EE:
+		case 0x013EF:
+		case 0x013F0:
+		case 0x013F1:
+		case 0x013F2:
+		case 0x013F3:
+		case 0x013F4:
+		case 0x013F5:
+		case 0x01C90:
+		case 0x01C91:
+		case 0x01C92:
+		case 0x01C93:
+		case 0x01C94:
+		case 0x01C95:
+		case 0x01C96:
+		case 0x01C97:
+		case 0x01C98:
+		case 0x01C99:
+		case 0x01C9A:
+		case 0x01C9B:
+		case 0x01C9C:
+		case 0x01C9D:
+		case 0x01C9E:
+		case 0x01C9F:
+		case 0x01CA0:
+		case 0x01CA1:
+		case 0x01CA2:
+		case 0x01CA3:
+		case 0x01CA4:
+		case 0x01CA5:
+		case 0x01CA6:
+		case 0x01CA7:
+		case 0x01CA8:
+		case 0x01CA9:
+		case 0x01CAA:
+		case 0x01CAB:
+		case 0x01CAC:
+		case 0x01CAD:
+		case 0x01CAE:
+		case 0x01CAF:
+		case 0x01CB0:
+		case 0x01CB1:
+		case 0x01CB2:
+		case 0x01CB3:
+		case 0x01CB4:
+		case 0x01CB5:
+		case 0x01CB6:
+		case 0x01CB7:
+		case 0x01CB8:
+		case 0x01CB9:
+		case 0x01CBA:
+		case 0x01CBD:
+		case 0x01CBE:
+		case 0x01CBF:
+		case 0x01E00:
+		case 0x01E02:
+		case 0x01E04:
+		case 0x01E06:
+		case 0x01E08:
+		case 0x01E0A:
+		case 0x01E0C:
+		case 0x01E0E:
+		case 0x01E10:
+		case 0x01E12:
+		case 0x01E14:
+		case 0x01E16:
+		case 0x01E18:
+		case 0x01E1A:
+		case 0x01E1C:
+		case 0x01E1E:
+		case 0x01E20:
+		case 0x01E22:
+		case 0x01E24:
+		case 0x01E26:
+		case 0x01E28:
+		case 0x01E2A:
+		case 0x01E2C:
+		case 0x01E2E:
+		case 0x01E30:
+		case 0x01E32:
+		case 0x01E34:
+		case 0x01E36:
+		case 0x01E38:
+		case 0x01E3A:
+		case 0x01E3C:
+		case 0x01E3E:
+		case 0x01E40:
+		case 0x01E42:
+		case 0x01E44:
+		case 0x01E46:
+		case 0x01E48:
+		case 0x01E4A:
+		case 0x01E4C:
+		case 0x01E4E:
+		case 0x01E50:
+		case 0x01E52:
+		case 0x01E54:
+		case 0x01E56:
+		case 0x01E58:
+		case 0x01E5A:
+		case 0x01E5C:
+		case 0x01E5E:
+		case 0x01E60:
+		case 0x01E62:
+		case 0x01E64:
+		case 0x01E66:
+		case 0x01E68:
+		case 0x01E6A:
+		case 0x01E6C:
+		case 0x01E6E:
+		case 0x01E70:
+		case 0x01E72:
+		case 0x01E74:
+		case 0x01E76:
+		case 0x01E78:
+		case 0x01E7A:
+		case 0x01E7C:
+		case 0x01E7E:
+		case 0x01E80:
+		case 0x01E82:
+		case 0x01E84:
+		case 0x01E86:
+		case 0x01E88:
+		case 0x01E8A:
+		case 0x01E8C:
+		case 0x01E8E:
+		case 0x01E90:
+		case 0x01E92:
+		case 0x01E94:
+		case 0x01E9E:
+		case 0x01EA0:
+		case 0x01EA2:
+		case 0x01EA4:
+		case 0x01EA6:
+		case 0x01EA8:
+		case 0x01EAA:
+		case 0x01EAC:
+		case 0x01EAE:
+		case 0x01EB0:
+		case 0x01EB2:
+		case 0x01EB4:
+		case 0x01EB6:
+		case 0x01EB8:
+		case 0x01EBA:
+		case 0x01EBC:
+		case 0x01EBE:
+		case 0x01EC0:
+		case 0x01EC2:
+		case 0x01EC4:
+		case 0x01EC6:
+		case 0x01EC8:
+		case 0x01ECA:
+		case 0x01ECC:
+		case 0x01ECE:
+		case 0x01ED0:
+		case 0x01ED2:
+		case 0x01ED4:
+		case 0x01ED6:
+		case 0x01ED8:
+		case 0x01EDA:
+		case 0x01EDC:
+		case 0x01EDE:
+		case 0x01EE0:
+		case 0x01EE2:
+		case 0x01EE4:
+		case 0x01EE6:
+		case 0x01EE8:
+		case 0x01EEA:
+		case 0x01EEC:
+		case 0x01EEE:
+		case 0x01EF0:
+		case 0x01EF2:
+		case 0x01EF4:
+		case 0x01EF6:
+		case 0x01EF8:
+		case 0x01EFA:
+		case 0x01EFC:
+		case 0x01EFE:
+		case 0x01F08:
+		case 0x01F09:
+		case 0x01F0A:
+		case 0x01F0B:
+		case 0x01F0C:
+		case 0x01F0D:
+		case 0x01F0E:
+		case 0x01F0F:
+		case 0x01F18:
+		case 0x01F19:
+		case 0x01F1A:
+		case 0x01F1B:
+		case 0x01F1C:
+		case 0x01F1D:
+		case 0x01F28:
+		case 0x01F29:
+		case 0x01F2A:
+		case 0x01F2B:
+		case 0x01F2C:
+		case 0x01F2D:
+		case 0x01F2E:
+		case 0x01F2F:
+		case 0x01F38:
+		case 0x01F39:
+		case 0x01F3A:
+		case 0x01F3B:
+		case 0x01F3C:
+		case 0x01F3D:
+		case 0x01F3E:
+		case 0x01F3F:
+		case 0x01F48:
+		case 0x01F49:
+		case 0x01F4A:
+		case 0x01F4B:
+		case 0x01F4C:
+		case 0x01F4D:
+		case 0x01F59:
+		case 0x01F5B:
+		case 0x01F5D:
+		case 0x01F5F:
+		case 0x01F68:
+		case 0x01F69:
+		case 0x01F6A:
+		case 0x01F6B:
+		case 0x01F6C:
+		case 0x01F6D:
+		case 0x01F6E:
+		case 0x01F6F:
+		case 0x01FB8:
+		case 0x01FB9:
+		case 0x01FBA:
+		case 0x01FBB:
+		case 0x01FC8:
+		case 0x01FC9:
+		case 0x01FCA:
+		case 0x01FCB:
+		case 0x01FD8:
+		case 0x01FD9:
+		case 0x01FDA:
+		case 0x01FDB:
+		case 0x01FE8:
+		case 0x01FE9:
+		case 0x01FEA:
+		case 0x01FEB:
+		case 0x01FEC:
+		case 0x01FF8:
+		case 0x01FF9:
+		case 0x01FFA:
+		case 0x01FFB:
+		case 0x02102:
+		case 0x02107:
+		case 0x0210B:
+		case 0x0210C:
+		case 0x0210D:
+		case 0x02110:
+		case 0x02111:
+		case 0x02112:
+		case 0x02115:
+		case 0x02119:
+		case 0x0211A:
+		case 0x0211B:
+		case 0x0211C:
+		case 0x0211D:
+		case 0x02124:
+		case 0x02126:
+		case 0x02128:
+		case 0x0212A:
+		case 0x0212B:
+		case 0x0212C:
+		case 0x0212D:
+		case 0x02130:
+		case 0x02131:
+		case 0x02132:
+		case 0x02133:
+		case 0x0213E:
+		case 0x0213F:
+		case 0x02145:
+		case 0x02183:
+		case 0x02C00:
+		case 0x02C01:
+		case 0x02C02:
+		case 0x02C03:
+		case 0x02C04:
+		case 0x02C05:
+		case 0x02C06:
+		case 0x02C07:
+		case 0x02C08:
+		case 0x02C09:
+		case 0x02C0A:
+		case 0x02C0B:
+		case 0x02C0C:
+		case 0x02C0D:
+		case 0x02C0E:
+		case 0x02C0F:
+		case 0x02C10:
+		case 0x02C11:
+		case 0x02C12:
+		case 0x02C13:
+		case 0x02C14:
+		case 0x02C15:
+		case 0x02C16:
+		case 0x02C17:
+		case 0x02C18:
+		case 0x02C19:
+		case 0x02C1A:
+		case 0x02C1B:
+		case 0x02C1C:
+		case 0x02C1D:
+		case 0x02C1E:
+		case 0x02C1F:
+		case 0x02C20:
+		case 0x02C21:
+		case 0x02C22:
+		case 0x02C23:
+		case 0x02C24:
+		case 0x02C25:
+		case 0x02C26:
+		case 0x02C27:
+		case 0x02C28:
+		case 0x02C29:
+		case 0x02C2A:
+		case 0x02C2B:
+		case 0x02C2C:
+		case 0x02C2D:
+		case 0x02C2E:
+		case 0x02C2F:
+		case 0x02C60:
+		case 0x02C62:
+		case 0x02C63:
+		case 0x02C64:
+		case 0x02C67:
+		case 0x02C69:
+		case 0x02C6B:
+		case 0x02C6D:
+		case 0x02C6E:
+		case 0x02C6F:
+		case 0x02C70:
+		case 0x02C72:
+		case 0x02C75:
+		case 0x02C7E:
+		case 0x02C7F:
+		case 0x02C80:
+		case 0x02C82:
+		case 0x02C84:
+		case 0x02C86:
+		case 0x02C88:
+		case 0x02C8A:
+		case 0x02C8C:
+		case 0x02C8E:
+		case 0x02C90:
+		case 0x02C92:
+		case 0x02C94:
+		case 0x02C96:
+		case 0x02C98:
+		case 0x02C9A:
+		case 0x02C9C:
+		case 0x02C9E:
+		case 0x02CA0:
+		case 0x02CA2:
+		case 0x02CA4:
+		case 0x02CA6:
+		case 0x02CA8:
+		case 0x02CAA:
+		case 0x02CAC:
+		case 0x02CAE:
+		case 0x02CB0:
+		case 0x02CB2:
+		case 0x02CB4:
+		case 0x02CB6:
+		case 0x02CB8:
+		case 0x02CBA:
+		case 0x02CBC:
+		case 0x02CBE:
+		case 0x02CC0:
+		case 0x02CC2:
+		case 0x02CC4:
+		case 0x02CC6:
+		case 0x02CC8:
+		case 0x02CCA:
+		case 0x02CCC:
+		case 0x02CCE:
+		case 0x02CD0:
+		case 0x02CD2:
+		case 0x02CD4:
+		case 0x02CD6:
+		case 0x02CD8:
+		case 0x02CDA:
+		case 0x02CDC:
+		case 0x02CDE:
+		case 0x02CE0:
+		case 0x02CE2:
+		case 0x02CEB:
+		case 0x02CED:
+		case 0x02CF2:
+		case 0x0A640:
+		case 0x0A642:
+		case 0x0A644:
+		case 0x0A646:
+		case 0x0A648:
+		case 0x0A64A:
+		case 0x0A64C:
+		case 0x0A64E:
+		case 0x0A650:
+		case 0x0A652:
+		case 0x0A654:
+		case 0x0A656:
+		case 0x0A658:
+		case 0x0A65A:
+		case 0x0A65C:
+		case 0x0A65E:
+		case 0x0A660:
+		case 0x0A662:
+		case 0x0A664:
+		case 0x0A666:
+		case 0x0A668:
+		case 0x0A66A:
+		case 0x0A66C:
+		case 0x0A680:
+		case 0x0A682:
+		case 0x0A684:
+		case 0x0A686:
+		case 0x0A688:
+		case 0x0A68A:
+		case 0x0A68C:
+		case 0x0A68E:
+		case 0x0A690:
+		case 0x0A692:
+		case 0x0A694:
+		case 0x0A696:
+		case 0x0A698:
+		case 0x0A69A:
+		case 0x0A722:
+		case 0x0A724:
+		case 0x0A726:
+		case 0x0A728:
+		case 0x0A72A:
+		case 0x0A72C:
+		case 0x0A72E:
+		case 0x0A732:
+		case 0x0A734:
+		case 0x0A736:
+		case 0x0A738:
+		case 0x0A73A:
+		case 0x0A73C:
+		case 0x0A73E:
+		case 0x0A740:
+		case 0x0A742:
+		case 0x0A744:
+		case 0x0A746:
+		case 0x0A748:
+		case 0x0A74A:
+		case 0x0A74C:
+		case 0x0A74E:
+		case 0x0A750:
+		case 0x0A752:
+		case 0x0A754:
+		case 0x0A756:
+		case 0x0A758:
+		case 0x0A75A:
+		case 0x0A75C:
+		case 0x0A75E:
+		case 0x0A760:
+		case 0x0A762:
+		case 0x0A764:
+		case 0x0A766:
+		case 0x0A768:
+		case 0x0A76A:
+		case 0x0A76C:
+		case 0x0A76E:
+		case 0x0A779:
+		case 0x0A77B:
+		case 0x0A77D:
+		case 0x0A77E:
+		case 0x0A780:
+		case 0x0A782:
+		case 0x0A784:
+		case 0x0A786:
+		case 0x0A78B:
+		case 0x0A78D:
+		case 0x0A790:
+		case 0x0A792:
+		case 0x0A796:
+		case 0x0A798:
+		case 0x0A79A:
+		case 0x0A79C:
+		case 0x0A79E:
+		case 0x0A7A0:
+		case 0x0A7A2:
+		case 0x0A7A4:
+		case 0x0A7A6:
+		case 0x0A7A8:
+		case 0x0A7AA:
+		case 0x0A7AB:
+		case 0x0A7AC:
+		case 0x0A7AD:
+		case 0x0A7AE:
+		case 0x0A7B0:
+		case 0x0A7B1:
+		case 0x0A7B2:
+		case 0x0A7B3:
+		case 0x0A7B4:
+		case 0x0A7B6:
+		case 0x0A7B8:
+		case 0x0A7BA:
+		case 0x0A7BC:
+		case 0x0A7BE:
+		case 0x0A7C0:
+		case 0x0A7C2:
+		case 0x0A7C4:
+		case 0x0A7C5:
+		case 0x0A7C6:
+		case 0x0A7C7:
+		case 0x0A7C9:
+		case 0x0A7D0:
+		case 0x0A7D6:
+		case 0x0A7D8:
+		case 0x0A7F5:
+		case 0x0FF21:
+		case 0x0FF22:
+		case 0x0FF23:
+		case 0x0FF24:
+		case 0x0FF25:
+		case 0x0FF26:
+		case 0x0FF27:
+		case 0x0FF28:
+		case 0x0FF29:
+		case 0x0FF2A:
+		case 0x0FF2B:
+		case 0x0FF2C:
+		case 0x0FF2D:
+		case 0x0FF2E:
+		case 0x0FF2F:
+		case 0x0FF30:
+		case 0x0FF31:
+		case 0x0FF32:
+		case 0x0FF33:
+		case 0x0FF34:
+		case 0x0FF35:
+		case 0x0FF36:
+		case 0x0FF37:
+		case 0x0FF38:
+		case 0x0FF39:
+		case 0x0FF3A:
+		case 0x10400:
+		case 0x10401:
+		case 0x10402:
+		case 0x10403:
+		case 0x10404:
+		case 0x10405:
+		case 0x10406:
+		case 0x10407:
+		case 0x10408:
+		case 0x10409:
+		case 0x1040A:
+		case 0x1040B:
+		case 0x1040C:
+		case 0x1040D:
+		case 0x1040E:
+		case 0x1040F:
+		case 0x10410:
+		case 0x10411:
+		case 0x10412:
+		case 0x10413:
+		case 0x10414:
+		case 0x10415:
+		case 0x10416:
+		case 0x10417:
+		case 0x10418:
+		case 0x10419:
+		case 0x1041A:
+		case 0x1041B:
+		case 0x1041C:
+		case 0x1041D:
+		case 0x1041E:
+		case 0x1041F:
+		case 0x10420:
+		case 0x10421:
+		case 0x10422:
+		case 0x10423:
+		case 0x10424:
+		case 0x10425:
+		case 0x10426:
+		case 0x10427:
+		case 0x104B0:
+		case 0x104B1:
+		case 0x104B2:
+		case 0x104B3:
+		case 0x104B4:
+		case 0x104B5:
+		case 0x104B6:
+		case 0x104B7:
+		case 0x104B8:
+		case 0x104B9:
+		case 0x104BA:
+		case 0x104BB:
+		case 0x104BC:
+		case 0x104BD:
+		case 0x104BE:
+		case 0x104BF:
+		case 0x104C0:
+		case 0x104C1:
+		case 0x104C2:
+		case 0x104C3:
+		case 0x104C4:
+		case 0x104C5:
+		case 0x104C6:
+		case 0x104C7:
+		case 0x104C8:
+		case 0x104C9:
+		case 0x104CA:
+		case 0x104CB:
+		case 0x104CC:
+		case 0x104CD:
+		case 0x104CE:
+		case 0x104CF:
+		case 0x104D0:
+		case 0x104D1:
+		case 0x104D2:
+		case 0x104D3:
+		case 0x10570:
+		case 0x10571:
+		case 0x10572:
+		case 0x10573:
+		case 0x10574:
+		case 0x10575:
+		case 0x10576:
+		case 0x10577:
+		case 0x10578:
+		case 0x10579:
+		case 0x1057A:
+		case 0x1057C:
+		case 0x1057D:
+		case 0x1057E:
+		case 0x1057F:
+		case 0x10580:
+		case 0x10581:
+		case 0x10582:
+		case 0x10583:
+		case 0x10584:
+		case 0x10585:
+		case 0x10586:
+		case 0x10587:
+		case 0x10588:
+		case 0x10589:
+		case 0x1058A:
+		case 0x1058C:
+		case 0x1058D:
+		case 0x1058E:
+		case 0x1058F:
+		case 0x10590:
+		case 0x10591:
+		case 0x10592:
+		case 0x10594:
+		case 0x10595:
+		case 0x10C80:
+		case 0x10C81:
+		case 0x10C82:
+		case 0x10C83:
+		case 0x10C84:
+		case 0x10C85:
+		case 0x10C86:
+		case 0x10C87:
+		case 0x10C88:
+		case 0x10C89:
+		case 0x10C8A:
+		case 0x10C8B:
+		case 0x10C8C:
+		case 0x10C8D:
+		case 0x10C8E:
+		case 0x10C8F:
+		case 0x10C90:
+		case 0x10C91:
+		case 0x10C92:
+		case 0x10C93:
+		case 0x10C94:
+		case 0x10C95:
+		case 0x10C96:
+		case 0x10C97:
+		case 0x10C98:
+		case 0x10C99:
+		case 0x10C9A:
+		case 0x10C9B:
+		case 0x10C9C:
+		case 0x10C9D:
+		case 0x10C9E:
+		case 0x10C9F:
+		case 0x10CA0:
+		case 0x10CA1:
+		case 0x10CA2:
+		case 0x10CA3:
+		case 0x10CA4:
+		case 0x10CA5:
+		case 0x10CA6:
+		case 0x10CA7:
+		case 0x10CA8:
+		case 0x10CA9:
+		case 0x10CAA:
+		case 0x10CAB:
+		case 0x10CAC:
+		case 0x10CAD:
+		case 0x10CAE:
+		case 0x10CAF:
+		case 0x10CB0:
+		case 0x10CB1:
+		case 0x10CB2:
+		case 0x118A0:
+		case 0x118A1:
+		case 0x118A2:
+		case 0x118A3:
+		case 0x118A4:
+		case 0x118A5:
+		case 0x118A6:
+		case 0x118A7:
+		case 0x118A8:
+		case 0x118A9:
+		case 0x118AA:
+		case 0x118AB:
+		case 0x118AC:
+		case 0x118AD:
+		case 0x118AE:
+		case 0x118AF:
+		case 0x118B0:
+		case 0x118B1:
+		case 0x118B2:
+		case 0x118B3:
+		case 0x118B4:
+		case 0x118B5:
+		case 0x118B6:
+		case 0x118B7:
+		case 0x118B8:
+		case 0x118B9:
+		case 0x118BA:
+		case 0x118BB:
+		case 0x118BC:
+		case 0x118BD:
+		case 0x118BE:
+		case 0x118BF:
+		case 0x16E40:
+		case 0x16E41:
+		case 0x16E42:
+		case 0x16E43:
+		case 0x16E44:
+		case 0x16E45:
+		case 0x16E46:
+		case 0x16E47:
+		case 0x16E48:
+		case 0x16E49:
+		case 0x16E4A:
+		case 0x16E4B:
+		case 0x16E4C:
+		case 0x16E4D:
+		case 0x16E4E:
+		case 0x16E4F:
+		case 0x16E50:
+		case 0x16E51:
+		case 0x16E52:
+		case 0x16E53:
+		case 0x16E54:
+		case 0x16E55:
+		case 0x16E56:
+		case 0x16E57:
+		case 0x16E58:
+		case 0x16E59:
+		case 0x16E5A:
+		case 0x16E5B:
+		case 0x16E5C:
+		case 0x16E5D:
+		case 0x16E5E:
+		case 0x16E5F:
+		case 0x1D400:
+		case 0x1D401:
+		case 0x1D402:
+		case 0x1D403:
+		case 0x1D404:
+		case 0x1D405:
+		case 0x1D406:
+		case 0x1D407:
+		case 0x1D408:
+		case 0x1D409:
+		case 0x1D40A:
+		case 0x1D40B:
+		case 0x1D40C:
+		case 0x1D40D:
+		case 0x1D40E:
+		case 0x1D40F:
+		case 0x1D410:
+		case 0x1D411:
+		case 0x1D412:
+		case 0x1D413:
+		case 0x1D414:
+		case 0x1D415:
+		case 0x1D416:
+		case 0x1D417:
+		case 0x1D418:
+		case 0x1D419:
+		case 0x1D434:
+		case 0x1D435:
+		case 0x1D436:
+		case 0x1D437:
+		case 0x1D438:
+		case 0x1D439:
+		case 0x1D43A:
+		case 0x1D43B:
+		case 0x1D43C:
+		case 0x1D43D:
+		case 0x1D43E:
+		case 0x1D43F:
+		case 0x1D440:
+		case 0x1D441:
+		case 0x1D442:
+		case 0x1D443:
+		case 0x1D444:
+		case 0x1D445:
+		case 0x1D446:
+		case 0x1D447:
+		case 0x1D448:
+		case 0x1D449:
+		case 0x1D44A:
+		case 0x1D44B:
+		case 0x1D44C:
+		case 0x1D44D:
+		case 0x1D468:
+		case 0x1D469:
+		case 0x1D46A:
+		case 0x1D46B:
+		case 0x1D46C:
+		case 0x1D46D:
+		case 0x1D46E:
+		case 0x1D46F:
+		case 0x1D470:
+		case 0x1D471:
+		case 0x1D472:
+		case 0x1D473:
+		case 0x1D474:
+		case 0x1D475:
+		case 0x1D476:
+		case 0x1D477:
+		case 0x1D478:
+		case 0x1D479:
+		case 0x1D47A:
+		case 0x1D47B:
+		case 0x1D47C:
+		case 0x1D47D:
+		case 0x1D47E:
+		case 0x1D47F:
+		case 0x1D480:
+		case 0x1D481:
+		case 0x1D49C:
+		case 0x1D49E:
+		case 0x1D49F:
+		case 0x1D4A2:
+		case 0x1D4A5:
+		case 0x1D4A6:
+		case 0x1D4A9:
+		case 0x1D4AA:
+		case 0x1D4AB:
+		case 0x1D4AC:
+		case 0x1D4AE:
+		case 0x1D4AF:
+		case 0x1D4B0:
+		case 0x1D4B1:
+		case 0x1D4B2:
+		case 0x1D4B3:
+		case 0x1D4B4:
+		case 0x1D4B5:
+		case 0x1D4D0:
+		case 0x1D4D1:
+		case 0x1D4D2:
+		case 0x1D4D3:
+		case 0x1D4D4:
+		case 0x1D4D5:
+		case 0x1D4D6:
+		case 0x1D4D7:
+		case 0x1D4D8:
+		case 0x1D4D9:
+		case 0x1D4DA:
+		case 0x1D4DB:
+		case 0x1D4DC:
+		case 0x1D4DD:
+		case 0x1D4DE:
+		case 0x1D4DF:
+		case 0x1D4E0:
+		case 0x1D4E1:
+		case 0x1D4E2:
+		case 0x1D4E3:
+		case 0x1D4E4:
+		case 0x1D4E5:
+		case 0x1D4E6:
+		case 0x1D4E7:
+		case 0x1D4E8:
+		case 0x1D4E9:
+		case 0x1D504:
+		case 0x1D505:
+		case 0x1D507:
+		case 0x1D508:
+		case 0x1D509:
+		case 0x1D50A:
+		case 0x1D50D:
+		case 0x1D50E:
+		case 0x1D50F:
+		case 0x1D510:
+		case 0x1D511:
+		case 0x1D512:
+		case 0x1D513:
+		case 0x1D514:
+		case 0x1D516:
+		case 0x1D517:
+		case 0x1D518:
+		case 0x1D519:
+		case 0x1D51A:
+		case 0x1D51B:
+		case 0x1D51C:
+		case 0x1D538:
+		case 0x1D539:
+		case 0x1D53B:
+		case 0x1D53C:
+		case 0x1D53D:
+		case 0x1D53E:
+		case 0x1D540:
+		case 0x1D541:
+		case 0x1D542:
+		case 0x1D543:
+		case 0x1D544:
+		case 0x1D546:
+		case 0x1D54A:
+		case 0x1D54B:
+		case 0x1D54C:
+		case 0x1D54D:
+		case 0x1D54E:
+		case 0x1D54F:
+		case 0x1D550:
+		case 0x1D56C:
+		case 0x1D56D:
+		case 0x1D56E:
+		case 0x1D56F:
+		case 0x1D570:
+		case 0x1D571:
+		case 0x1D572:
+		case 0x1D573:
+		case 0x1D574:
+		case 0x1D575:
+		case 0x1D576:
+		case 0x1D577:
+		case 0x1D578:
+		case 0x1D579:
+		case 0x1D57A:
+		case 0x1D57B:
+		case 0x1D57C:
+		case 0x1D57D:
+		case 0x1D57E:
+		case 0x1D57F:
+		case 0x1D580:
+		case 0x1D581:
+		case 0x1D582:
+		case 0x1D583:
+		case 0x1D584:
+		case 0x1D585:
+		case 0x1D5A0:
+		case 0x1D5A1:
+		case 0x1D5A2:
+		case 0x1D5A3:
+		case 0x1D5A4:
+		case 0x1D5A5:
+		case 0x1D5A6:
+		case 0x1D5A7:
+		case 0x1D5A8:
+		case 0x1D5A9:
+		case 0x1D5AA:
+		case 0x1D5AB:
+		case 0x1D5AC:
+		case 0x1D5AD:
+		case 0x1D5AE:
+		case 0x1D5AF:
+		case 0x1D5B0:
+		case 0x1D5B1:
+		case 0x1D5B2:
+		case 0x1D5B3:
+		case 0x1D5B4:
+		case 0x1D5B5:
+		case 0x1D5B6:
+		case 0x1D5B7:
+		case 0x1D5B8:
+		case 0x1D5B9:
+		case 0x1D5D4:
+		case 0x1D5D5:
+		case 0x1D5D6:
+		case 0x1D5D7:
+		case 0x1D5D8:
+		case 0x1D5D9:
+		case 0x1D5DA:
+		case 0x1D5DB:
+		case 0x1D5DC:
+		case 0x1D5DD:
+		case 0x1D5DE:
+		case 0x1D5DF:
+		case 0x1D5E0:
+		case 0x1D5E1:
+		case 0x1D5E2:
+		case 0x1D5E3:
+		case 0x1D5E4:
+		case 0x1D5E5:
+		case 0x1D5E6:
+		case 0x1D5E7:
+		case 0x1D5E8:
+		case 0x1D5E9:
+		case 0x1D5EA:
+		case 0x1D5EB:
+		case 0x1D5EC:
+		case 0x1D5ED:
+		case 0x1D608:
+		case 0x1D609:
+		case 0x1D60A:
+		case 0x1D60B:
+		case 0x1D60C:
+		case 0x1D60D:
+		case 0x1D60E:
+		case 0x1D60F:
+		case 0x1D610:
+		case 0x1D611:
+		case 0x1D612:
+		case 0x1D613:
+		case 0x1D614:
+		case 0x1D615:
+		case 0x1D616:
+		case 0x1D617:
+		case 0x1D618:
+		case 0x1D619:
+		case 0x1D61A:
+		case 0x1D61B:
+		case 0x1D61C:
+		case 0x1D61D:
+		case 0x1D61E:
+		case 0x1D61F:
+		case 0x1D620:
+		case 0x1D621:
+		case 0x1D63C:
+		case 0x1D63D:
+		case 0x1D63E:
+		case 0x1D63F:
+		case 0x1D640:
+		case 0x1D641:
+		case 0x1D642:
+		case 0x1D643:
+		case 0x1D644:
+		case 0x1D645:
+		case 0x1D646:
+		case 0x1D647:
+		case 0x1D648:
+		case 0x1D649:
+		case 0x1D64A:
+		case 0x1D64B:
+		case 0x1D64C:
+		case 0x1D64D:
+		case 0x1D64E:
+		case 0x1D64F:
+		case 0x1D650:
+		case 0x1D651:
+		case 0x1D652:
+		case 0x1D653:
+		case 0x1D654:
+		case 0x1D655:
+		case 0x1D670:
+		case 0x1D671:
+		case 0x1D672:
+		case 0x1D673:
+		case 0x1D674:
+		case 0x1D675:
+		case 0x1D676:
+		case 0x1D677:
+		case 0x1D678:
+		case 0x1D679:
+		case 0x1D67A:
+		case 0x1D67B:
+		case 0x1D67C:
+		case 0x1D67D:
+		case 0x1D67E:
+		case 0x1D67F:
+		case 0x1D680:
+		case 0x1D681:
+		case 0x1D682:
+		case 0x1D683:
+		case 0x1D684:
+		case 0x1D685:
+		case 0x1D686:
+		case 0x1D687:
+		case 0x1D688:
+		case 0x1D689:
+		case 0x1D6A8:
+		case 0x1D6A9:
+		case 0x1D6AA:
+		case 0x1D6AB:
+		case 0x1D6AC:
+		case 0x1D6AD:
+		case 0x1D6AE:
+		case 0x1D6AF:
+		case 0x1D6B0:
+		case 0x1D6B1:
+		case 0x1D6B2:
+		case 0x1D6B3:
+		case 0x1D6B4:
+		case 0x1D6B5:
+		case 0x1D6B6:
+		case 0x1D6B7:
+		case 0x1D6B8:
+		case 0x1D6B9:
+		case 0x1D6BA:
+		case 0x1D6BB:
+		case 0x1D6BC:
+		case 0x1D6BD:
+		case 0x1D6BE:
+		case 0x1D6BF:
+		case 0x1D6C0:
+		case 0x1D6E2:
+		case 0x1D6E3:
+		case 0x1D6E4:
+		case 0x1D6E5:
+		case 0x1D6E6:
+		case 0x1D6E7:
+		case 0x1D6E8:
+		case 0x1D6E9:
+		case 0x1D6EA:
+		case 0x1D6EB:
+		case 0x1D6EC:
+		case 0x1D6ED:
+		case 0x1D6EE:
+		case 0x1D6EF:
+		case 0x1D6F0:
+		case 0x1D6F1:
+		case 0x1D6F2:
+		case 0x1D6F3:
+		case 0x1D6F4:
+		case 0x1D6F5:
+		case 0x1D6F6:
+		case 0x1D6F7:
+		case 0x1D6F8:
+		case 0x1D6F9:
+		case 0x1D6FA:
+		case 0x1D71C:
+		case 0x1D71D:
+		case 0x1D71E:
+		case 0x1D71F:
+		case 0x1D720:
+		case 0x1D721:
+		case 0x1D722:
+		case 0x1D723:
+		case 0x1D724:
+		case 0x1D725:
+		case 0x1D726:
+		case 0x1D727:
+		case 0x1D728:
+		case 0x1D729:
+		case 0x1D72A:
+		case 0x1D72B:
+		case 0x1D72C:
+		case 0x1D72D:
+		case 0x1D72E:
+		case 0x1D72F:
+		case 0x1D730:
+		case 0x1D731:
+		case 0x1D732:
+		case 0x1D733:
+		case 0x1D734:
+		case 0x1D756:
+		case 0x1D757:
+		case 0x1D758:
+		case 0x1D759:
+		case 0x1D75A:
+		case 0x1D75B:
+		case 0x1D75C:
+		case 0x1D75D:
+		case 0x1D75E:
+		case 0x1D75F:
+		case 0x1D760:
+		case 0x1D761:
+		case 0x1D762:
+		case 0x1D763:
+		case 0x1D764:
+		case 0x1D765:
+		case 0x1D766:
+		case 0x1D767:
+		case 0x1D768:
+		case 0x1D769:
+		case 0x1D76A:
+		case 0x1D76B:
+		case 0x1D76C:
+		case 0x1D76D:
+		case 0x1D76E:
+		case 0x1D790:
+		case 0x1D791:
+		case 0x1D792:
+		case 0x1D793:
+		case 0x1D794:
+		case 0x1D795:
+		case 0x1D796:
+		case 0x1D797:
+		case 0x1D798:
+		case 0x1D799:
+		case 0x1D79A:
+		case 0x1D79B:
+		case 0x1D79C:
+		case 0x1D79D:
+		case 0x1D79E:
+		case 0x1D79F:
+		case 0x1D7A0:
+		case 0x1D7A1:
+		case 0x1D7A2:
+		case 0x1D7A3:
+		case 0x1D7A4:
+		case 0x1D7A5:
+		case 0x1D7A6:
+		case 0x1D7A7:
+		case 0x1D7A8:
+		case 0x1D7CA:
+		case 0x1E900:
+		case 0x1E901:
+		case 0x1E902:
+		case 0x1E903:
+		case 0x1E904:
+		case 0x1E905:
+		case 0x1E906:
+		case 0x1E907:
+		case 0x1E908:
+		case 0x1E909:
+		case 0x1E90A:
+		case 0x1E90B:
+		case 0x1E90C:
+		case 0x1E90D:
+		case 0x1E90E:
+		case 0x1E90F:
+		case 0x1E910:
+		case 0x1E911:
+		case 0x1E912:
+		case 0x1E913:
+		case 0x1E914:
+		case 0x1E915:
+		case 0x1E916:
+		case 0x1E917:
+		case 0x1E918:
+		case 0x1E919:
+		case 0x1E91A:
+		case 0x1E91B:
+		case 0x1E91C:
+		case 0x1E91D:
+		case 0x1E91E:
+		case 0x1E91F:
+		case 0x1E920:
+		case 0x1E921:
 			return true;
 
 		default:
@@ -31707,6 +30985,62 @@ bool uc32_oletter(uc32_t c) {
 	}
 }
 
+bool uc16_letter(const uc16_t *c) {
+    return uc32_letter(uc32_from_uc16(c));
+}
+
+bool uc16_case(const uc16_t *c, ucase_t ca) {
+    return uc32_case(uc32_from_uc16(c), ca);
+}
+
+bool uc16_lower(const uc16_t *c) {
+    return uc32_lower(uc32_from_uc16(c));
+}
+
+bool uc16_upper(const uc16_t *c) {
+    return uc32_upper(uc32_from_uc16(c));
+}
+
+bool uc16_title(const uc16_t *c) {
+    return uc32_title(uc32_from_uc16(c));
+}
+
+bool uc16_mod(const uc16_t *c) {
+    return uc32_mod(uc32_from_uc16(c));
+}
+
+bool uc16_oletter(const uc16_t *c) {
+    return uc32_oletter(uc32_from_uc16(c));
+}
+
+bool uc8_letter(const uc8_t *c) {
+    return uc32_letter(uc32_from_uc8(c));
+}
+
+bool uc8_case(const uc8_t *c, ucase_t ca) {
+    return uc32_case(uc32_from_uc8(c), ca);
+}
+
+bool uc8_lower(const uc8_t *c) {
+    return uc32_lower(uc32_from_uc8(c));
+}
+
+bool uc8_upper(const uc8_t *c) {
+    return uc32_upper(uc32_from_uc8(c));
+}
+
+bool uc8_title(const uc8_t *c) {
+    return uc32_title(uc32_from_uc8(c));
+}
+
+bool uc8_mod(const uc8_t *c) {
+    return uc32_mod(uc32_from_uc8(c));
+}
+
+bool uc8_oletter(const uc8_t *c) {
+    return uc32_oletter(uc32_from_uc8(c));
+}
+
 bool uc32_number(uc32_t c) {
     switch (c) {
 		case 0x00030:
@@ -34499,50 +33833,120 @@ bool uc32_punct(uc32_t c) {
 
 bool uc32_priv(uc32_t c) {
     return 0x00E000 <= c && c <= 0x00F8FF  // From BMP
-        || 0xF00000 <= c && c <= 0x10FFFF; // Two last pages merged
+        || 0xF00000 <= c && c <= 0x10FFFF; // Two last planes merged
 }
 
-bool uc32_srgt(uc32_t c) {
-	return 0xD800 <= c && c <= 0xDFFF;
+bool uc16_number(const uc16_t *c) {
+    return uc32_number(uc32_from_uc16(c));
 }
 
-bool uc32_srgt_low(uc32_t c) {
+bool uc16_cntrl(const uc16_t *c) {
+    return uc32_cntrl(uc32_from_uc16(c));
+}
+
+bool uc16_space(const uc16_t *c) {
+    return uc32_space(uc32_from_uc16(c));
+}
+
+bool uc16_wspace(const uc16_t *c) {
+    return uc32_wspace(uc32_from_uc16(c));
+}
+
+bool uc16_punct(const uc16_t *c) {
+    return uc32_punct(uc32_from_uc16(c));
+}
+
+bool uc16_priv(const uc16_t *c) {
+    return uc32_priv(uc32_from_uc16(c));
+}
+
+bool uc16_srgt(uc16_t c) {
+    return uc16_srgt_low(c) || uc16_srgt_high(c);
+}
+
+bool uc16_srgt_low(uc16_t c) {
 	return 0xD800 <= c && c <= 0xDBFF;
 }
 
-bool uc32_srgt_high(uc32_t c) {
+bool uc16_srgt_high(uc16_t c) {
 	return 0xDC00 <= c && c <= 0xDFFF;
+    
+}
+
+bool uc8_number(const uc8_t *c) {
+    return uc32_number(uc32_from_uc8(c));
+}
+
+bool uc8_cntrl(const uc8_t *c) {
+    return uc32_cntrl(uc32_from_uc8(c));
+}
+
+bool uc8_space(const uc8_t *c) {
+    return uc32_space(uc32_from_uc8(c));
+}
+
+bool uc8_wspace(const uc8_t *c) {
+    return uc32_wspace(uc32_from_uc8(c));
+}
+
+bool uc8_punct(const uc8_t *c) {
+    return uc32_punct(uc32_from_uc8(c));
+}
+
+bool uc8_priv(const uc8_t *c) {
+    return uc32_priv(uc32_from_uc8(c));
+}
+
+bool uc8_lead(uc8_t c) {
+    // 0xxx xxxx
+    if ((c & 0x80) == 0)
+        return 1;
+
+    // 110x xxxx
+    if ((c & 0xE0) == 0xC0)
+        return 2;
+
+    // 1110 xxxx
+    if ((c & 0xF0) == 0xE0)
+        return 3;
+
+    // 1111 0xxx
+    if ((c & 0xF7) == 0xF0)
+        return 4;
+
+    return 0;
+}
+
+bool uc8_trail(uc8_t c) {
+	return (c & 0xC0) == 0x80; // 10xx xxxx
 }
 
 unsigned uc32_len(uc32_t c) {
-	return 1;
+    return uc32_32_len(c);
 }
 
 unsigned uc32_n_len(uc32_t c, unsigned n) {
-	switch (n) {
-		case 1:
-			return uc32_8_len(c);
+    switch (n) {
+        case 1:
+            return uc32_8_len(c);
 
-		case 2:
-			return uc32_16_len(c);
+        case 2:
+            return uc32_16_len(c);
 
-		case 4:
-			return uc32_32_len(c);
+        case 4:
+            return uc32_32_len(c);
 
-		default:
-			assert(false);
-			return 0;
-	}
+        default:
+            assert(false);
+            return 0;
+    }
 }
 
 unsigned uc32_32_len(uc32_t c) {
-	return 1;
+    return 1;
 }
 
 unsigned uc32_16_len(uc32_t c) {
-	if (c > UMAX_CP)
-		return 0;
-
 	return c >= 0x10000 ? 2 : 1;
 }
 
@@ -34556,12 +33960,116 @@ unsigned uc32_8_len(uc32_t c) {
 	if (c <= 0xFFFF)
 		return 3;
 
-	if (c <= 0x10FFFF)
-		return 4;
+    return 4;
+}
 
-	return 0;
+unsigned uc16_len(uc16_t c) {
+    return uc16_16_len(c);
+}
+
+unsigned uc16_n_len(uc16_t c, unsigned n) {
+    switch (n) {
+        case 1:
+            return uc32_8_len(c);
+
+        case 2:
+            return uc32_16_len(c);
+
+        case 4:
+            return uc32_32_len(c);
+
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
+unsigned uc16_32_len(uc16_t c) {
+    return 1;
+}
+
+unsigned uc16_16_len(uc16_t c) {
+	return uc16_srgt_low(c) ? 2 : 1;
+}
+
+unsigned uc16_8_len(uc16_t c) {
+	if (c <= 0x7F)
+		return 1;
+
+	if (c <= 0x7FF)
+		return 2;
+
+	if (uc16_srgt_low(c))
+		return 3;
+
+	return 4;
+}
+
+unsigned uc8_len(uc8_t c) {
+    return uc8_8_len(c);
+}
+
+unsigned uc8_n_len(uc8_t c, unsigned n) {
+    switch (n) {
+        case 1:
+            return uc8_8_len(c);
+
+        case 2:
+            return uc8_16_len(c);
+
+        case 4:
+            return uc8_32_len(c);
+
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
+unsigned uc8_32_len(uc8_t c) {
+    return 1;
+}
+
+unsigned uc8_16_len(uc8_t c) {
+	return uc8_8_len(c) == 4 ? 2 : 1;
+}
+
+unsigned uc8_8_len(uc8_t c) {
+    unsigned len = uc8_lead(c);
+    return len ? len : 1;
 }
 
 bool uc32_valid(uc32_t c) {
-	return c <= UMAX_CP;
+    return c <= UMAX_CP;
+}
+
+unsigned uc16_valid(const uc16_t *c) {
+	assert(c);
+
+	uc16_t low = c[0];
+
+	if (uc16_srgt_high(low))
+		return 0;
+
+	if (!uc16_srgt_low(low))
+		return 1;
+
+	uc16_t high = c[1];
+
+	return uc16_srgt_high(high) ? 2 : 0;
+}
+
+unsigned uc8_valid(const uc8_t *c) {
+	assert(c);
+
+	unsigned len  = uc8_lead(c[0]);
+
+    if (!len)
+        return 0;
+
+	for (unsigned i = 1; i <= len; ++i) 
+		if (!uc8_trail(c[i]))
+			return 0;
+
+	return len;
 }

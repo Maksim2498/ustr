@@ -1851,7 +1851,7 @@ size_t uz_from_int_fmt_write_(void *cstr, unsigned n, uintmax_t i, bool s, const
     // Fill digit buffer
 
     do {
-        digits[digit_count++] = uc32_case_radix_from_val(i % fmt->radix, fmt->radix, fmt->digit_case);
+        digits[digit_count++] = uc32_case_radix_from_val(fmt->digit_case, fmt->radix, i % fmt->radix);
         i /= fmt->radix;
     } while (i);
 
@@ -2141,8 +2141,8 @@ size_t uz32_from_uz8n(uc32_t *to, const uc8_t *from, size_t n) {
     size_t len = 0;
 
     for (size_t i = 0; i < n;) {
-        len += uc32_from_uc8(to + len, from + i);
-        i   += uc8_len(from[i]);
+        to[len++] = uc32_from_uc8(from + i);
+        i        += uc8_len(from[i]);
     }
 
 	return len;
@@ -2161,8 +2161,8 @@ size_t uz32_from_uz16n(uc32_t *to, const uc16_t *from, size_t n) {
     size_t len = 0;
 
     for (size_t i = 0; i < n;) {
-        len += uc32_from_uc16(to + len, from + i);
-        i   += uc16_len(from[i]);
+        to[len++] = uc32_from_uc16(from + i);
+        i        += uc16_len(from[i]);
     }
 
 	return len;
@@ -3334,7 +3334,7 @@ void uz16_to_case(uc16_t *cstr, ucase_t ca) {
         return;
 
     while (*cstr)
-        cstr += func(cstr);
+        cstr += func(cstr, cstr);
 }
 
 void uz16n_to_case(uc16_t *cstr, size_t n, ucase_t ca) {
@@ -3346,7 +3346,7 @@ void uz16n_to_case(uc16_t *cstr, size_t n, ucase_t ca) {
         return;
 
     while (n--)
-        cstr += func(cstr);
+        cstr += func(cstr, cstr);
 }
 
 #define USTR_UZ8_TO_CASE_(case, from, to)        \
@@ -3406,7 +3406,7 @@ void uz8_to_case(const uc8_t *from, uc8_t *to, ucase_t ca) {
 
         uz8_copy_n(to + j, from + i, len);
 
-        unsigned to_len = func(to + j);
+        unsigned to_len = func(to + j, to + j);
 
         i += len;
         j += to_len;
@@ -3426,7 +3426,7 @@ void uz8n_to_case(const uc8_t *from, size_t n, uc8_t *to, ucase_t ca) {
 
         uz8_copy_n(to + j, from + i, len);
 
-        unsigned to_len = func(to + j);
+        unsigned to_len = func(to + j, to + j);
 
         i += len;
         j += to_len;

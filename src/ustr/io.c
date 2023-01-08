@@ -666,9 +666,7 @@ size_t ufreadln_us32_sep_e(FILE *file, us32_t *s, uc32_t sep, bool *error) {
 			c8[i] = c;
 		}
 
-		uc32_t c32;
-
-		uc32_from_uc8(&c32, c8);
+		uc32_t c32 = uc32_from_uc8(c8);
 
 		if (c32 == sep)
 			break;
@@ -715,7 +713,7 @@ size_t ufread_uc32(FILE *file, uc32_t *c32) {
 	if (!ufread_uc8_f(file, c8))
 		return 0;
 
-	uc32_from_uc8(c32, c8);
+	*c32 = uc32_from_uc8(c8);
 
 	return 1;
 }

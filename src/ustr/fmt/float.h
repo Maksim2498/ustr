@@ -23,6 +23,7 @@ static const struct uffmt UFFMT = {
 };
 
 struct uffmt uffmt_from_ufmt(const struct ufmt *fmt, va_list *args);
+
 bool uffmt_valid(const struct uffmt *fmt);
 
 #endif
