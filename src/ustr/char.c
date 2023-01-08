@@ -215,7 +215,7 @@ uc32_t uc32_lower_radix_from_val(uradix_t radix, unsigned val) {
     if (val <= 9)
         return '0' + val;
 
-    return 'a' + val;
+    return 'a' + val - 10;
 }
 
 uc32_t uc32_upper_radix_from_val(uradix_t radix, unsigned val) {
@@ -227,7 +227,7 @@ uc32_t uc32_upper_radix_from_val(uradix_t radix, unsigned val) {
     if (val <= 9)
         return '0' + val;
 
-    return 'A' + val;
+    return 'A' + val - 10;
 }
 
 uc16_t uc16_bin_from_val(unsigned val) {
