@@ -1,13 +1,19 @@
 #ifndef USTR_CONFIG_H
 #define USTR_CONFIG_H
 
+// Version
+
 #define USTR_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
 #define USTR_VERSION_MINOR @PROJECT_VERSION_MINOR@
 #define USTR_VERSION_PATCH @PROJECT_VERSION_PATCH@
 
+// Constants
+
 #define USTR_RAISE_FACTOR   @USTR_RAISE_FACTOR@
 #define USTR_INIT_CAP       @USTR_INIT_CAP@
 #define USTR_IO_BUFFER_SIZE @USTR_IO_BUFFER_SIZE@
+
+// Types
 
 #define uarg_int8_t   @INT_8_ARG_TYPE@
 #define uarg_uint8_t  @UINT_8_ARG_TYPE@
