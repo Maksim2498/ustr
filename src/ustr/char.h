@@ -225,22 +225,22 @@ bool uc8_trail(uc8_t c);
 // Length
 
 unsigned uc32_len(uc32_t c);
-unsigned uc32_n_len(uc32_t c, unsigned n);
-unsigned uc32_32_len(uc32_t c);
-unsigned uc32_16_len(uc32_t c);
-unsigned uc32_8_len(uc32_t c);
+unsigned uc32_len_n(uc32_t c, unsigned n);
+unsigned uc32_len_32(uc32_t c);
+unsigned uc32_len_16(uc32_t c);
+unsigned uc32_len_8(uc32_t c);
 
 unsigned uc16_len(uc16_t c);
-unsigned uc16_n_len(uc16_t c, unsigned n);
-unsigned uc16_32_len(uc16_t c);
-unsigned uc16_16_len(uc16_t c);
-unsigned uc16_8_len(uc16_t c);
+unsigned uc16_len_n(uc16_t c, unsigned n);
+unsigned uc16_len_32(uc16_t c);
+unsigned uc16_len_16(uc16_t c);
+unsigned uc16_len_8(uc16_t c);
 
 unsigned uc8_len(uc8_t c);
-unsigned uc8_n_len(uc8_t c, unsigned n);
-unsigned uc8_32_len(uc8_t c);
-unsigned uc8_16_len(uc8_t c);
-unsigned uc8_8_len(uc8_t c);
+unsigned uc8_len_n(uc8_t c, unsigned n);
+unsigned uc8_len_32(uc8_t c);
+unsigned uc8_len_16(uc8_t c);
+unsigned uc8_len_8(uc8_t c);
 
 // Valid
 

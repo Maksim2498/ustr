@@ -387,7 +387,7 @@ size_t ufprint_uz16n(FILE *file, const uc16_t *cstr, size_t n) {
 
 	size_t written = 0;
 
-	for (; written < n; written += uc16_32_len(cstr[written])) {
+	for (; written < n; written += uc16_len_32(cstr[written])) {
 		uc8_t    c8[4];
 		unsigned c8_len = uc8_from_uc16(c8, cstr + written);
 
@@ -721,7 +721,7 @@ size_t ufread_uc32(FILE *file, uc32_t *c32) {
 size_t ufread_uc16(FILE *file, uc16_t *c16) {
 	assert(c16);
 	uc32_t c32;
-	return ufread_uc32(file, &c32) && uc32_16_len(c32) == 1 ? uc16_from_uc32(c16, c32) : 0;
+	return ufread_uc32(file, &c32) && uc32_len_16(c32) == 1 ? uc16_from_uc32(c16, c32) : 0;
 }
 
 size_t ufread_uc16_f(FILE *file, uc16_t *c16) {

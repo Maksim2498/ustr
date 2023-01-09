@@ -245,16 +245,16 @@ void us32_free(us32_t *str) {
 	str->cap   = 0;
 }
 
-size_t us32_n_len_from(const us32_t *str, unsigned n, size_t from) {
+size_t us32_len_n_from(const us32_t *str, unsigned n, size_t from) {
 	switch (n) {
 		case 1:
-			return us32_8_len_from(str, from);
+			return us32_len_8_from(str, from);
 
 		case 2:
-			return us32_16_len_from(str, from);
+			return us32_len_16_from(str, from);
 
 		case 4:
-			return us32_32_len_from(str, from);
+			return us32_len_32_from(str, from);
 
 		default:
 			assert(false);
@@ -262,31 +262,31 @@ size_t us32_n_len_from(const us32_t *str, unsigned n, size_t from) {
 	}
 }
 
-size_t us32_32_len_from(const us32_t *str, size_t from) {
+size_t us32_len_32_from(const us32_t *str, size_t from) {
 	assert(us32_ebounds(str, from));
-	return uz32n_32_len(str->chars + from, str->len - from);
+	return uz32n_len_32(str->chars + from, str->len - from);
 }
 
-size_t us32_16_len_from(const us32_t *str, size_t from) {
+size_t us32_len_16_from(const us32_t *str, size_t from) {
 	assert(us32_ebounds(str, from));
-	return uz32n_16_len(str->chars + from, str->len - from);
+	return uz32n_len_16(str->chars + from, str->len - from);
 }
 
-size_t us32_8_len_from(const us32_t *str, size_t from) {
+size_t us32_len_8_from(const us32_t *str, size_t from) {
 	assert(us32_ebounds(str, from));
-	return uz32n_8_len(str->chars + from, str->len - from);
+	return uz32n_len_8(str->chars + from, str->len - from);
 }
 
-size_t us32_n_len_to(const us32_t *str, unsigned n, size_t to) {
+size_t us32_len_n_to(const us32_t *str, unsigned n, size_t to) {
 	switch (n) {
 		case 1:
-			return us32_8_len_to(str, to);
+			return us32_len_8_to(str, to);
 
 		case 2:
-			return us32_16_len_to(str, to);
+			return us32_len_16_to(str, to);
 
 		case 4:
-			return us32_32_len_to(str, to);
+			return us32_len_32_to(str, to);
 
 		default:
 			assert(false);
@@ -294,31 +294,31 @@ size_t us32_n_len_to(const us32_t *str, unsigned n, size_t to) {
 	}
 }
 
-size_t us32_32_len_to(const us32_t *str, size_t to) {
+size_t us32_len_32_to(const us32_t *str, size_t to) {
 	assert(us32_ebounds(str, to));
-	return uz32n_32_len(str->chars, to);
+	return uz32n_len_32(str->chars, to);
 }
 
-size_t us32_16_len_to(const us32_t *str, size_t to) {
+size_t us32_len_16_to(const us32_t *str, size_t to) {
 	assert(us32_ebounds(str, to));
-	return uz32n_16_len(str->chars, to);
+	return uz32n_len_16(str->chars, to);
 }
 
-size_t us32_8_len_to(const us32_t *str, size_t to) {
+size_t us32_len_8_to(const us32_t *str, size_t to) {
 	assert(us32_ebounds(str, to));
-	return uz32n_8_len(str->chars, to);
+	return uz32n_len_8(str->chars, to);
 }
 
-size_t us32_n_len_range(const us32_t *str, unsigned n, size_t from, size_t len) {
+size_t us32_len_n_range(const us32_t *str, unsigned n, size_t from, size_t len) {
 	switch (n) {
 		case 1:
-			return us32_8_len_range(str, from, len);
+			return us32_len_8_range(str, from, len);
 
 		case 2:
-			return us32_16_len_range(str, from, len);
+			return us32_len_16_range(str, from, len);
 
 		case 4:
-			return us32_32_len_range(str, from, len);
+			return us32_len_32_range(str, from, len);
 
 		default:
 			assert(false);
@@ -326,35 +326,35 @@ size_t us32_n_len_range(const us32_t *str, unsigned n, size_t from, size_t len) 
 	}
 }
 
-size_t us32_32_len_range(const us32_t *str, size_t from, size_t len) {
+size_t us32_len_32_range(const us32_t *str, size_t from, size_t len) {
 	assert(us32_ebounds_range(str, from, len));
-	return uz32n_32_len(str->chars + from, len);
+	return uz32n_len_32(str->chars + from, len);
 }
 
-size_t us32_16_len_range(const us32_t *str, size_t from, size_t len) {
+size_t us32_len_16_range(const us32_t *str, size_t from, size_t len) {
 	assert(us32_ebounds_range(str, from, len));
-	return uz32n_16_len(str->chars + from, len);
+	return uz32n_len_16(str->chars + from, len);
 }
 
-size_t us32_8_len_range(const us32_t *str, size_t from, size_t len) {
+size_t us32_len_8_range(const us32_t *str, size_t from, size_t len) {
 	assert(us32_ebounds_range(str, from, len));
-	return uz32n_8_len(str->chars + from, len);
+	return uz32n_len_8(str->chars + from, len);
 }
 
-size_t us32_n_len(const us32_t *str, unsigned n) {
-	return uz32n_n_len(US32_CEXPAND(str), n);
+size_t us32_len_n(const us32_t *str, unsigned n) {
+	return uz32n_len_n(US32_CEXPAND(str), n);
 }
 
-size_t us32_32_len(const us32_t *str) {
+size_t us32_len_32(const us32_t *str) {
 	return us32_len(str);
 }
 
-size_t us32_16_len(const us32_t *str) {
-	return uz32n_16_len(US32_CEXPAND(str));
+size_t us32_len_16(const us32_t *str) {
+	return uz32n_len_16(US32_CEXPAND(str));
 }
 
-size_t us32_8_len(const us32_t *str) {
-	return uz32n_8_len(US32_CEXPAND(str));
+size_t us32_len_8(const us32_t *str) {
+	return uz32n_len_8(US32_CEXPAND(str));
 }
 
 size_t us32_prepend(us32_t *str, const us32_t *another) {

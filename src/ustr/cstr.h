@@ -127,32 +127,32 @@ size_t uz8_from_uz32n(uc8_t *to, const uc32_t *from, size_t n);
 
 // Cross-UTF Len
 
-size_t uz32_n_len(const uc32_t *cstr, unsigned n);
-size_t uz32n_n_len(const uc32_t *cstr, size_t cstr_len, unsigned n);
-size_t uz32_8_len(const uc32_t *cstr);
-size_t uz32n_8_len(const uc32_t *cstr, size_t n);
-size_t uz32_16_len(const uc32_t *cstr);
-size_t uz32n_16_len(const uc32_t *cstr, size_t n);
-size_t uz32_32_len(const uc32_t *cstr);
-size_t uz32n_32_len(const uc32_t *cstr, size_t n);
+size_t uz32_len_n(const uc32_t *cstr, unsigned n);
+size_t uz32n_len_n(const uc32_t *cstr, size_t cstr_len, unsigned n);
+size_t uz32_len_8(const uc32_t *cstr);
+size_t uz32n_len_8(const uc32_t *cstr, size_t n);
+size_t uz32_len_16(const uc32_t *cstr);
+size_t uz32n_len_16(const uc32_t *cstr, size_t n);
+size_t uz32_len_32(const uc32_t *cstr);
+size_t uz32n_len_32(const uc32_t *cstr, size_t n);
 
-size_t uz16_n_len(const uc16_t *cstr, unsigned n);
-size_t uz16n_n_len(const uc16_t *cstr, size_t cstr_len, unsigned n);
-size_t uz16_8_len(const uc16_t *cstr);
-size_t uz16n_8_len(const uc16_t *cstr, size_t n);
-size_t uz16_16_len(const uc16_t *cstr);
-size_t uz16n_16_len(const uc16_t *cstr, size_t n);
-size_t uz16_32_len(const uc16_t *cstr);
-size_t uz16n_32_len(const uc16_t *cstr, size_t n);
+size_t uz16_len_n(const uc16_t *cstr, unsigned n);
+size_t uz16n_len_n(const uc16_t *cstr, size_t cstr_len, unsigned n);
+size_t uz16_len_8(const uc16_t *cstr);
+size_t uz16n_len_8(const uc16_t *cstr, size_t n);
+size_t uz16_len_16(const uc16_t *cstr);
+size_t uz16n_len_16(const uc16_t *cstr, size_t n);
+size_t uz16_len_32(const uc16_t *cstr);
+size_t uz16n_len_32(const uc16_t *cstr, size_t n);
 
-size_t uz8_n_len(const uc8_t *cstr, unsigned n);
-size_t uz8n_n_len(const uc8_t *cstr, size_t cstr_len, unsigned n);
-size_t uz8_8_len(const uc8_t *cstr);
-size_t uz8n_8_len(const uc8_t *cstr, size_t n);
-size_t uz8_16_len(const uc8_t *cstr);
-size_t uz8n_16_len(const uc8_t *cstr, size_t n);
-size_t uz8_32_len(const uc8_t *cstr);
-size_t uz8n_32_len(const uc8_t *cstr, size_t n);
+size_t uz8_len_n(const uc8_t *cstr, unsigned n);
+size_t uz8n_len_n(const uc8_t *cstr, size_t cstr_len, unsigned n);
+size_t uz8_len_8(const uc8_t *cstr);
+size_t uz8n_len_8(const uc8_t *cstr, size_t n);
+size_t uz8_len_16(const uc8_t *cstr);
+size_t uz8n_len_16(const uc8_t *cstr, size_t n);
+size_t uz8_len_32(const uc8_t *cstr);
+size_t uz8n_len_32(const uc8_t *cstr, size_t n);
 
 // Len
 

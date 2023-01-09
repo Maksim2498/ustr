@@ -74,25 +74,25 @@ void us32_free(us32_t *str);
 
 // Cross-UTF Len
 
-size_t us32_n_len_from(const us32_t *str, unsigned n, size_t from);
-size_t us32_32_len_from(const us32_t *str, size_t from);
-size_t us32_16_len_from(const us32_t *str, size_t from);
-size_t us32_8_len_from(const us32_t *str, size_t from);
+size_t us32_len_n_from(const us32_t *str, unsigned n, size_t from);
+size_t us32_len_32_from(const us32_t *str, size_t from);
+size_t us32_len_16_from(const us32_t *str, size_t from);
+size_t us32_len_8_from(const us32_t *str, size_t from);
 
-size_t us32_n_len_to(const us32_t *str, unsigned n, size_t to);
-size_t us32_32_len_to(const us32_t *str, size_t to);
-size_t us32_16_len_to(const us32_t *str, size_t to);
-size_t us32_8_len_to(const us32_t *str, size_t to);
+size_t us32_len_n_to(const us32_t *str, unsigned n, size_t to);
+size_t us32_len_32_to(const us32_t *str, size_t to);
+size_t us32_len_16_to(const us32_t *str, size_t to);
+size_t us32_len_8_to(const us32_t *str, size_t to);
 
-size_t us32_n_len_range(const us32_t *str, unsigned n, size_t from, size_t len);
-size_t us32_32_len_range(const us32_t *str, size_t from, size_t len);
-size_t us32_16_len_range(const us32_t *str, size_t from, size_t len);
-size_t us32_8_len_range(const us32_t *str, size_t from, size_t len);
+size_t us32_len_n_range(const us32_t *str, unsigned n, size_t from, size_t len);
+size_t us32_len_32_range(const us32_t *str, size_t from, size_t len);
+size_t us32_len_16_range(const us32_t *str, size_t from, size_t len);
+size_t us32_len_8_range(const us32_t *str, size_t from, size_t len);
 
-size_t us32_n_len(const us32_t *str, unsigned n);
-size_t us32_32_len(const us32_t *str);
-size_t us32_16_len(const us32_t *str);
-size_t us32_8_len(const us32_t *str);
+size_t us32_len_n(const us32_t *str, unsigned n);
+size_t us32_len_32(const us32_t *str);
+size_t us32_len_16(const us32_t *str);
+size_t us32_len_8(const us32_t *str);
 
 // Prepend
 

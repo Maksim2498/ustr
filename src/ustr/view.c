@@ -62,16 +62,16 @@ uv32_t uv32_from_uz32n(uc32_t *cstr, size_t n) {
     };
 }
 
-size_t uv32_n_len_from(uv32_t view, unsigned n, size_t from) {
+size_t uv32_len_n_from(uv32_t view, unsigned n, size_t from) {
     switch (n) {
         case 1:
-            return uv32_8_len_from(view, from);
+            return uv32_len_8_from(view, from);
 
         case 2:
-            return uv32_16_len_from(view, from);
+            return uv32_len_16_from(view, from);
 
         case 4:
-            return uv32_32_len_from(view, from);
+            return uv32_len_32_from(view, from);
 
         default:
             assert(false);
@@ -79,31 +79,31 @@ size_t uv32_n_len_from(uv32_t view, unsigned n, size_t from) {
     }
 }
 
-size_t uv32_32_len_from(uv32_t view, size_t from) {
+size_t uv32_len_32_from(uv32_t view, size_t from) {
     assert(uv32_ebounds(view, from));
-    return uz32n_32_len(uv32_cchars(view) + from, view.len - from);
+    return uz32n_len_32(uv32_cchars(view) + from, view.len - from);
 }
 
-size_t uv32_16_len_from(uv32_t view, size_t from) {
+size_t uv32_len_16_from(uv32_t view, size_t from) {
     assert(uv32_ebounds(view, from));
-    return uz32n_16_len(uv32_cchars(view) + from, view.len - from);
+    return uz32n_len_16(uv32_cchars(view) + from, view.len - from);
 }
 
-size_t uv32_8_len_from(uv32_t view, size_t from) {
+size_t uv32_len_8_from(uv32_t view, size_t from) {
     assert(uv32_ebounds(view, from));
-    return uz32n_8_len(uv32_cchars(view) + from, view.len - from);
+    return uz32n_len_8(uv32_cchars(view) + from, view.len - from);
 }
 
-size_t uv32_n_len_to(uv32_t view, unsigned n, size_t to) {
+size_t uv32_len_n_to(uv32_t view, unsigned n, size_t to) {
     switch (n) {
         case 1:
-            return uv32_8_len_to(view, to);
+            return uv32_len_8_to(view, to);
 
         case 2:
-            return uv32_16_len_to(view, to);
+            return uv32_len_16_to(view, to);
 
         case 4:
-            return uv32_32_len_to(view, to);
+            return uv32_len_32_to(view, to);
 
         default:
             assert(false);
@@ -111,31 +111,31 @@ size_t uv32_n_len_to(uv32_t view, unsigned n, size_t to) {
     }
 }
 
-size_t uv32_32_len_to(uv32_t view, size_t to) {
+size_t uv32_len_32_to(uv32_t view, size_t to) {
     assert(uv32_ebounds(view, to));
-    return uz32n_32_len(uv32_cchars(view), to);
+    return uz32n_len_32(uv32_cchars(view), to);
 }
 
-size_t uv32_16_len_to(uv32_t view, size_t to) {
+size_t uv32_len_16_to(uv32_t view, size_t to) {
     assert(uv32_ebounds(view, to));
-    return uz32n_16_len(uv32_cchars(view), to);
+    return uz32n_len_16(uv32_cchars(view), to);
 }
 
-size_t uv32_8_len_to(uv32_t view, size_t to) {
+size_t uv32_len_8_to(uv32_t view, size_t to) {
     assert(uv32_ebounds(view, to));
-    return uz32n_8_len(uv32_cchars(view), to);
+    return uz32n_len_8(uv32_cchars(view), to);
 }
 
-size_t uv32_n_len_range(uv32_t view, unsigned n, size_t from, size_t len) {
+size_t uv32_len_n_range(uv32_t view, unsigned n, size_t from, size_t len) {
     switch (n) {
         case 1:
-            return uv32_8_len_range(view, from, len);
+            return uv32_len_8_range(view, from, len);
 
         case 2:
-            return uv32_16_len_range(view, from, len);
+            return uv32_len_16_range(view, from, len);
 
         case 4:
-            return uv32_32_len_range(view, from, len);
+            return uv32_len_32_range(view, from, len);
 
         default:
             assert(false);
@@ -143,35 +143,35 @@ size_t uv32_n_len_range(uv32_t view, unsigned n, size_t from, size_t len) {
     }
 }
 
-size_t uv32_32_len_range(uv32_t view, size_t from, size_t len) {
+size_t uv32_len_32_range(uv32_t view, size_t from, size_t len) {
     assert(uv32_ebounds_range(view, from, len));
-    return uz32n_32_len(uv32_cchars(view) + from, len);
+    return uz32n_len_32(uv32_cchars(view) + from, len);
 }
 
-size_t uv32_16_len_range(uv32_t view, size_t from, size_t len) {
+size_t uv32_len_16_range(uv32_t view, size_t from, size_t len) {
     assert(uv32_ebounds_range(view, from, len));
-    return uz32n_16_len(uv32_cchars(view) + from, len);
+    return uz32n_len_16(uv32_cchars(view) + from, len);
 }
 
-size_t uv32_8_len_range(uv32_t view, size_t from, size_t len) {
+size_t uv32_len_8_range(uv32_t view, size_t from, size_t len) {
     assert(uv32_ebounds_range(view, from, len));
-    return uz32n_8_len(uv32_cchars(view) + from, len);
+    return uz32n_len_8(uv32_cchars(view) + from, len);
 }
 
-size_t uv32_n_len(uv32_t view, unsigned n) {
-    return uz32n_n_len(UV32_CEXPAND(view), n);
+size_t uv32_len_n(uv32_t view, unsigned n) {
+    return uz32n_len_n(UV32_CEXPAND(view), n);
 }
 
-size_t uv32_32_len(uv32_t view) {
+size_t uv32_len_32(uv32_t view) {
     return uv32_len(view);
 }
 
-size_t uv32_16_len(uv32_t view) {
-    return uz32n_16_len(UV32_CEXPAND(view));
+size_t uv32_len_16(uv32_t view) {
+    return uz32n_len_16(UV32_CEXPAND(view));
 }
 
-size_t uv32_8_len(uv32_t view) {
-    return uz32n_8_len(UV32_CEXPAND(view));
+size_t uv32_len_8(uv32_t view) {
+    return uz32n_len_8(UV32_CEXPAND(view));
 }
 
 void uv32_reverse(uv32_t view) {
