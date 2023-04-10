@@ -5,6 +5,7 @@
 #include "float.h"
 #include "fmt.h"
 #include "int.h"
+#include "plus.h"
 #include "radix.h"
 #include "type.h"
 

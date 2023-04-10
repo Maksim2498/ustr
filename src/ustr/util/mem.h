@@ -3,12 +3,20 @@
 
 #include <stddef.h>
 
-void *usafe_alloc(size_t size);
-void *usafe_realloc(void *block, size_t new_size);
-void usafe_free(void *block);
+#include <ustr/type/util/mem.h>
 
-extern _Thread_local void *(*ualloc)(size_t);
-extern _Thread_local void *(*urealloc)(void *, size_t);
-extern _Thread_local void (*ufree)(void *);
+#include "export.h"
+
+// Safe memory managment
+
+UEXPORT void *usafe_alloc(size_t size);
+UEXPORT void *usafe_realloc(void *block, size_t new_size);
+UEXPORT void usafe_free(void *block);
+
+// Library memory managment functions
+
+UEXPORT extern _Thread_local ualloc_t   ualloc;
+UEXPORT extern _Thread_local urealloc_t urealloc;
+UEXPORT extern _Thread_local ufree_t    ufree;
 
 #endif

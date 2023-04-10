@@ -4,4 +4,8 @@
 #define UNULLABLE
 #define UNOT_NULL
 
+#define UIN
+#define UOUT
+#define UINOUT
+
 #endif

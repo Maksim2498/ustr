@@ -2,22 +2,38 @@
 
 #include <assert.h>
 
-ucv32_t uradix_prefix(uradix_t radix, ucase_t ca) {
-    assert(uradix_valid(radix));
+#include "case.h"
 
-    switch (radix) {
-        case 2:
-            return UCASE_UPPER == ca ? UBIN_PREFIX_UPPER : UBIN_PREFIX_LOWER;
-
-        case 8:
-            return UCASE_UPPER == ca ? UOCT_PREFIX_UPPER : UOCT_PREFIX_LOWER;
-
-        case 16:
-            return UCASE_UPPER == ca ? UHEX_PREFIX_UPPER : UHEX_PREFIX_LOWER;
-        
-        default:
-            return ucv32_mk();
+#define URADIX_PREFIX_X(radix, ca, X)                         \
+    assert(uradix_valid(radix) && ucase_valid_output(ca));    \
+                                                              \
+    switch (radix) {                                          \
+        case 2:                                               \
+            return UCASE_UPPER == ca ? UBIN_PREFIX_UPPER_##X  \
+                                     : UBIN_PREFIX_LOWER_##X; \
+                                                              \
+        case 8:                                               \
+            return UCASE_UPPER == ca ? UOCT_PREFIX_UPPER_##X  \
+                                     : UOCT_PREFIX_LOWER_##X; \
+                                                              \
+        case 16:                                              \
+            return UCASE_UPPER == ca ? UHEX_PREFIX_UPPER_##X  \
+                                     : UHEX_PREFIX_LOWER_##X; \
+                                                              \
+        default:                                              \
+            return UCV##X##_NULL;                             \
     }
+
+ucv32_t uradix_prefix_32(uradix_t radix, ucase_t ca) {
+    URADIX_PREFIX_X(radix, ca, 32);
+}
+
+ucv16_t uradix_prefix_16(uradix_t radix, ucase_t ca) {
+    URADIX_PREFIX_X(radix, ca, 16);
+}
+
+ucv8_t uradix_prefix_8(uradix_t radix, ucase_t ca) {
+    URADIX_PREFIX_X(radix, ca, 8);
 }
 
 bool uradix_has_prefix(uradix_t radix) {

@@ -4,17 +4,44 @@
 
 #include "fmt/case.h"
 #include "fmt/radix.h"
+#include "util/endian.h"
+#include "encoding.h"
 
-uc32_t uc32_from_uc32(uc32_t from) {
+uc32_t uc32_from_bytes_imm(const void *from, uencoding_t encoding) {
+    assert(uencoding_valid(encoding));
+
+    switch (encoding) {
+        case UENCODING_UTF32LE:
+            return uc32_from_uc32le_imm(*(const uc32_t *) from);
+
+        case UENCODING_UTF32BE:
+            return uc32_from_uc32be_imm(*(const uc32_t *) from);
+
+        case UENCODING_UTF16LE:
+            return uc32_from_uc16le_imm(from);
+
+        case UENCODING_UTF16BE:
+            return uc32_from_uc16be_imm(from);
+
+        case UENCODING_UTF8:
+            return uc32_from_uc8_imm(from);
+
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
+uc32_t uc32_from_uc32_imm(uc32_t from) {
     return from;
 }
 
-uc32_t uc32_from_uc16(const uc16_t *from) {
+uc32_t uc32_from_uc16_imm(const uc16_t *from) {
 	assert(from);
 
 	uc16_t low = from[0];
 
-	if (!uc16_srgt_low(low))
+	if (!uc16_lsrgt(low))
         return low;
 
 	uc16_t high = from[1];
@@ -22,7 +49,7 @@ uc32_t uc32_from_uc16(const uc16_t *from) {
     return ((low  & 0x3FF) << 10 | (high & 0x3FF)) + 0x10000;
 }
 
-uc32_t uc32_from_uc8(const uc8_t *from) {
+uc32_t uc32_from_uc8_imm(const uc8_t *from) {
 	assert(from);
 
     switch (uc8_len(*from)) {
@@ -50,7 +77,517 @@ uc32_t uc32_from_uc8(const uc8_t *from) {
     }
 }
 
-unsigned uc16_from_uc32(UNULLABLE uc16_t *to, uc32_t from) {
+uc32_t uc32_from_uc32le_imm(uc32_t from) {
+    uendian_toggle_if_big(&from, sizeof from);
+	return from;
+}
+
+uc32_t uc32_from_uc16le_imm(const uc16_t *from) {
+    uc16_t from_he[2];
+    uc16_from_uc16le(from_he, from);
+	return uc32_from_uc16_imm(from_he);
+}
+
+uc32_t uc32_from_uc32be_imm(uc32_t from) {
+    uendian_toggle_if_little(&from, sizeof from);
+	return from;
+}
+
+uc32_t uc32_from_uc16be_imm(const uc16_t *from) {
+    uc16_t from_he[2];
+    uc16_from_uc16be(from_he, from);
+	return uc32_from_uc16_imm(from_he);
+}
+
+uc32_t uc32le_from_bytes_imm(const void *from, uencoding_t encoding) {
+    uc32_t c = uc32_from_bytes_imm(from, encoding);
+    uendian_toggle_if_big(&c, sizeof c);
+    return c;
+}
+
+uc32_t uc32le_from_uc32_imm(uc32_t from) {
+    uendian_toggle_if_big(&from, sizeof from);
+	return from;
+}
+
+uc32_t uc32le_from_uc16_imm(const uc16_t *from) {
+    uc32_t c = uc32_from_uc16_imm(from);
+    uendian_toggle_if_big(&c, sizeof c);
+	return c;
+}
+
+uc32_t uc32le_from_uc8_imm(const uc8_t *from) {
+    uc32_t c = uc32_from_uc8_imm(from);
+    uendian_toggle_if_big(&c, sizeof c);
+	return c;
+}
+
+uc32_t uc32le_from_uc32le_imm(uc32_t from) {
+	return from;
+}
+
+uc32_t uc32le_from_uc16le_imm(const uc16_t *from) {
+    uc16_t from_he[2];
+    uc16_from_uc16le(from_he, from);
+	return uc32le_from_uc16_imm(from_he);
+}
+
+uc32_t uc32le_from_uc32be_imm(uc32_t from) {
+    uendian_toggle(&from, sizeof from);
+	return from;
+}
+
+uc32_t uc32le_from_uc16be_imm(const uc16_t *from) {
+    uc16_t from_he[2];
+    uc16_from_uc16be(from_he, from);
+	return uc32le_from_uc16_imm(from_he);
+}
+
+uc32_t uc32be_from_bytes_imm(const void *from, uencoding_t encoding) {
+    uc32_t c = uc32_from_bytes_imm(from, encoding);
+    uendian_toggle_if_little(&c, sizeof c);
+    return c;
+}
+
+uc32_t uc32be_from_uc32_imm(uc32_t from) {
+    uendian_toggle_if_little(&from, sizeof from);
+	return from;
+}
+
+uc32_t uc32be_from_uc16_imm(const uc16_t *from) {
+    uc32_t c = uc32_from_uc16_imm(from);
+    uendian_toggle_if_little(&c, sizeof c);
+	return c;
+}
+
+uc32_t uc32be_from_uc8_imm(const uc8_t *from) {
+    uc32_t c = uc32_from_uc8_imm(from);
+    uendian_toggle_if_little(&c, sizeof c);
+	return c;
+}
+
+uc32_t uc32be_from_uc32le_imm(uc32_t from) {
+    uendian_toggle(&from, sizeof from);
+	return from;
+}
+
+uc32_t uc32be_from_uc16le_imm(const uc16_t *from) {
+    uc16_t from_he[2];
+    uc16_from_uc16le(from_he, from);
+	return uc32be_from_uc16_imm(from_he);
+}
+
+uc32_t uc32be_from_uc32be_imm(uc32_t from) {
+	return from;
+}
+
+uc32_t uc32be_from_uc16be_imm(const uc16_t *from) {
+    uc16_t from_he[2];
+    uc16_from_uc16be(from_he, from);
+	return uc32be_from_uc16_imm(from_he);
+}
+
+unsigned uc32_from_bytes(UNULLABLE UOUT uc32_t *to, const void *from, uencoding_t encoding) {
+    assert(from && uencoding_valid(encoding));
+
+    if (to) 
+        *to = uc32_from_bytes_imm(from, encoding);
+
+    return 1;
+}
+
+unsigned uc32_from_uc32(UNULLABLE UOUT uc32_t *to, const uc32_t *from) {
+    assert(from);
+
+    if (to)
+        *to = *from;
+
+    return 1;
+}
+
+unsigned uc32_from_uc16(UNULLABLE UOUT uc32_t *to, const uc16_t *from) {
+    assert(from);
+
+    if (to)
+        *to = uc32_from_uc16_imm(from);
+
+    return 1;
+}
+
+unsigned uc32_from_uc8(UNULLABLE UOUT uc32_t *to, const uc8_t *from) {
+    assert(from);
+
+    if (to)
+        *to = uc32_from_uc8_imm(from);
+
+    return 1;
+}
+
+unsigned uc32_from_uc32le(UNULLABLE UOUT uc32_t *to, const uc32_t *from) {
+    assert(from);
+ 
+    if (to)
+        *to = uc32_from_uc32le_imm(*from);
+
+	return 1;
+}
+
+unsigned uc32_from_uc16le(UNULLABLE UOUT uc32_t *to, const uc16_t *from) {
+    assert(from);
+ 
+    if (to)
+        *to = uc32_from_uc16le_imm(from);
+
+	return 1;
+}
+
+unsigned uc32_from_uc32be(UNULLABLE UOUT uc32_t *to, const uc32_t *from) {
+    assert(from);
+ 
+    if (to)
+        *to = uc32_from_uc32be_imm(*from);
+
+	return 1;
+}
+
+unsigned uc32_from_uc16be(UNULLABLE UOUT uc32_t *to, const uc16_t *from) {
+    assert(from);
+ 
+    if (to)
+        *to = uc32_from_uc16be_imm(from);
+
+	return 1;
+}
+
+unsigned uc32_from_bytesn(UNULLABLE UOUT uc32_t *to, const void *from, size_t from_size, uencoding_t encoding) {
+    assert(uencoding_valid(encoding));
+
+    switch (encoding) {
+        case UENCODING_UTF32LE:
+            return uc32_from_uc32len(to, from, from_size / sizeof(uc32_t));
+
+        case UENCODING_UTF32BE:
+            return uc32_from_uc32ben(to, from, from_size / sizeof(uc32_t));
+
+        case UENCODING_UTF16LE:
+            return uc32_from_uc16len(to, from, from_size / sizeof(uc16_t));
+
+        case UENCODING_UTF16BE:
+            return uc32_from_uc16ben(to, from, from_size / sizeof(uc16_t));
+
+        case UENCODING_UTF8:
+            return uc32_from_uc8n(to, from, from_size / sizeof(uc8_t));
+
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
+unsigned uc32_from_uc32n(UNULLABLE UOUT uc32_t *to, const uc32_t *from, size_t from_len) {
+    return from_len ? uc32_from_uc32(to, from) : 0;
+}
+
+unsigned uc32_from_uc16n(UNULLABLE UOUT uc32_t *to, const uc16_t *from, size_t from_len) {
+    assert(from);
+	return uc16_len(*from) <= from_len ? uc32_from_uc16(to, from) : 0;
+}
+
+unsigned uc32_from_uc8n(UNULLABLE UOUT uc32_t *to, const uc8_t *from, size_t from_len) {
+    assert(from);
+	return uc8_len(*from) <= from_len ? uc32_from_uc8(to, from) : 0;
+}
+
+unsigned uc32_from_uc32len(UNULLABLE UOUT uc32_t *to, const uc32_t *from, size_t from_len) {
+    return from_len ? uc32_from_uc32le(to, from) : 0;
+}
+
+unsigned uc32_from_uc16len(UNULLABLE UOUT uc32_t *to, const uc16_t *from, size_t from_len) {
+    assert(from);
+    uc16_t from_0_he = *from;
+    uendian_toggle_if_big(&from_0_he, sizeof(uc16_t));
+    return uc16_len(from_0_he) <= from_len ? uc32_from_uc16le(to, from) : 0;
+}
+
+unsigned uc32_from_uc32ben(UNULLABLE UOUT uc32_t *to, const uc32_t *from, size_t from_len) {
+    return from_len ? uc32_from_uc32be(to, from) : 0;
+}
+
+unsigned uc32_from_uc16ben(UNULLABLE UOUT uc32_t *to, const uc16_t *from, size_t from_len) {
+    assert(from);
+    uc16_t from_0_he = *from;
+    uendian_toggle_if_little(&from_0_he, sizeof(uc16_t));
+    return uc16_len(from_0_he) <= from_len ? uc32_from_uc16be(to, from) : 0;
+}
+
+unsigned uc32le_from_bytes(UNULLABLE UOUT uc32_t *to, const void *from, uencoding_t encoding) {
+    assert(from && uencoding_valid(encoding));
+
+    if (to)
+        *to = uc32le_from_bytes_imm(from, encoding);
+
+    return 1;
+}
+
+unsigned uc32le_from_uc32(UNULLABLE UOUT uc32_t *to, const uc32_t *from) {
+    assert(from);
+ 
+    if (to)
+        *to = uc32le_from_uc32_imm(*from);
+
+	return 1;
+}
+
+unsigned uc32le_from_uc16(UNULLABLE UOUT uc32_t *to, const uc16_t *from) {
+    assert(from);
+ 
+    if (to)
+        *to = uc32le_from_uc16_imm(from);
+
+	return 1;
+}
+
+unsigned uc32le_from_uc8(UNULLABLE UOUT uc32_t *to, const uc8_t *from) {
+    assert(from);
+ 
+    if (to)
+        *to = uc32le_from_uc8_imm(from);
+
+	return 1;
+}
+
+unsigned uc32le_from_uc32le(UNULLABLE UOUT uc32_t *to, const uc32_t *from) {
+    assert(from);
+ 
+    if (to)
+        *to = uc32le_from_uc32le_imm(*from);
+
+	return 1;
+}
+
+unsigned uc32le_from_uc16le(UNULLABLE UOUT uc32_t *to, const uc16_t *from) {
+    assert(from);
+ 
+    if (to)
+        *to = uc32le_from_uc16le_imm(from);
+
+	return 1;
+}
+
+unsigned uc32le_from_uc32be(UNULLABLE UOUT uc32_t *to, const uc32_t *from) {
+    assert(from);
+ 
+    if (to)
+        *to = uc32le_from_uc32be_imm(*from);
+
+	return 1;
+}
+
+unsigned uc32le_from_uc16be(UNULLABLE UOUT uc32_t *to, const uc16_t *from) {
+    assert(from);
+ 
+    if (to)
+        *to = uc32le_from_uc16be_imm(from);
+
+	return 1;
+}
+
+unsigned uc32le_from_bytesn(UNULLABLE UOUT uc32_t *to, const void *from, size_t from_size, uencoding_t encoding) {
+    assert(uencoding_valid(encoding));
+
+    switch (encoding) {
+        case UENCODING_UTF32LE:
+            return uc32le_from_uc32len(to, from, from_size / sizeof(uc32_t));
+
+        case UENCODING_UTF32BE:
+            return uc32le_from_uc32ben(to, from, from_size / sizeof(uc32_t));
+
+        case UENCODING_UTF16LE:
+            return uc32le_from_uc16len(to, from, from_size / sizeof(uc16_t));
+
+        case UENCODING_UTF16BE:
+            return uc32le_from_uc16ben(to, from, from_size / sizeof(uc16_t));
+
+        case UENCODING_UTF8:
+            return uc32le_from_uc8n(to, from, from_size / sizeof(uc8_t));
+
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
+unsigned uc32le_from_uc32n(UNULLABLE UOUT uc32_t *to, const uc32_t *from, size_t from_len) {
+    return from_len ? uc32le_from_uc32(to, from) : 0;
+}
+
+unsigned uc32le_from_uc16n(UNULLABLE UOUT uc32_t *to, const uc16_t *from, size_t from_len) {
+    assert(from);
+	return uc16_len(*from) <= from_len ? uc32le_from_uc16(to, from) : 0;
+}
+
+unsigned uc32le_from_uc8n(UNULLABLE UOUT uc32_t *to, const uc8_t *from, size_t from_len) {
+    assert(from);
+	return uc8_len(*from) <= from_len ? uc32le_from_uc8(to, from) : 0;
+}
+
+unsigned uc32le_from_uc32len(UNULLABLE UOUT uc32_t *to, const uc32_t *from, size_t from_len) {
+    return from_len ? uc32le_from_uc32le(to, from) : 0;
+}
+
+unsigned uc32le_from_uc16len(UNULLABLE UOUT uc32_t *to, const uc16_t *from, size_t from_len) {
+    assert(from);
+    uc16_t from_0_he = *from;
+    uendian_toggle_if_big(&from_0_he, sizeof(uc16_t));
+    return uc16_len(from_0_he) <= from_len ? uc32le_from_uc16le(to, from) : 0;
+}
+
+unsigned uc32le_from_uc32ben(UNULLABLE UOUT uc32_t *to, const uc32_t *from, size_t from_len) {
+    return from_len ? uc32le_from_uc32be(to, from) : 0;
+}
+
+unsigned uc32le_from_uc16ben(UNULLABLE UOUT uc32_t *to, const uc16_t *from, size_t from_len) {
+    assert(from);
+    uc16_t from_0_he = *from;
+    uendian_toggle_if_little(&from_0_he, sizeof(uc16_t));
+    return uc16_len(from_0_he) <= from_len ? uc32le_from_uc16be(to, from) : 0;
+}
+
+unsigned uc32be_from_bytes(UNULLABLE UOUT uc32_t *to, const void *from, uencoding_t encoding) {
+    assert(from && uencoding_valid(encoding));
+
+    if (to)
+        *to = uc32be_from_bytes_imm(from, encoding);
+
+    return 1;
+}
+
+unsigned uc32be_from_uc32(UNULLABLE UOUT uc32_t *to, const uc32_t *from) {
+    assert(from);
+ 
+    if (to)
+        *to = uc32be_from_uc32_imm(*from);
+
+	return 1;
+
+}
+
+unsigned uc32be_from_uc16(UNULLABLE UOUT uc32_t *to, const uc16_t *from) {
+    assert(from);
+ 
+    if (to)
+        *to = uc32be_from_uc16_imm(from);
+
+	return 1;
+}
+
+unsigned uc32be_from_uc8(UNULLABLE UOUT uc32_t *to, const uc8_t *from) {
+    assert(from);
+ 
+    if (to)
+        *to = uc32be_from_uc8_imm(from);
+
+	return 1;
+}
+
+unsigned uc32be_from_uc32le(UNULLABLE UOUT uc32_t *to, const uc32_t *from) {
+    assert(from);
+ 
+    if (to)
+        *to = uc32be_from_uc32le_imm(*from);
+
+	return 1;
+}
+
+unsigned uc32be_from_uc16le(UNULLABLE UOUT uc32_t *to, const uc16_t *from) {
+    assert(from);
+ 
+    if (to)
+        *to = uc32be_from_uc16le_imm(from);
+
+	return 1;
+}
+
+unsigned uc32be_from_uc32be(UNULLABLE UOUT uc32_t *to, const uc32_t *from) {
+    assert(from);
+ 
+    if (to)
+        *to = uc32be_from_uc32be_imm(*from);
+
+	return 1;
+}
+
+unsigned uc32be_from_uc16be(UNULLABLE UOUT uc32_t *to, const uc16_t *from) {
+    assert(from);
+ 
+    if (to)
+        *to = uc32be_from_uc16be_imm(from);
+
+	return 1;
+}
+
+unsigned uc32be_from_bytesn(UNULLABLE UOUT uc32_t *to, const void *from, size_t from_size, uencoding_t encoding) {
+    assert(uencoding_valid(encoding));
+
+    switch (encoding) {
+        case UENCODING_UTF32LE:
+            return uc32be_from_uc32len(to, from, from_size / sizeof(uc32_t));
+
+        case UENCODING_UTF32BE:
+            return uc32be_from_uc32ben(to, from, from_size / sizeof(uc32_t));
+
+        case UENCODING_UTF16LE:
+            return uc32be_from_uc16len(to, from, from_size / sizeof(uc16_t));
+
+        case UENCODING_UTF16BE:
+            return uc32be_from_uc16ben(to, from, from_size / sizeof(uc16_t));
+
+        case UENCODING_UTF8:
+            return uc32be_from_uc8n(to, from, from_size / sizeof(uc8_t));
+
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
+unsigned uc32be_from_uc32n(UNULLABLE UOUT uc32_t *to, const uc32_t *from, size_t from_len) {
+    return from_len ? uc32be_from_uc32(to, from) : 0;
+}
+
+unsigned uc32be_from_uc16n(UNULLABLE UOUT uc32_t *to, const uc16_t *from, size_t from_len) {
+    assert(from);
+	return uc16_len(*from) <= from_len ? uc32be_from_uc16(to, from) : 0;
+}
+
+unsigned uc32be_from_uc8n(UNULLABLE UOUT uc32_t *to, const uc8_t *from, size_t from_len) {
+    assert(from);
+	return uc8_len(*from) <= from_len ? uc32be_from_uc8(to, from) : 0;
+}
+
+unsigned uc32be_from_uc32len(UNULLABLE UOUT uc32_t *to, const uc32_t *from, size_t from_len) {
+    return from_len ? uc32be_from_uc32le(to, from) : 0;
+}
+
+unsigned uc32be_from_uc16len(UNULLABLE UOUT uc32_t *to, const uc16_t *from, size_t from_len) {
+    assert(from);
+    uc16_t from_0_he = *from;
+    uendian_toggle_if_big(&from_0_he, sizeof(uc16_t));
+    return uc16_len(from_0_he) <= from_len ? uc32be_from_uc16le(to, from) : 0;
+}
+
+unsigned uc32be_from_uc32ben(UNULLABLE UOUT uc32_t *to, const uc32_t *from, size_t from_len) {
+    return from_len ? uc32be_from_uc32be(to, from) : 0;
+}
+
+unsigned uc32be_from_uc16ben(UNULLABLE UOUT uc32_t *to, const uc16_t *from, size_t from_len) {
+    assert(from);
+    uc16_t from_0_he = *from;
+    uendian_toggle_if_little(&from_0_he, sizeof(uc16_t));
+    return uc16_len(from_0_he) <= from_len ? uc32be_from_uc16be(to, from) : 0;
+}
+
+unsigned uc16_from_uc32_imm(UNULLABLE UOUT uc16_t *to, uc32_t from) {
 	if (from < 0x10000) {
         if (to)
             *to = from;
@@ -71,7 +608,79 @@ unsigned uc16_from_uc32(UNULLABLE uc16_t *to, uc32_t from) {
     return 2;
 }
 
-unsigned uc16_from_uc16(UNULLABLE uc16_t *to, const uc16_t *from) {
+unsigned uc16_from_uc32le_imm(UNULLABLE UOUT uc16_t *to, uc32_t from) {
+    return uc16_from_uc32_imm(to, uc32_from_uc32le_imm(from));
+}
+
+unsigned uc16_from_uc32be_imm(UNULLABLE UOUT uc16_t *to, uc32_t from) {
+    return uc16_from_uc32_imm(to, uc32_from_uc32be_imm(from));
+}
+
+unsigned uc16le_from_uc32_imm(UNULLABLE UOUT uc16_t *to, uc32_t from) {
+    unsigned len = uc16_from_uc32_imm(to, from);
+
+    if (to)
+        uendian_toggle_array_if_big(to, len, sizeof(uc16_t));
+
+    return len;
+}
+
+unsigned uc16le_from_uc32le_imm(UNULLABLE UOUT uc16_t *to, uc32_t from) {
+    return uc16le_from_uc32_imm(to, uc32le_from_uc32_imm(from));
+}
+
+unsigned uc16le_from_uc32be_imm(UNULLABLE UOUT uc16_t *to, uc32_t from) {
+    return uc16le_from_uc32_imm(to, uc32be_from_uc32_imm(from));
+}
+
+unsigned uc16be_from_uc32_imm(UNULLABLE UOUT uc16_t *to, uc32_t from) {
+    unsigned len = uc16_from_uc32_imm(to, from);
+
+    if (to)
+        uendian_toggle_array_if_little(to, len, sizeof(uc16_t));
+
+    return len;
+}
+
+unsigned uc16be_from_uc32le_imm(UNULLABLE UOUT uc16_t *to, uc32_t from) {
+    return uc16be_from_uc32_imm(to, uc32le_from_uc32_imm(from));
+}
+
+unsigned uc16be_from_uc32be_imm(UNULLABLE UOUT uc16_t *to, uc32_t from) {
+    return uc16be_from_uc32_imm(to, uc32be_from_uc32_imm(from));
+}
+
+unsigned uc16_from_bytes(UNULLABLE UOUT uc16_t *to, const void *from, uencoding_t encoding) {
+    assert(uencoding_valid(encoding));
+
+    switch (encoding) {
+        case UENCODING_UTF32LE:
+            return uc16_from_uc32le(to, from);
+
+        case UENCODING_UTF32BE:
+            return uc16_from_uc32be(to, from);
+
+        case UENCODING_UTF16LE:
+            return uc16_from_uc16le(to, from);
+
+        case UENCODING_UTF16BE:
+            return uc16_from_uc16be(to, from);
+
+        case UENCODING_UTF8:
+            return uc16_from_uc8(to, from);
+
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
+unsigned uc16_from_uc32(UNULLABLE UOUT uc16_t *to, const uc32_t *from) {
+    assert(from);
+    return uc16_from_uc32_imm(to, *from);
+}
+
+unsigned uc16_from_uc16(UNULLABLE UOUT uc16_t *to, const uc16_t *from) {
     assert(from);
 
     unsigned len = uc16_len(*from);
@@ -86,11 +695,445 @@ unsigned uc16_from_uc16(UNULLABLE uc16_t *to, const uc16_t *from) {
     return len;
 }
 
-unsigned uc16_from_uc8(UNULLABLE uc16_t *to, const uc8_t *from) {
-	return uc16_from_uc32(to, uc32_from_uc8(from));
+unsigned uc16_from_uc8(UNULLABLE UOUT uc16_t *to, const uc8_t *from) {
+	return uc16_from_uc32_imm(to, uc32_from_uc8_imm(from));
 }
 
-unsigned uc8_from_uc32(UNULLABLE uc8_t *to, uc32_t from) {
+unsigned uc16_from_uc32le(UNULLABLE UOUT uc16_t *to, const uc32_t *from) {
+    assert(from);
+    return uc16_from_uc32le_imm(to, *from);
+}
+
+unsigned uc16_from_uc16le(UNULLABLE UOUT uc16_t *to, const uc16_t *from) {
+    assert(from);
+
+    uc16_t from_0_he = *from;
+
+    uendian_toggle_if_big(&from_0_he, sizeof(uc16_t));
+
+    unsigned len = uc16_len(from_0_he);
+
+    if (to) {
+        to[0] = from_0_he;
+
+        if (len == 2) {
+            to[1] = from[1];
+            uendian_toggle_if_big(to + 1, sizeof(uc16_t));
+        }
+    }
+
+    return len;
+}
+
+unsigned uc16_from_uc32be(UNULLABLE UOUT uc16_t *to, const uc32_t *from) {
+    assert(from);
+    return uc16_from_uc32be_imm(to, *from);
+}
+
+unsigned uc16_from_uc16be(UNULLABLE UOUT uc16_t *to, const uc16_t *from) {
+    assert(from);
+
+    uc16_t from_0_he = *from;
+
+    uendian_toggle_if_little(&from_0_he, sizeof(uc16_t));
+
+    unsigned len = uc16_len(from_0_he);
+
+    if (to) {
+        to[0] = from_0_he;
+
+        if (len == 2) {
+            to[1] = from[1];
+            uendian_toggle_if_little(to + 1, sizeof(uc16_t));
+        }
+    }
+
+    return len;
+}
+
+unsigned uc16_from_bytesn(UNULLABLE UOUT uc16_t *to, const void *from, size_t from_size, uencoding_t encoding) {
+    assert(uencoding_valid(encoding));
+
+    switch (encoding) {
+        case UENCODING_UTF32LE:
+            return uc16_from_uc32len(to, from, from_size / sizeof(uc32_t));
+
+        case UENCODING_UTF32BE:
+            return uc16_from_uc32ben(to, from, from_size / sizeof(uc32_t));
+
+        case UENCODING_UTF16LE:
+            return uc16_from_uc16len(to, from, from_size / sizeof(uc16_t));
+
+        case UENCODING_UTF16BE:
+            return uc16_from_uc16ben(to, from, from_size / sizeof(uc16_t));
+
+        case UENCODING_UTF8:
+            return uc16_from_uc8n(to, from, from_size / sizeof(uc8_t));
+
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
+unsigned uc16_from_uc32n(UNULLABLE UOUT uc16_t *to, const uc32_t *from, size_t from_len) {
+    return from_len ? uc16_from_uc32(to, from) : 0;
+}
+
+unsigned uc16_from_uc16n(UNULLABLE UOUT uc16_t *to, const uc16_t *from, size_t from_len) {
+    assert(from);
+	return uc16_len(*from) <= from_len ? uc16_from_uc16(to, from) : 0;
+}
+
+unsigned uc16_from_uc8n(UNULLABLE UOUT uc16_t *to, const uc8_t *from, size_t from_len) {
+    assert(from);
+	return uc8_len(*from) <= from_len ? uc16_from_uc8(to, from) : 0;
+}
+
+unsigned uc16_from_uc32len(UNULLABLE UOUT uc16_t *to, const uc32_t *from, size_t from_len) {
+    return from_len ? uc16_from_uc32le(to, from) : 0;
+}
+
+unsigned uc16_from_uc16len(UNULLABLE UOUT uc16_t *to, const uc16_t *from, size_t from_len) {
+    assert(from);
+    uc16_t from_0_he = *from;
+    uendian_toggle_if_big(&from_0_he, sizeof(uc16_t));
+    return uc16_len(from_0_he) <= from_len ? uc16_from_uc16le(to, from) : 0;
+}
+
+unsigned uc16_from_uc32ben(UNULLABLE UOUT uc16_t *to, const uc32_t *from, size_t from_len) {
+    return from_len ? uc16_from_uc32be(to, from) : 0;
+}
+
+unsigned uc16_from_uc16ben(UNULLABLE UOUT uc16_t *to, const uc16_t *from, size_t from_len) {
+    assert(from);
+    uc16_t from_0_he = *from;
+    uendian_toggle_if_little(&from_0_he, sizeof(uc16_t));
+    return uc16_len(from_0_he) <= from_len ? uc16_from_uc16be(to, from) : 0;
+}
+
+unsigned uc16le_from_bytes(UNULLABLE UOUT uc16_t *to, const void *from, uencoding_t encoding) {
+    assert(uencoding_valid(encoding));
+
+    switch (encoding) {
+        case UENCODING_UTF32LE:
+            return uc16le_from_uc32le(to, from);
+
+        case UENCODING_UTF32BE:
+            return uc16le_from_uc32be(to, from);
+
+        case UENCODING_UTF16LE:
+            return uc16le_from_uc16le(to, from);
+
+        case UENCODING_UTF16BE:
+            return uc16le_from_uc16be(to, from);
+
+        case UENCODING_UTF8:
+            return uc16le_from_uc8(to, from);
+
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
+unsigned uc16le_from_uc32(UNULLABLE UOUT uc16_t *to, const uc32_t *from) {
+    assert(from);
+	return uc16le_from_uc32_imm(to, *from);
+}
+
+unsigned uc16le_from_uc16(UNULLABLE UOUT uc16_t *to, const uc16_t *from) {
+    unsigned len = uc16_from_uc16(to, from);
+
+    if (to)
+        uendian_toggle_array_if_big(to, len, sizeof(uc16_t));
+
+    return len;
+}
+
+unsigned uc16le_from_uc8(UNULLABLE UOUT uc16_t *to, const uc8_t *from) {
+    unsigned len = uc16_from_uc8(to, from);
+
+    if (to)
+        uendian_toggle_array_if_big(to, len, sizeof(uc16_t));
+
+    return len;
+}
+
+unsigned uc16le_from_uc32le(UNULLABLE UOUT uc16_t *to, const uc32_t *from) {
+    assert(from);
+	return uc16le_from_uc32le_imm(to, *from);
+}
+
+unsigned uc16le_from_uc16le(UNULLABLE UOUT uc16_t *to, const uc16_t *from) {
+    assert(from);
+
+    uc16_t from_0_he = *from;
+
+    uendian_toggle_if_big(&from_0_he, sizeof(uc16_t));
+
+    unsigned len = uc16_len(from_0_he);
+
+    if (to) {
+        to[0] = from[0];
+
+        if (len == 2)
+            to[1] = from[1];
+    }
+
+	return len;
+}
+
+unsigned uc16le_from_uc32be(UNULLABLE UOUT uc16_t *to, const uc32_t *from) {
+    assert(from);
+	return uc16le_from_uc32be_imm(to, *from);
+}
+
+unsigned uc16le_from_uc16be(UNULLABLE UOUT uc16_t *to, const uc16_t *from) {
+    assert(from);
+
+    uc16_t from_0_he = *from;
+
+    uendian_toggle_if_little(&from_0_he, sizeof(uc16_t));
+
+    unsigned len = uc16_len(from_0_he);
+
+    if (to) {
+        to[0] = from_0_he;
+        uendian_toggle_if_big(to, sizeof(uc16_t));
+
+        if (len == 2) {
+            to[1] = from[1];
+            uendian_toggle(to + 1, sizeof(uc16_t));
+        }
+    }
+
+    return len;
+}
+
+unsigned uc16le_from_bytesn(UNULLABLE UOUT uc16_t *to, const void *from, size_t from_size, uencoding_t encoding) {
+    assert(uencoding_valid(encoding));
+
+    switch (encoding) {
+        case UENCODING_UTF32LE:
+            return uc16le_from_uc32len(to, from, from_size / sizeof(uc32_t));
+
+        case UENCODING_UTF32BE:
+            return uc16le_from_uc32ben(to, from, from_size / sizeof(uc32_t));
+
+        case UENCODING_UTF16LE:
+            return uc16le_from_uc16len(to, from, from_size / sizeof(uc16_t));
+
+        case UENCODING_UTF16BE:
+            return uc16le_from_uc16ben(to, from, from_size / sizeof(uc16_t));
+
+        case UENCODING_UTF8:
+            return uc16le_from_uc8n(to, from, from_size / sizeof(uc8_t));
+
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
+unsigned uc16le_from_uc32n(UNULLABLE UOUT uc16_t *to, const uc32_t *from, size_t from_len) {
+    return from_len ? uc16le_from_uc32(to, from) : 0;
+}
+
+unsigned uc16le_from_uc16n(UNULLABLE UOUT uc16_t *to, const uc16_t *from, size_t from_len) {
+    assert(from);
+	return uc16_len(*from) <= from_len ? uc16le_from_uc16(to, from) : 0;
+}
+
+unsigned uc16le_from_uc8n(UNULLABLE UOUT uc16_t *to, const uc8_t *from, size_t from_len) {
+    assert(from);
+	return uc8_len(*from) <= from_len ? uc16le_from_uc8(to, from) : 0;
+}
+
+unsigned uc16le_from_uc32len(UNULLABLE UOUT uc16_t *to, const uc32_t *from, size_t from_len) {
+    return from_len ? uc16le_from_uc32le(to, from) : 0;
+}
+
+unsigned uc16le_from_uc16len(UNULLABLE UOUT uc16_t *to, const uc16_t *from, size_t from_len) {
+    assert(from);
+    uc16_t from_0_he = *from;
+    uendian_toggle_if_big(&from_0_he, sizeof(uc16_t));
+    return uc16_len(from_0_he) <= from_len ? uc16le_from_uc16le(to, from) : 0;
+}
+
+unsigned uc16le_from_uc32ben(UNULLABLE UOUT uc16_t *to, const uc32_t *from, size_t from_len) {
+    return from_len ? uc16le_from_uc32be(to, from) : 0;
+}
+
+unsigned uc16le_from_uc16ben(UNULLABLE UOUT uc16_t *to, const uc16_t *from, size_t from_len) {
+    assert(from);
+    uc16_t from_0_he = *from;
+    uendian_toggle_if_little(&from_0_he, sizeof(uc16_t));
+    return uc16_len(from_0_he) <= from_len ? uc16le_from_uc16be(to, from) : 0;
+}
+
+unsigned uc16be_from_bytes(UNULLABLE UOUT uc16_t *to, const void *from, uencoding_t encoding) {
+    assert(uencoding_valid(encoding));
+
+    switch (encoding) {
+        case UENCODING_UTF32LE:
+            return uc16be_from_uc32le(to, from);
+
+        case UENCODING_UTF32BE:
+            return uc16be_from_uc32be(to, from);
+
+        case UENCODING_UTF16LE:
+            return uc16be_from_uc16le(to, from);
+
+        case UENCODING_UTF16BE:
+            return uc16be_from_uc16be(to, from);
+
+        case UENCODING_UTF8:
+            return uc16be_from_uc8(to, from);
+
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
+unsigned uc16be_from_uc32(UNULLABLE UOUT uc16_t *to, const uc32_t *from) {
+    assert(from);
+	return uc16be_from_uc32_imm(to, *from);
+}
+
+unsigned uc16be_from_uc16(UNULLABLE UOUT uc16_t *to, const uc16_t *from) {
+    unsigned len = uc16_from_uc16(to, from);
+
+    if (to)
+        uendian_toggle_array_if_little(to, len, sizeof(uc16_t));
+
+    return len;
+}
+
+unsigned uc16be_from_uc8(UNULLABLE UOUT uc16_t *to, const uc8_t *from) {
+    unsigned len = uc16_from_uc8(to, from);
+
+    if (to)
+        uendian_toggle_array_if_little(to, len, sizeof(uc16_t));
+
+    return len;
+}
+
+unsigned uc16be_from_uc32le(UNULLABLE UOUT uc16_t *to, const uc32_t *from) {
+    assert(from);
+	return uc16be_from_uc32le_imm(to, *from);
+
+}
+
+unsigned uc16be_from_uc16le(UNULLABLE UOUT uc16_t *to, const uc16_t *from) {
+    assert(from);
+
+    uc16_t from_0_he = *from;
+
+    uendian_toggle_if_big(&from_0_he, sizeof(uc16_t));
+
+    unsigned len = uc16_len(from_0_he);
+
+    if (to) {
+        to[0] = from_0_he;
+        uendian_toggle_if_little(to, sizeof(uc16_t));
+
+        if (len == 2) {
+            to[1] = from[1];
+            uendian_toggle(to + 1, sizeof(uc16_t));
+        }
+    }
+
+    return len;
+}
+
+unsigned uc16be_from_uc32be(UNULLABLE UOUT uc16_t *to, const uc32_t *from) {
+    assert(from);
+	return uc16be_from_uc32be_imm(to, *from);
+}
+
+unsigned uc16be_from_uc16be(UNULLABLE UOUT uc16_t *to, const uc16_t *from) {
+    assert(from);
+
+    uc16_t from_0_he = *from;
+
+    uendian_toggle_if_little(&from_0_he, sizeof(uc16_t));
+
+    unsigned len = uc16_len(from_0_he);
+
+    if (to) {
+        to[0] = from[0];
+
+        if (len == 2)
+            to[1] = from[1];
+    }
+
+	return len;
+}
+
+unsigned uc16be_from_bytesn(UNULLABLE UOUT uc16_t *to, const void *from, size_t from_size, uencoding_t encoding) {
+    assert(uencoding_valid(encoding));
+
+    switch (encoding) {
+        case UENCODING_UTF32LE:
+            return uc16be_from_uc32len(to, from, from_size / sizeof(uc32_t));
+
+        case UENCODING_UTF32BE:
+            return uc16be_from_uc32ben(to, from, from_size / sizeof(uc32_t));
+
+        case UENCODING_UTF16LE:
+            return uc16be_from_uc16len(to, from, from_size / sizeof(uc16_t));
+
+        case UENCODING_UTF16BE:
+            return uc16be_from_uc16ben(to, from, from_size / sizeof(uc16_t));
+
+        case UENCODING_UTF8:
+            return uc16be_from_uc8n(to, from, from_size / sizeof(uc8_t));
+
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
+unsigned uc16be_from_uc32n(UNULLABLE UOUT uc16_t *to, const uc32_t *from, size_t from_len) {
+    return from_len ? uc16be_from_uc32(to, from) : 0;
+}
+
+unsigned uc16be_from_uc16n(UNULLABLE UOUT uc16_t *to, const uc16_t *from, size_t from_len) {
+    assert(from);
+	return uc16_len(*from) <= from_len ? uc16be_from_uc16(to, from) : 0;
+}
+
+unsigned uc16be_from_uc8n(UNULLABLE UOUT uc16_t *to, const uc8_t *from, size_t from_len) {
+    assert(from);
+	return uc8_len(*from) <= from_len ? uc16be_from_uc8(to, from) : 0;
+}
+
+unsigned uc16be_from_uc32len(UNULLABLE UOUT uc16_t *to, const uc32_t *from, size_t from_len) {
+    return from_len ? uc16be_from_uc32le(to, from) : 0;
+}
+
+unsigned uc16be_from_uc16len(UNULLABLE UOUT uc16_t *to, const uc16_t *from, size_t from_len) {
+    assert(from);
+    uc16_t from_0_he = *from;
+    uendian_toggle_if_big(&from_0_he, sizeof(uc16_t));
+    return uc16_len(from_0_he) <= from_len ? uc16be_from_uc16le(to, from) : 0;
+}
+
+unsigned uc16be_from_uc32ben(UNULLABLE UOUT uc16_t *to, const uc32_t *from, size_t from_len) {
+    return from_len ? uc16be_from_uc32be(to, from) : 0;
+}
+
+unsigned uc16be_from_uc16ben(UNULLABLE UOUT uc16_t *to, const uc16_t *from, size_t from_len) {
+    assert(from);
+    uc16_t from_0_he = *from;
+    uendian_toggle_if_little(&from_0_he, sizeof(uc16_t));
+    return uc16_len(from_0_he) <= from_len ? uc16be_from_uc16be(to, from) : 0;
+}
+
+unsigned uc8_from_uc32_imm(UNULLABLE uc8_t *to, uc32_t from) {
 	unsigned len = uc32_len_8(from);
 
 	if (to)
@@ -120,11 +1163,49 @@ unsigned uc8_from_uc32(UNULLABLE uc8_t *to, uc32_t from) {
 	return len;
 }
 
-unsigned uc8_from_uc16(UNULLABLE uc8_t *to, const uc16_t *from) {
-    return uc8_from_uc32(to, uc32_from_uc16(from));
+unsigned uc8_from_uc32le_imm(UNULLABLE uc8_t *to, uc32_t from) {
+    return uc8_from_uc32_imm(to, uc32_from_uc32le_imm(from));
 }
 
-unsigned uc8_from_uc8(UNULLABLE uc8_t *to, const uc8_t *from) {
+unsigned uc8_from_uc32be_imm(UNULLABLE uc8_t *to, uc32_t from) {
+    return uc8_from_uc32_imm(to, uc32_from_uc32be_imm(from));
+}
+
+unsigned uc8_from_bytes(UNULLABLE UOUT uc8_t *to, const void *from, uencoding_t encoding) {
+    assert(uencoding_valid(encoding));
+
+    switch (encoding) {
+        case UENCODING_UTF32LE:
+            return uc8_from_uc32le(to, from);
+
+        case UENCODING_UTF32BE:
+            return uc8_from_uc32be(to, from);
+
+        case UENCODING_UTF16LE:
+            return uc8_from_uc16le(to, from);
+
+        case UENCODING_UTF16BE:
+            return uc8_from_uc16be(to, from);
+
+        case UENCODING_UTF8:
+            return uc8_from_uc8(to, from);
+
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
+unsigned uc8_from_uc32(UNULLABLE UOUT uc8_t *to, const uc32_t *from) {
+    assert(from);
+    return uc8_from_uc32_imm(to, *from);
+}
+
+unsigned uc8_from_uc16(UNULLABLE UOUT uc8_t *to, const uc16_t *from) {
+    return uc8_from_uc32_imm(to, uc32_from_uc16_imm(from));
+}
+
+unsigned uc8_from_uc8(UNULLABLE UOUT uc8_t *to, const uc8_t *from) {
     assert(from);
 
     unsigned len = uc8_len(*from);
@@ -134,6 +1215,89 @@ unsigned uc8_from_uc8(UNULLABLE uc8_t *to, const uc8_t *from) {
             *to++ = *from++;
 
     return len;
+}
+
+unsigned uc8_from_uc32le(UNULLABLE UOUT uc8_t *to, const uc32_t *from) {
+    assert(from);
+    return uc8_from_uc32le_imm(to, *from);
+}
+
+unsigned uc8_from_uc16le(UNULLABLE UOUT uc8_t *to, const uc16_t *from) {
+    uc16_t from_he[2];
+    uc16_from_uc16le(from_he, from);
+    return uc8_from_uc16(to, from_he);
+}
+
+unsigned uc8_from_uc32be(UNULLABLE UOUT uc8_t *to, const uc32_t *from) {
+    assert(from);
+    return uc8_from_uc32be_imm(to, *from);
+}
+
+unsigned uc8_from_uc16be(UNULLABLE UOUT uc8_t *to, const uc16_t *from) {
+    uc16_t from_he[2];
+    uc16_from_uc16be(from_he, from);
+    return uc8_from_uc16(to, from_he);
+}
+
+unsigned uc8_from_bytesn(UNULLABLE UOUT uc8_t *to, const void *from, size_t from_size, uencoding_t encoding) {
+    assert(uencoding_valid(encoding));
+
+    switch (encoding) {
+        case UENCODING_UTF32LE:
+            return uc8_from_uc32len(to, from, from_size / sizeof(uc32_t));
+
+        case UENCODING_UTF32BE:
+            return uc8_from_uc32ben(to, from, from_size / sizeof(uc32_t));
+
+        case UENCODING_UTF16LE:
+            return uc8_from_uc16len(to, from, from_size / sizeof(uc16_t));
+
+        case UENCODING_UTF16BE:
+            return uc8_from_uc16ben(to, from, from_size / sizeof(uc16_t));
+
+        case UENCODING_UTF8:
+            return uc8_from_uc8n(to, from, from_size / sizeof(uc8_t));
+
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
+unsigned uc8_from_uc32n(UNULLABLE UOUT uc8_t *to, const uc32_t *from, size_t from_len) {
+    return from_len ? uc8_from_uc32(to, from) : 0;
+}
+
+unsigned uc8_from_uc16n(UNULLABLE UOUT uc8_t *to, const uc16_t *from, size_t from_len) {
+    assert(from);
+	return uc16_len(*from) <= from_len ? uc8_from_uc16(to, from) : 0;
+}
+
+unsigned uc8_from_uc8n(UNULLABLE UOUT uc8_t *to, const uc8_t *from, size_t from_len) {
+    assert(from);
+	return uc8_len(*from) <= from_len ? uc8_from_uc8(to, from) : 0;
+}
+
+unsigned uc8_from_uc32len(UNULLABLE UOUT uc8_t *to, const uc32_t *from, size_t from_len) {
+    return from_len ? uc8_from_uc32le(to, from) : 0;
+}
+
+unsigned uc8_from_uc16len(UNULLABLE UOUT uc8_t *to, const uc16_t *from, size_t from_len) {
+    assert(from);
+    uc16_t from_0_he = *from;
+    uendian_toggle_if_big(&from_0_he, sizeof(uc16_t));
+    return uc16_len(from_0_he) <= from_len ? uc8_from_uc16le(to, from) : 0;
+}
+
+unsigned uc8_from_uc32ben(UNULLABLE UOUT uc8_t *to, const uc32_t *from, size_t from_len) {
+    return from_len ? uc8_from_uc32be(to, from) : 0;
+}
+
+unsigned uc8_from_uc16ben(UNULLABLE UOUT uc8_t *to, const uc16_t *from, size_t from_len) {
+    assert(from);
+    uc16_t from_0_he = *from;
+    uendian_toggle_if_little(&from_0_he, sizeof(uc16_t));
+    return uc16_len(from_0_he) <= from_len ? uc8_from_uc16be(to, from) : 0;
 }
 
 uc32_t uc32_bin_from_val(unsigned val) {
@@ -153,7 +1317,7 @@ uc32_t uc32_hex_from_val(unsigned val) {
 }
 
 uc32_t uc32_case_hex_from_val(ucase_t ca, unsigned val) {
-    assert(ucase_valid(ca));
+    assert(ucase_valid_output(ca));
 
     switch (ca) {
         case UCASE_LOWER:
@@ -192,7 +1356,7 @@ uc32_t uc32_radix_from_val(uradix_t radix, unsigned val) {
 }
 
 uc32_t uc32_case_radix_from_val(ucase_t ca, uradix_t radix, unsigned val) {
-    assert(ucase_valid(ca));
+    assert(ucase_valid_output(ca));
 
     switch (ca) {
         case UCASE_LOWER:
@@ -316,6 +1480,196 @@ uc8_t uc8_lower_radix_from_val(uradix_t radix, unsigned val) {
 
 uc8_t uc8_upper_radix_from_val(uradix_t radix, unsigned val) {
     return uc32_upper_radix_from_val(radix, val);
+}
+
+unsigned uc32_to_bytes_imm(UNULLABLE UOUT void *to, uencoding_t encoding, uc32_t from) {
+    assert(uencoding_valid(encoding));
+
+    switch (encoding) {
+        case UENCODING_UTF32LE:
+            return sizeof(uc32_t) * uc32le_from_uc32(to, &from);
+
+        case UENCODING_UTF32BE:
+            return sizeof(uc32_t) * uc32be_from_uc32(to, &from);
+
+        case UENCODING_UTF16LE:
+            return sizeof(uc16_t) * uc16le_from_uc32_imm(to, from);
+
+        case UENCODING_UTF16BE:
+            return sizeof(uc16_t) * uc16be_from_uc32_imm(to, from);
+
+        case UENCODING_UTF8:
+            return sizeof(uc8_t) * uc8_from_uc32_imm(to, from);
+
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
+unsigned uc32le_to_bytes_imm(UNULLABLE UOUT void *to, uencoding_t encoding, uc32_t from) {
+    assert(uencoding_valid(encoding));
+
+    switch (encoding) {
+        case UENCODING_UTF32LE:
+            return sizeof(uc32_t) * uc32le_from_uc32le(to, &from);
+
+        case UENCODING_UTF32BE:
+            return sizeof(uc32_t) * uc32be_from_uc32le(to, &from);
+
+        case UENCODING_UTF16LE:
+            return sizeof(uc16_t) * uc16le_from_uc32le_imm(to, from);
+
+        case UENCODING_UTF16BE:
+            return sizeof(uc16_t) * uc16be_from_uc32le_imm(to, from);
+
+        case UENCODING_UTF8:
+            return sizeof(uc8_t) * uc8_from_uc32le_imm(to, from);
+
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
+unsigned uc32be_to_bytes_imm(UNULLABLE UOUT void *to, uencoding_t encoding, uc32_t from) {
+    assert(uencoding_valid(encoding));
+
+    switch (encoding) {
+        case UENCODING_UTF32LE:
+            return sizeof(uc32_t) * uc32le_from_uc32be(to, &from);
+
+        case UENCODING_UTF32BE:
+            return sizeof(uc32_t) * uc32be_from_uc32be(to, &from);
+
+        case UENCODING_UTF16LE:
+            return sizeof(uc16_t) * uc16le_from_uc32be_imm(to, from);
+
+        case UENCODING_UTF16BE:
+            return sizeof(uc16_t) * uc16be_from_uc32be_imm(to, from);
+
+        case UENCODING_UTF8:
+            return sizeof(uc8_t) * uc8_from_uc32be_imm(to, from);
+
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
+unsigned uc32_to_bytes(UNULLABLE UOUT void *to, uencoding_t encoding, const uc32_t *from) {
+    assert(from);
+    return uc32_to_bytes_imm(to, encoding, *from);
+}
+
+unsigned uc32le_to_bytes(UNULLABLE UOUT void *to, uencoding_t encoding, const uc32_t *from) {
+    assert(from);
+    return uc32le_to_bytes_imm(to, encoding, *from);
+}
+
+unsigned uc32be_to_bytes(UNULLABLE UOUT void *to, uencoding_t encoding, const uc32_t *from) {
+    assert(from);
+    return uc32be_to_bytes_imm(to, encoding, *from);
+}
+
+unsigned uc16_to_bytes(UNULLABLE UOUT void *to, uencoding_t encoding, const uc16_t *from) {
+    assert(uencoding_valid(encoding) && from);
+
+    switch (encoding) {
+        case UENCODING_UTF32LE:
+            return sizeof(uc32_t) * uc32le_from_uc16(to, from);
+
+        case UENCODING_UTF32BE:
+            return sizeof(uc32_t) * uc32be_from_uc16(to, from);
+
+        case UENCODING_UTF16LE:
+            return sizeof(uc16_t) * uc16le_from_uc16(to, from);
+
+        case UENCODING_UTF16BE:
+            return sizeof(uc16_t) * uc16be_from_uc16(to, from);
+
+        case UENCODING_UTF8:
+            return sizeof(uc8_t) * uc8_from_uc16(to, from);
+
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
+unsigned uc16le_to_bytes(UNULLABLE UOUT void *to, uencoding_t encoding, const uc16_t *from) {
+    assert(uencoding_valid(encoding) && from);
+
+    switch (encoding) {
+        case UENCODING_UTF32LE:
+            return sizeof(uc32_t) * uc32le_from_uc16le(to, from);
+
+        case UENCODING_UTF32BE:
+            return sizeof(uc32_t) * uc32be_from_uc16le(to, from);
+
+        case UENCODING_UTF16LE:
+            return sizeof(uc16_t) * uc16le_from_uc16le(to, from);
+
+        case UENCODING_UTF16BE:
+            return sizeof(uc16_t) * uc16be_from_uc16le(to, from);
+
+        case UENCODING_UTF8:
+            return sizeof(uc8_t) * uc8_from_uc16le(to, from);
+
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
+unsigned uc16be_to_bytes(UNULLABLE UOUT void *to, uencoding_t encoding, const uc16_t *from) {
+    assert(uencoding_valid(encoding) && from);
+
+    switch (encoding) {
+        case UENCODING_UTF32LE:
+            return sizeof(uc32_t) * uc32le_from_uc16be(to, from);
+
+        case UENCODING_UTF32BE:
+            return sizeof(uc32_t) * uc32be_from_uc16be(to, from);
+
+        case UENCODING_UTF16LE:
+            return sizeof(uc16_t) * uc16le_from_uc16be(to, from);
+
+        case UENCODING_UTF16BE:
+            return sizeof(uc16_t) * uc16be_from_uc16be(to, from);
+
+        case UENCODING_UTF8:
+            return sizeof(uc8_t) * uc8_from_uc16be(to, from);
+
+        default:
+            assert(false);
+            return 0;
+    }
+}
+
+unsigned uc8_to_bytes(UNULLABLE UOUT void *to, uencoding_t encoding, const uc8_t *from) {
+    assert(uencoding_valid(encoding) && from);
+
+    switch (encoding) {
+        case UENCODING_UTF32LE:
+            return sizeof(uc32_t) * uc32le_from_uc8(to, from);
+
+        case UENCODING_UTF32BE:
+            return sizeof(uc32_t) * uc32be_from_uc8(to, from);
+
+        case UENCODING_UTF16LE:
+            return sizeof(uc16_t) * uc16le_from_uc8(to, from);
+
+        case UENCODING_UTF16BE:
+            return sizeof(uc16_t) * uc16be_from_uc8(to, from);
+
+        case UENCODING_UTF8:
+            return sizeof(uc8_t) * uc8_from_uc8(to, from);
+
+        default:
+            assert(false);
+            return 0;
+    }
 }
 
 int uc32_bin_val(uc32_t c) {
@@ -713,37 +2067,22 @@ bool uc8_upper_radix(uc8_t c, uradix_t radix) {
     return uc32_upper_radix(c, radix);
 }
 
-uc32_to_case_func_t uc32_to_case_func_from_ucase(ucase_t ca) {
-    assert(ucase_valid(ca));
+uc32_t uc32_to_case_imm(uc32_t c, ucase_t ca) {
+    assert(uc32_valid_imm(ca));
 
     switch (ca) {
         case UCASE_LOWER:
-            return uc32_to_lower;
+            return uc32_to_lower_imm(c);
 
         case UCASE_UPPER:
-            return uc32_to_upper;
-
-        default:
-            return uc32_from_uc32;
-    }
-}
-
-uc32_t uc32_to_case(uc32_t c, ucase_t ca) {
-    assert(uc32_valid(ca));
-
-    switch (ca) {
-        case UCASE_LOWER:
-            return uc32_to_lower(c);
-
-        case UCASE_UPPER:
-            return uc32_to_upper(c);
+            return uc32_to_upper_imm(c);
 
         default:
             return c;
     }
 }
 
-uc32_t uc32_to_lower(uc32_t c) {
+uc32_t uc32_to_lower_imm(uc32_t c) {
 	switch (c) {
 		case 0x0041:
 			return 0x0061;
@@ -4830,7 +6169,7 @@ uc32_t uc32_to_lower(uc32_t c) {
 	}
 }
 
-uc32_t uc32_to_upper(uc32_t c) {
+uc32_t uc32_to_upper_imm(uc32_t c) {
 	switch (c) {
 		case 0x0061:
 			return 0x0041;
@@ -9046,22 +10385,43 @@ uc32_t uc32_to_upper(uc32_t c) {
 	}
 }
 
-uc16_to_case_func_t uc16_to_case_func_from_ucase(ucase_t ca) {
+unsigned uc32_to_case(UNULLABLE UOUT uc32_t *to, const uc32_t *from, ucase_t ca) {
     assert(ucase_valid(ca));
 
     switch (ca) {
         case UCASE_LOWER:
-            return uc16_to_lower;
+            return uc32_to_lower(to, from);
 
         case UCASE_UPPER:
-            return uc16_to_upper;
+            return uc32_to_upper(to, from);
 
         default:
-            return uc16_from_uc16;
+            if (to)
+                *to = *from;
+
+            return 1;
     }
 }
 
-unsigned uc16_to_case(UNULLABLE uc16_t *to, const uc16_t *from, ucase_t ca) {
+unsigned uc32_to_lower(UNULLABLE UOUT uc32_t *to, const uc32_t *from) {
+    assert(from);
+
+    if (to)
+        *to = uc32_to_lower_imm(*from);
+
+    return 1;
+}
+
+unsigned uc32_to_upper(UNULLABLE UOUT uc32_t *to, const uc32_t *from) {
+    assert(from);
+
+    if (to)
+        *to = uc32_to_upper_imm(*from);
+
+    return 1;
+}
+
+unsigned uc16_to_case(UNULLABLE UOUT uc16_t *to, const uc16_t *from, ucase_t ca) {
     assert(ucase_valid(ca));
 
     switch (ca) {
@@ -9076,30 +10436,15 @@ unsigned uc16_to_case(UNULLABLE uc16_t *to, const uc16_t *from, ucase_t ca) {
     }
 }
 
-unsigned uc16_to_lower(UNULLABLE uc16_t *to, const uc16_t *from) {
-    return uc16_from_uc32(to, uc32_to_lower(uc32_from_uc16(from)));
+unsigned uc16_to_lower(UNULLABLE UOUT uc16_t *to, const uc16_t *from) {
+    return uc16_from_uc32_imm(to, uc32_to_lower_imm(uc32_from_uc16_imm(from)));
 }
 
-unsigned uc16_to_upper(UNULLABLE uc16_t *to, const uc16_t *from) {
-    return uc16_from_uc32(to, uc32_to_upper(uc32_from_uc16(from)));
+unsigned uc16_to_upper(UNULLABLE UOUT uc16_t *to, const uc16_t *from) {
+    return uc16_from_uc32_imm(to, uc32_to_upper_imm(uc32_from_uc16_imm(from)));
 }
 
-uc8_to_case_func_t uc8_to_case_func_from_ucase(ucase_t ca) {
-    assert(ucase_valid(ca));
-
-    switch (ca) {
-        case UCASE_LOWER:
-            return uc8_to_lower;
-
-        case UCASE_UPPER:
-            return uc8_to_upper;
-
-        default:
-            return uc8_from_uc8;
-    }
-}
-
-unsigned uc8_to_case(UNULLABLE uc8_t *to, const uc8_t *from, ucase_t ca) {
+unsigned uc8_to_case(UNULLABLE UOUT uc8_t *to, const uc8_t *from, ucase_t ca) {
     assert(ucase_valid(ca));
 
     switch (ca) {
@@ -9114,32 +10459,12 @@ unsigned uc8_to_case(UNULLABLE uc8_t *to, const uc8_t *from, ucase_t ca) {
     }
 }
 
-unsigned uc8_to_lower(UNULLABLE uc8_t *to, const uc8_t *from) {
-    return uc8_from_uc32(to, uc32_to_lower(uc32_from_uc8(from)));
+unsigned uc8_to_lower(UNULLABLE UOUT uc8_t *to, const uc8_t *from) {
+    return uc8_from_uc32_imm(to, uc32_to_lower_imm(uc32_from_uc8_imm(from)));
 }
 
-unsigned uc8_to_upper(UNULLABLE uc8_t *to, const uc8_t *from) {
-    return uc8_from_uc32(to, uc32_to_upper(uc32_from_uc8(from)));
-}
-
-static unsigned uc8_len_p_(const uc8_t *c) {
-    assert(c);
-    return uc8_len(*c);
-}
-
-uc8_case_len_func_t uc8_case_len_func_from_ucase(ucase_t ca) {
-    assert(ucase_valid(ca));
-
-    switch (ca) {
-        case UCASE_LOWER:
-            return uc8_lower_len;
-
-        case UCASE_UPPER:
-            return uc8_upper_len;
-
-        default:
-            return uc8_len_p_;
-    }
+unsigned uc8_to_upper(UNULLABLE UOUT uc8_t *to, const uc8_t *from) {
+    return uc8_from_uc32_imm(to, uc32_to_upper_imm(uc32_from_uc8_imm(from)));
 }
 
 unsigned uc8_case_len(const uc8_t *c, ucase_t ca) {
@@ -9158,37 +10483,37 @@ unsigned uc8_case_len(const uc8_t *c, ucase_t ca) {
 }
 
 unsigned uc8_lower_len(const uc8_t *c) {
-    return uc32_len_8(uc32_to_lower(uc32_from_uc8(c)));
+    return uc32_len_8(uc32_to_lower_imm(uc32_from_uc8_imm(c)));
 }
 
 unsigned uc8_upper_len(const uc8_t *c) {
-    return uc32_len_8(uc32_to_upper(uc32_from_uc8(c)));
+    return uc32_len_8(uc32_to_upper_imm(uc32_from_uc8_imm(c)));
 }
 
-bool uc32_letter(uc32_t c) {
-    return uc32_upper(c)
-		|| uc32_lower(c)
-		|| uc32_title(c)
-		|| uc32_mod(c
-		|| uc32_oletter(c));
+bool uc32_letter_imm(uc32_t c) {
+    return uc32_upper_imm(c)
+		|| uc32_lower_imm(c)
+		|| uc32_title_imm(c)
+		|| uc32_mod_imm(c
+		|| uc32_oletter_imm(c));
 }
 
-bool uc32_case(uc32_t c, ucase_t ca) {
+bool uc32_case_imm(uc32_t c, ucase_t ca) {
     assert(ucase_valid(ca));
 
     switch (ca) {
         case UCASE_LOWER:
-            return uc32_lower(c);
+            return uc32_lower_imm(c);
 
         case UCASE_UPPER:
-            return uc32_upper(c);
+            return uc32_upper_imm(c);
 
         default:
-            return uc32_lower(c) || uc32_upper(c);
+            return uc32_lower_imm(c) || uc32_upper_imm(c);
     }
 }
 
-bool uc32_lower(uc32_t c) {
+bool uc32_lower_imm(uc32_t c) {
 	switch (c) {
 		case 0x00061:
 		case 0x00062:
@@ -11430,7 +12755,7 @@ bool uc32_lower(uc32_t c) {
 	}
 }
 
-bool uc32_upper(uc32_t c) {
+bool uc32_upper_imm(uc32_t c) {
 	switch (c) {
 		case 0x00041:
 		case 0x00042:
@@ -13270,7 +14595,7 @@ bool uc32_upper(uc32_t c) {
 	}
 }
 
-bool uc32_title(uc32_t c) {
+bool uc32_title_imm(uc32_t c) {
     switch (c) {
         case 0x01C5:
         case 0x01C8:
@@ -13310,7 +14635,7 @@ bool uc32_title(uc32_t c) {
     }
 }
 
-bool uc32_mod(uc32_t c) {
+bool uc32_mod_imm(uc32_t c) {
     switch (c) {
 		case 0x02B0:
 		case 0x02B1:
@@ -13716,7 +15041,7 @@ bool uc32_mod(uc32_t c) {
     }
 }
 
-bool uc32_oletter(uc32_t c) {
+bool uc32_oletter_imm(uc32_t c) {
 	switch (c) {
 		case 0x000AA:
 		case 0x000BA:
@@ -30985,63 +32310,98 @@ bool uc32_oletter(uc32_t c) {
 	}
 }
 
+bool uc32_letter(const uc32_t *c) {
+	assert(c);
+    return uc32_letter_imm(*c);
+}
+
+bool uc32_case(const uc32_t *c, ucase_t ca) {
+	assert(c);
+    return uc32_case_imm(*c, ca);
+}
+
+bool uc32_lower(const uc32_t *c) {
+	assert(c);
+    return uc32_lower_imm(*c);
+}
+
+bool uc32_upper(const uc32_t *c) {
+	assert(c);
+    return uc32_upper_imm(*c);
+}
+
+bool uc32_title(const uc32_t *c) {
+	assert(c);
+    return uc32_title_imm(*c);
+}
+
+bool uc32_mod(const uc32_t *c) {
+	assert(c);
+    return uc32_mod_imm(*c);
+}
+
+bool uc32_oletter(const uc32_t *c) {
+	assert(c);
+    return uc32_oletter_imm(*c);
+}
+
 bool uc16_letter(const uc16_t *c) {
-    return uc32_letter(uc32_from_uc16(c));
+    return uc32_letter_imm(uc32_from_uc16_imm(c));
 }
 
 bool uc16_case(const uc16_t *c, ucase_t ca) {
-    return uc32_case(uc32_from_uc16(c), ca);
+    return uc32_case_imm(uc32_from_uc16_imm(c), ca);
 }
 
 bool uc16_lower(const uc16_t *c) {
-    return uc32_lower(uc32_from_uc16(c));
+    return uc32_lower_imm(uc32_from_uc16_imm(c));
 }
 
 bool uc16_upper(const uc16_t *c) {
-    return uc32_upper(uc32_from_uc16(c));
+    return uc32_upper_imm(uc32_from_uc16_imm(c));
 }
 
 bool uc16_title(const uc16_t *c) {
-    return uc32_title(uc32_from_uc16(c));
+    return uc32_title_imm(uc32_from_uc16_imm(c));
 }
 
 bool uc16_mod(const uc16_t *c) {
-    return uc32_mod(uc32_from_uc16(c));
+    return uc32_mod_imm(uc32_from_uc16_imm(c));
 }
 
 bool uc16_oletter(const uc16_t *c) {
-    return uc32_oletter(uc32_from_uc16(c));
+    return uc32_oletter_imm(uc32_from_uc16_imm(c));
 }
 
 bool uc8_letter(const uc8_t *c) {
-    return uc32_letter(uc32_from_uc8(c));
+    return uc32_letter_imm(uc32_from_uc8_imm(c));
 }
 
 bool uc8_case(const uc8_t *c, ucase_t ca) {
-    return uc32_case(uc32_from_uc8(c), ca);
+    return uc32_case_imm(uc32_from_uc8_imm(c), ca);
 }
 
 bool uc8_lower(const uc8_t *c) {
-    return uc32_lower(uc32_from_uc8(c));
+    return uc32_lower_imm(uc32_from_uc8_imm(c));
 }
 
 bool uc8_upper(const uc8_t *c) {
-    return uc32_upper(uc32_from_uc8(c));
+    return uc32_upper_imm(uc32_from_uc8_imm(c));
 }
 
 bool uc8_title(const uc8_t *c) {
-    return uc32_title(uc32_from_uc8(c));
+    return uc32_title_imm(uc32_from_uc8_imm(c));
 }
 
 bool uc8_mod(const uc8_t *c) {
-    return uc32_mod(uc32_from_uc8(c));
+    return uc32_mod_imm(uc32_from_uc8_imm(c));
 }
 
 bool uc8_oletter(const uc8_t *c) {
-    return uc32_oletter(uc32_from_uc8(c));
+    return uc32_oletter_imm(uc32_from_uc8_imm(c));
 }
 
-bool uc32_number(uc32_t c) {
+bool uc32_number_imm(uc32_t c) {
     switch (c) {
 		case 0x00030:
 		case 0x00031:
@@ -32881,13 +34241,13 @@ bool uc32_number(uc32_t c) {
     }
 }
 
-bool uc32_cntrl(uc32_t c) {
+bool uc32_cntrl_imm(uc32_t c) {
     // C0 and C1 controls
     return 0x00 <= c && c <=0x1F
         || 0x7F <= c && c <=0x9F;
 }
 
-bool uc32_space(uc32_t c) {
+bool uc32_space_imm(uc32_t c) {
     switch (c) {
 		case 0x0020:
 		case 0x00A0:
@@ -32913,7 +34273,7 @@ bool uc32_space(uc32_t c) {
     }
 }
 
-bool uc32_wspace(uc32_t c) {
+bool uc32_wspace_imm(uc32_t c) {
 	switch (c) {
 		 case 0x0009:
 		 case 0x000A:
@@ -32947,7 +34307,7 @@ bool uc32_wspace(uc32_t c) {
 	}
 }
 
-bool uc32_punct(uc32_t c) {
+bool uc32_punct_imm(uc32_t c) {
     switch (c) {
         case 0x00021:
         case 0x00022:
@@ -33831,70 +35191,100 @@ bool uc32_punct(uc32_t c) {
     }
 }
 
-bool uc32_priv(uc32_t c) {
+bool uc32_priv_imm(uc32_t c) {
     return 0x00E000 <= c && c <= 0x00F8FF  // From BMP
         || 0xF00000 <= c && c <= 0x10FFFF; // Two last planes merged
 }
 
+bool uc32_number(const uc32_t *c) {
+    assert(c);
+    return uc32_number_imm(*c);
+}
+
+bool uc32_cntrl(const uc32_t *c) {
+    assert(c);
+    return uc32_cntrl_imm(*c);
+}
+
+bool uc32_space(const uc32_t *c) {
+    assert(c);
+    return uc32_space_imm(*c);
+}
+
+bool uc32_wspace(const uc32_t *c) {
+    assert(c);
+    return uc32_wspace_imm(*c);
+}
+
+bool uc32_punct(const uc32_t *c) {
+    assert(c);
+    return uc32_punct_imm(*c);
+}
+
+bool uc32_priv(const uc32_t *c) {
+    assert(c);
+    return uc32_priv_imm(*c);
+}
+
 bool uc16_number(const uc16_t *c) {
-    return uc32_number(uc32_from_uc16(c));
+    return uc32_number_imm(uc32_from_uc16_imm(c));
 }
 
 bool uc16_cntrl(const uc16_t *c) {
-    return uc32_cntrl(uc32_from_uc16(c));
+    return uc32_cntrl_imm(uc32_from_uc16_imm(c));
 }
 
 bool uc16_space(const uc16_t *c) {
-    return uc32_space(uc32_from_uc16(c));
+    return uc32_space_imm(uc32_from_uc16_imm(c));
 }
 
 bool uc16_wspace(const uc16_t *c) {
-    return uc32_wspace(uc32_from_uc16(c));
+    return uc32_wspace_imm(uc32_from_uc16_imm(c));
 }
 
 bool uc16_punct(const uc16_t *c) {
-    return uc32_punct(uc32_from_uc16(c));
+    return uc32_punct_imm(uc32_from_uc16_imm(c));
 }
 
 bool uc16_priv(const uc16_t *c) {
-    return uc32_priv(uc32_from_uc16(c));
+    return uc32_priv_imm(uc32_from_uc16_imm(c));
 }
 
 bool uc16_srgt(uc16_t c) {
-    return uc16_srgt_low(c) || uc16_srgt_high(c);
+    return uc16_lsrgt(c) || uc16_hsrgt(c);
 }
 
-bool uc16_srgt_low(uc16_t c) {
+bool uc16_lsrgt(uc16_t c) {
 	return 0xD800 <= c && c <= 0xDBFF;
 }
 
-bool uc16_srgt_high(uc16_t c) {
+bool uc16_hsrgt(uc16_t c) {
 	return 0xDC00 <= c && c <= 0xDFFF;
     
 }
 
 bool uc8_number(const uc8_t *c) {
-    return uc32_number(uc32_from_uc8(c));
+    return uc32_number_imm(uc32_from_uc8_imm(c));
 }
 
 bool uc8_cntrl(const uc8_t *c) {
-    return uc32_cntrl(uc32_from_uc8(c));
+    return uc32_cntrl_imm(uc32_from_uc8_imm(c));
 }
 
 bool uc8_space(const uc8_t *c) {
-    return uc32_space(uc32_from_uc8(c));
+    return uc32_space_imm(uc32_from_uc8_imm(c));
 }
 
 bool uc8_wspace(const uc8_t *c) {
-    return uc32_wspace(uc32_from_uc8(c));
+    return uc32_wspace_imm(uc32_from_uc8_imm(c));
 }
 
 bool uc8_punct(const uc8_t *c) {
-    return uc32_punct(uc32_from_uc8(c));
+    return uc32_punct_imm(uc32_from_uc8_imm(c));
 }
 
 bool uc8_priv(const uc8_t *c) {
-    return uc32_priv(uc32_from_uc8(c));
+    return uc32_priv_imm(uc32_from_uc8_imm(c));
 }
 
 unsigned uc8_lead(uc8_t c) {
@@ -33927,13 +35317,13 @@ unsigned uc32_len(uc32_t c) {
 
 unsigned uc32_len_n(uc32_t c, unsigned n) {
     switch (n) {
-        case 1:
+        case 8:
             return uc32_len_8(c);
 
-        case 2:
+        case 16:
             return uc32_len_16(c);
 
-        case 4:
+        case 32:
             return uc32_len_32(c);
 
         default:
@@ -33963,6 +35353,56 @@ unsigned uc32_len_8(uc32_t c) {
     return 4;
 }
 
+unsigned uc32le_len(uc32_t c) {
+    uendian_toggle_if_big(&c, sizeof c);
+    return uc32_len(c);
+}
+
+unsigned uc32le_len_n(uc32_t c, unsigned n) {
+    uendian_toggle_if_big(&c, sizeof c);
+    return uc32_len_n(c, n);
+}
+
+unsigned uc32le_len_32(uc32_t c) {
+    uendian_toggle_if_big(&c, sizeof c);
+    return uc32_len_32(c);
+}
+
+unsigned uc32le_len_16(uc32_t c) {
+    uendian_toggle_if_big(&c, sizeof c);
+    return uc32_len_16(c);
+}
+
+unsigned uc32le_len_8(uc32_t c) {
+    uendian_toggle_if_big(&c, sizeof c);
+    return uc32_len_8(c);
+}
+
+unsigned uc32be_len(uc32_t c) {
+    uendian_toggle_if_little(&c, sizeof c);
+    return uc32_len(c);
+}
+
+unsigned uc32be_len_n(uc32_t c, unsigned n) {
+    uendian_toggle_if_little(&c, sizeof c);
+    return uc32_len_n(c, n);
+}
+
+unsigned uc32be_len_32(uc32_t c) {
+    uendian_toggle_if_little(&c, sizeof c);
+    return uc32_len_32(c);
+}
+
+unsigned uc32be_len_16(uc32_t c) {
+    uendian_toggle_if_little(&c, sizeof c);
+    return uc32_len_16(c);
+}
+
+unsigned uc32be_len_8(uc32_t c) {
+    uendian_toggle_if_little(&c, sizeof c);
+    return uc32_len_8(c);
+}
+
 unsigned uc16_len(uc16_t c) {
     return uc16_len_16(c);
 }
@@ -33989,7 +35429,7 @@ unsigned uc16_len_32(uc16_t c) {
 }
 
 unsigned uc16_len_16(uc16_t c) {
-	return uc16_srgt_low(c) ? 2 : 1;
+	return uc16_lsrgt(c) ? 2 : 1;
 }
 
 unsigned uc16_len_8(uc16_t c) {
@@ -33999,10 +35439,60 @@ unsigned uc16_len_8(uc16_t c) {
 	if (c <= 0x7FF)
 		return 2;
 
-	if (uc16_srgt_low(c))
+	if (uc16_lsrgt(c))
 		return 3;
 
 	return 4;
+}
+
+unsigned uc16le_len(uc16_t c) {
+    uendian_toggle_if_big(&c, sizeof c);
+    return uc16_len(c);
+}
+
+unsigned uc16le_len_n(uc16_t c, unsigned n) {
+    uendian_toggle_if_big(&c, sizeof c);
+    return uc16_len_n(c, n);
+}
+
+unsigned uc16le_len_32(uc16_t c) {
+    uendian_toggle_if_big(&c, sizeof c);
+    return uc16_len_32(c);
+}
+
+unsigned uc16le_len_16(uc16_t c) {
+    uendian_toggle_if_big(&c, sizeof c);
+    return uc16_len_16(c);
+}
+
+unsigned uc16le_len_8(uc16_t c) {
+    uendian_toggle_if_big(&c, sizeof c);
+    return uc16_len_8(c);
+}
+
+unsigned uc16be_len(uc16_t c) {
+    uendian_toggle_if_little(&c, sizeof c);
+    return uc16_len(c);
+}
+
+unsigned uc16be_len_n(uc16_t c, unsigned n) {
+    uendian_toggle_if_little(&c, sizeof c);
+    return uc16_len_n(c, n);
+}
+
+unsigned uc16be_len_32(uc16_t c) {
+    uendian_toggle_if_little(&c, sizeof c);
+    return uc16_len_32(c);
+}
+
+unsigned uc16be_len_16(uc16_t c) {
+    uendian_toggle_if_little(&c, sizeof c);
+    return uc16_len_16(c);
+}
+
+unsigned uc16be_len_8(uc16_t c) {
+    uendian_toggle_if_little(&c, sizeof c);
+    return uc16_len_8(c);
 }
 
 unsigned uc8_len(uc8_t c) {
@@ -34039,8 +35529,13 @@ unsigned uc8_len_8(uc8_t c) {
     return len ? len : 1;
 }
 
-bool uc32_valid(uc32_t c) {
+bool uc32_valid_imm(uc32_t c) {
     return c <= UMAX_CP;
+}
+
+unsigned uc32_valid(const uc32_t *c) {
+    assert(c);
+    return uc32_valid_imm(*c);
 }
 
 unsigned uc16_valid(const uc16_t *c) {
@@ -34048,15 +35543,15 @@ unsigned uc16_valid(const uc16_t *c) {
 
 	uc16_t low = c[0];
 
-	if (uc16_srgt_high(low))
+	if (uc16_hsrgt(low))
 		return 0;
 
-	if (!uc16_srgt_low(low))
+	if (!uc16_lsrgt(low))
 		return 1;
 
 	uc16_t high = c[1];
 
-	return uc16_srgt_high(high) ? 2 : 0;
+	return uc16_hsrgt(high) ? 2 : 0;
 }
 
 unsigned uc8_valid(const uc8_t *c) {
@@ -34071,5 +35566,5 @@ unsigned uc8_valid(const uc8_t *c) {
 		if (!uc8_trail(c[i]))
 			return 0;
 
-	return len;
+    return len;
 }

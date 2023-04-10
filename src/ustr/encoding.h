@@ -3,16 +3,23 @@
 
 #include <stdbool.h>
 
+#include "type/util/endian.h"
 #include "type/encoding.h"
-#include "cview.h"
+#include "type/cview.h"
+#include "util/export.h"
 
-static const ucv32_t UENCODING_UTF8_NAME     = ucv32("UTF-8");
-static const ucv32_t UENCODING_UTF16_LE_NAME = ucv32("UTF-16LE");
-static const ucv32_t UENCODING_UTF16_BE_NAME = ucv32("UTF-16BE");
-static const ucv32_t UENCODING_UTF32_LE_NAME = ucv32("UTF-32LE");
-static const ucv32_t UENCODING_UTF32_BE_NAME = ucv32("UTF-32BE");
+// Endian
 
-ucv32_t uencoding_name(uencoding_t encoding);
-bool uencoding_valid(uencoding_t encoding);
+UEXPORT uendian_t uencoding_endian(uencoding_t encoding);
+
+// Name
+
+UEXPORT ucv32_t uencoding_name_32(uencoding_t encoding);
+UEXPORT ucv16_t uencoding_name_16(uencoding_t encoding);
+UEXPORT ucv8_t uencoding_name_8(uencoding_t encoding);
+
+// Valid
+
+UEXPORT bool uencoding_valid(uencoding_t encoding);
 
 #endif

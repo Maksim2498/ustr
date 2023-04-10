@@ -2,5 +2,7 @@
 #define USTR_TYPE_UTIL_ALL_H
 
 #include "endian.h"
+#include "mem.h"
+#include "write.h"
 
 #endif

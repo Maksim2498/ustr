@@ -1,18 +1,21 @@
 #ifndef USTR_FMT_CASE_H
 #define USTR_FMT_CASE_H
 
+#include <stdbool.h>
+
 #include <ustr/type/fmt/case.h>
-#include <ustr/cview.h>
+#include <ustr/type/cview.h>
+#include <ustr/util/export.h>
 
-static const ucv32_t UCASE_NONE_NAME  = ucv32("NONE");
-static const ucv32_t UCASE_UPPER_NAME = ucv32("UPPER");
-static const ucv32_t UCASE_LOWER_NAME = ucv32("LOWER");
+// Name
 
-bool ucase_upper(ucase_t c);
-bool ucase_lower(ucase_t c);
+UEXPORT ucv32_t ucase_name_32(ucase_t c);
+UEXPORT ucv16_t ucase_name_16(ucase_t c);
+UEXPORT ucv8_t ucase_name_8(ucase_t c);
 
-ucv32_t ucase_name(ucase_t c);
+// Valid
 
-bool ucase_valid(ucase_t c);
+UEXPORT bool ucase_valid(ucase_t c);
+UEXPORT bool ucase_valid_output(ucase_t c);
 
 #endif

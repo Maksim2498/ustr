@@ -36,14 +36,18 @@ typedef uarg_uint_least32_t uarg_uc32_t;
 typedef uarg_uint_least16_t uarg_uc16_t;
 typedef unsigned            uarg_uc8_t;
 
-// uc8_t case len func type
+// Creation
 
-typedef unsigned (*uc8_case_len_func_t)(const uc8_t *);
+// - Char
 
-// char to case func types
+#define uc32(literal) (const uc32_t *)  U##literal
+#define uc16(literal) (const uc16_t *)  u##literal
+#define uc8(literal)  (const uc8_t  *) u8##literal
 
-typedef uc32_t   (*uc32_to_case_func_t)(uc32_t                  );
-typedef unsigned (*uc16_to_case_func_t)(uc16_t *, const uc16_t *);
-typedef unsigned (* uc8_to_case_func_t)(uc8_t  *, const uc8_t  *);
+// - String
+
+#define uz32(literal) (uc32_t *)  U##literal
+#define uz16(literal) (uc16_t *)  u##literal
+#define  uz8(literal) (uc8_t  *) u8##literal
 
 #endif

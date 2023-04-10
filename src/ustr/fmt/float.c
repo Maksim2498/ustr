@@ -1,28 +1,39 @@
 #include "float.h"
 
-#include <assert.h>
+#include <ustr/fmt/case.h>
+#include <ustr/fmt/plus.h>
+#include <ustr/cview.h>
 
-#include "case.h"
-#include "fmt.h"
-
-struct uffmt uffmt_from_ufmt(const struct ufmt *fmt, va_list *args) {
-    assert(ufmt_valid(fmt) && args);
-
-    struct uffmt res = UFFMT;
-
-    res.scientific = fmt->f.scientific;
-    res.exp_case   = fmt->f.exp_case;
-    res.show_plus  = fmt->f.show_plus;
-
-    if (fmt->use_precision)
-        res.precision = fmt->arg_precision ? va_arg(*args, size_t) : fmt->precision;
-
-    return res;
+size_t uwrite_float_32(double val, const struct ufmt32_float_output *fmt, uwrite_uc32_t write, void *write_arg) {
+    // TODO
+    return 0;
 }
 
-bool uffmt_valid(const struct uffmt *fmt) {
-    return fmt
-        && ucv32_valid(fmt->nan)
-        && ucv32_valid(fmt->inf)
-        && ucase_valid(fmt->exp_case);
+size_t uwrite_float_16(double val, const struct ufmt16_float_output *fmt, uwrite_uc16_t write, void *write_arg) {
+    // TODO
+    return 0;
+}
+
+size_t uwrite_float_8(double val, const struct ufmt8_float_output *fmt, uwrite_uc8_t write, void *write_arg) {
+    // TODO
+    return 0;
+}
+
+#define UFMTX_FLOAT_OUTPUT_VALID(fmt, X) \
+    return fmt                           \
+        && ucv##X##_valid(fmt->nan)      \
+        && ucv##X##_valid(fmt->inf)      \
+        && ucase_valid(fmt->exp_case)    \
+        && uplus_valid(fmt->plus)
+
+bool ufmt32_float_output_valid(const struct ufmt32_float_output *fmt) {
+    UFMTX_FLOAT_OUTPUT_VALID(fmt, 32);
+}
+
+bool ufmt16_float_output_valid(const struct ufmt16_float_output *fmt) {
+    UFMTX_FLOAT_OUTPUT_VALID(fmt, 16);
+}
+
+bool ufmt8_float_output_valid(const struct ufmt8_float_output *fmt) {
+    UFMTX_FLOAT_OUTPUT_VALID(fmt, 8);
 }

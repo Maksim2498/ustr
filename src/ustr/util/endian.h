@@ -5,21 +5,30 @@
 #include <stddef.h>
 
 #include <ustr/type/util/endian.h>
-#include <ustr/cview.h>
+#include <ustr/type/attr.h>
+#include <ustr/type/cview.h>
 
-static const ucv32_t UENDIAN_BIG_NAME    = ucv32("BIG-ENDIAN");
-static const ucv32_t UENDIAN_LITTLE_NAME = ucv32("LITTLE-ENDIAN");
+#include "export.h"
 
-void uendian_big_to_host_arr(void *arr, size_t len, size_t el_size);
-void uendian_big_to_host(void *val, size_t size);
+// Endian conversion
 
-void uendian_little_to_host_arr(void *arr, size_t len, size_t el_size);
-void uendian_little_host_sys(void *val, size_t size);
+UEXPORT void uendian_toggle_array_if_big(UINOUT void *array, size_t array_len, size_t el_size);
+UEXPORT void uendian_toggle_if_big(UINOUT void *val, size_t size);
 
-void uendian_toggle_arr(void *arr, size_t len, size_t el_size);
-void uendian_toggle(void *val, size_t size);
+UEXPORT void uendian_toggle_array_if_little(UINOUT void *array, size_t array_len, size_t el_size);
+UEXPORT void uendian_toggle_if_little(UINOUT void *val, size_t size);
 
-ucv32_t uendian_name(uendian_t endian);
-bool uendian_valid(uendian_t endian);
+UEXPORT void uendian_toggle_array(UINOUT void *array, size_t array_len, size_t el_size);
+UEXPORT void uendian_toggle(UINOUT void *val, size_t size);
+
+// Name
+
+UEXPORT ucv32_t uendian_name_32(uendian_t endian);
+UEXPORT ucv16_t uendian_name_16(uendian_t endian);
+UEXPORT ucv8_t uendian_name_8(uendian_t endian);
+
+// Valid
+
+UEXPORT bool uendian_valid(uendian_t endian);
 
 #endif

@@ -5,3 +5,4 @@
 /test/manual
 /CMakeCache.txt
 .DS_Store
+*-old.*

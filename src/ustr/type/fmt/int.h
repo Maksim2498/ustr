@@ -7,6 +7,7 @@
 #include <ustr/type/cview.h>
 
 #include "case.h"
+#include "plus.h"
 #include "radix.h"
 
 // Value: 2498249824982498
@@ -21,26 +22,120 @@
 //            | |                        digit_case: UCASE_UPPER/UCASE_LOWER - doesn't matter for radix <= 10
 //            | +- group separator
 //            |
-//            +- show plus
+//            +- plus
 
-enum {
-    UIFMT_GROUP_SIZE_UNUSED = 0,
-    UIFMT_PRECISON_UNUSED   = 0
+// Output
+
+// - Struct
+
+struct ufmt32_int_output {
+    ucv32_t       group_sep;
+    unsigned char group_size; // 0 if unused
+
+    unsigned char precision;  // 0 if unused
+    unsigned char min_digits;
+
+    bool          show_radix_prefix;
+    ucase_t       radix_prefix_case;
+    uradix_t      radix;
+
+    ucase_t       digit_case;
+
+    uplus_t       plus;
 };
 
-struct uifmt {
-    ucv32_t        group_separator;
-    size_t         leading_zeroes_limit;
-    size_t         start_from;
-    size_t         max_len;              // counts characters before start_from
-    unsigned char  group_size;           // if 0 then unused
-    unsigned char  precision;            // if 0 then unused
-    ucase_t        radix_prefix_case;
-    ucase_t        digit_case;
-    uradix_t       radix;
-    bool           show_plus;
-    bool           show_minus;
-    bool           show_radix_prefix;
+struct ufmt16_int_output {
+    ucv16_t       group_sep;
+    unsigned char group_size; // 0 if unused
+
+    unsigned char precision;  // 0 if unused
+    unsigned char min_digits;
+
+    bool          show_radix_prefix;
+    ucase_t       radix_prefix_case;
+    uradix_t      radix;
+
+    ucase_t       digit_case;
+
+    uplus_t       plus;
 };
+
+struct ufmt8_int_output {
+    ucv8_t        group_sep;
+    unsigned char group_size; // 0 if unused
+
+    unsigned char precision;  // 0 if unused
+    unsigned char min_digits;
+
+    bool          show_radix_prefix;
+    ucase_t       radix_prefix_case;
+    uradix_t      radix;
+
+    ucase_t       digit_case;
+
+    uplus_t       plus;
+};
+
+// - Predefined
+
+#define UFMTX_INT_OUTPUT_R_CTC(X, R) ((struct ufmt##X##_int_output) { \
+    .group_sep         = UCV##X##_EMPTY_CTC,                          \
+    .group_size        = 0,                                           \
+                                                                      \
+    .precision         = 0,                                           \
+    .min_digits        = 0,                                           \
+                                                                      \
+    .show_radix_prefix = false,                                       \
+    .radix_prefix_case = UCASE_LOWER,                                 \
+    .radix             = R,                                           \
+                                                                      \
+    .digit_case        = UCASE_UPPER,                                 \
+                                                                      \
+    .plus              = UPLUS_NONE                                   \
+})
+
+// -- Binary 
+
+#define UFMT32_INT_OUTPUT_BIN_CTC UFMTX_INT_OUTPUT_R_CTC(32, 2)
+static const struct ufmt32_int_output UFMT32_INT_OUTPUT_BIN = UFMT32_INT_OUTPUT_BIN_CTC;
+
+#define UFMT16_INT_OUTPUT_BIN_CTC UFMTX_INT_OUTPUT_R_CTC(16, 2)
+static const struct ufmt16_int_output UFMT16_INT_OUTPUT_BIN = UFMT16_INT_OUTPUT_BIN_CTC;
+
+#define UFMT8_INT_OUTPUT_BIN_CTC UFMTX_INT_OUTPUT_R_CTC(8, 2)
+static const struct ufmt8_int_output UFMT8_INT_OUTPUT_BIN = UFMT8_INT_OUTPUT_BIN_CTC;
+
+// -- Octal
+
+#define UFMT32_INT_OUTPUT_OCT_CTC UFMTX_INT_OUTPUT_R_CTC(32, 8)
+static const struct ufmt32_int_output UFMT32_INT_OUTPUT_OCT = UFMT32_INT_OUTPUT_OCT_CTC;
+
+#define UFMT16_INT_OUTPUT_OCT_CTC UFMTX_INT_OUTPUT_R_CTC(16, 8)
+static const struct ufmt16_int_output UFMT16_INT_OUTPUT_OCT = UFMT16_INT_OUTPUT_OCT_CTC;
+
+#define UFMT8_INT_OUTPUT_OCT_CTC UFMTX_INT_OUTPUT_R_CTC(8, 8)
+static const struct ufmt8_int_output UFMT8_INT_OUTPUT_OCT = UFMT8_INT_OUTPUT_OCT_CTC;
+
+// -- Decimal
+
+#define UFMT32_INT_OUTPUT_DEC_CTC UFMTX_INT_OUTPUT_R_CTC(32, 10)
+static const struct ufmt32_int_output UFMT32_INT_OUTPUT_DEC = UFMT32_INT_OUTPUT_DEC_CTC;
+
+#define UFMT16_INT_OUTPUT_DEC_CTC UFMTX_INT_OUTPUT_R_CTC(16, 10)
+static const struct ufmt16_int_output UFMT16_INT_OUTPUT_DEC = UFMT16_INT_OUTPUT_DEC_CTC;
+
+#define UFMT8_INT_OUTPUT_DEC_CTC UFMTX_INT_OUTPUT_R_CTC(8, 10)
+static const struct ufmt8_int_output UFMT8_INT_OUTPUT_DEC = UFMT8_INT_OUTPUT_DEC_CTC;
+
+// -- Hexadecimal
+
+#define UFMT32_INT_OUTPUT_HEX_CTC UFMTX_INT_OUTPUT_R_CTC(32, 16)
+static const struct ufmt32_int_output UFMT32_INT_OUTPUT_HEX = UFMT32_INT_OUTPUT_HEX_CTC;
+
+#define UFMT16_INT_OUTPUT_HEX_CTC UFMTX_INT_OUTPUT_R_CTC(16, 16)
+static const struct ufmt16_int_output UFMT16_INT_OUTPUT_HEX = UFMT16_INT_OUTPUT_HEX_CTC;
+
+#define UFMT8_INT_OUTPUT_HEX_CTC UFMTX_INT_OUTPUT_R_CTC(8, 16)
+static const struct ufmt8_int_output UFMT8_INT_OUTPUT_HEX = UFMT8_INT_OUTPUT_HEX_CTC;
 
 #endif

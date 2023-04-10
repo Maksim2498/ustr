@@ -1,67 +1,28 @@
 #ifndef USTR_FMT_INT_H
 #define USTR_FMT_INT_H
 
-#include <stdarg.h>
-#include <stdbool.h>
-#include <limits.h>
+#include <stddef.h>
+#include <stdint.h>
 
-#include <ustr/type/fmt/case.h>
-#include <ustr/type/fmt/fmt.h>
 #include <ustr/type/fmt/int.h>
+#include <ustr/type/util/write.h>
+#include <ustr/util/export.h>
 
-static const struct uifmt UIFMT_BIN = {
-    .start_from           = 0,
-    .max_len              = SIZE_MAX,
-    .leading_zeroes_limit = 0,
-    .group_size           = UIFMT_GROUP_SIZE_UNUSED,
-    .precision            = UIFMT_PRECISON_UNUSED,
-    .radix                = 2,
-    .radix_prefix_case    = UCASE_LOWER,
-    .show_plus            = false,
-    .show_minus           = true,
-    .show_radix_prefix    = true
-};
+// Format
 
-static const struct uifmt UIFMT_OCT = {
-    .start_from           = 0,
-    .max_len              = SIZE_MAX,
-    .leading_zeroes_limit = 0,
-    .group_size           = UIFMT_GROUP_SIZE_UNUSED,
-    .precision            = UIFMT_PRECISON_UNUSED,
-    .radix                = 8,
-    .radix_prefix_case    = UCASE_LOWER,
-    .show_plus            = false,
-    .show_minus           = true,
-    .show_radix_prefix    = true
-};
+UEXPORT size_t uwrite_int_32(intmax_t val, const struct ufmt32_int_output *fmt, uwrite_uc32_t write, void *write_arg);
+UEXPORT size_t uwrite_uint_32(uintmax_t val, const struct ufmt32_int_output *fmt, uwrite_uc32_t write, void *write_arg);
 
-static const struct uifmt UIFMT_DEC = {
-    .start_from           = 0,
-    .max_len              = SIZE_MAX,
-    .leading_zeroes_limit = 0,
-    .group_size           = UIFMT_GROUP_SIZE_UNUSED,
-    .precision            = UIFMT_PRECISON_UNUSED,
-    .radix                = 10,
-    .show_plus            = false,
-    .show_minus           = true
-};
+UEXPORT size_t uwrite_int_16(intmax_t val, const struct ufmt16_int_output *fmt, uwrite_uc16_t write, void *write_arg);
+UEXPORT size_t uwrite_uint_16(uintmax_t val, const struct ufmt16_int_output *fmt, uwrite_uc16_t write, void *write_arg);
 
-static const struct uifmt UIFMT_HEX = {
-    .start_from           = 0,
-    .max_len              = SIZE_MAX,
-    .leading_zeroes_limit = 0,
-    .group_size           = UIFMT_GROUP_SIZE_UNUSED,
-    .precision            = UIFMT_PRECISON_UNUSED,
-    .radix                = 16,
-    .radix_prefix_case    = UCASE_LOWER,
-    .digit_case           = UCASE_UPPER,
-    .show_plus            = false,
-    .show_minus           = true,
-    .show_radix_prefix    = true
-};
+UEXPORT size_t uwrite_int_8(intmax_t val, const struct ufmt8_int_output *fmt, uwrite_uc8_t write, void *write_arg);
+UEXPORT size_t uwrite_uint_8(uintmax_t val, const struct ufmt8_int_output *fmt, uwrite_uc8_t write, void *write_arg);
 
-struct uifmt uifmt_from_ufmt(const struct ufmt *fmt, va_list *args);
+// Valid
 
-bool uifmt_valid(const struct uifmt *fmt);
+UEXPORT bool ufmt32_int_output_valid(const struct ufmt32_int_output *fmt);
+UEXPORT bool ufmt16_int_output_valid(const struct ufmt16_int_output *fmt);
+UEXPORT bool ufmt8_int_output_valid(const struct ufmt8_int_output *fmt);
 
 #endif

@@ -30,6 +30,6 @@ void usafe_free(void *block) {
     free(block);
 }
 
-_Thread_local void *(*ualloc)(size_t)           = usafe_alloc;
-_Thread_local void *(*urealloc)(void *, size_t) = usafe_realloc;
-_Thread_local void (*ufree)(void *)             = usafe_free;
+_Thread_local ualloc_t   ualloc   = usafe_alloc;
+_Thread_local urealloc_t urealloc = usafe_realloc;
+_Thread_local ufree_t    ufree    = usafe_free;

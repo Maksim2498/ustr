@@ -1,29 +1,20 @@
 #ifndef USTR_FMT_FLOAT_H
 #define USTR_FMT_FLOAT_H
 
-#include <stdarg.h>
-#include <stdbool.h>
-#include <limits.h>
-
-#include <ustr/type/fmt/case.h>
 #include <ustr/type/fmt/float.h>
-#include <ustr/type/fmt/fmt.h>
-#include <ustr/cview.h>
+#include <ustr/type/util/write.h>
+#include <ustr/util/export.h>
 
-static const struct uffmt UFFMT = {
-    .nan        = ucv32("NaN"),
-    .inf        = ucv32("∞"),
-    .start_from = 0,
-    .max_len    = SIZE_MAX,
-    .precision  = UFFMT_AUTO_PRECISION,
-    .exp_case   = UCASE_LOWER,
-    .scientific = false,
-    .show_plus  = false,
-    .show_minus = true
-};
+// Format
 
-struct uffmt uffmt_from_ufmt(const struct ufmt *fmt, va_list *args);
+UEXPORT size_t uwrite_float_32(double val, const struct ufmt32_float_output *fmt, uwrite_uc32_t write, void *write_arg);
+UEXPORT size_t uwrite_float_16(double val, const struct ufmt16_float_output *fmt, uwrite_uc16_t write, void *write_arg);
+UEXPORT size_t uwrite_float_8(double val, const struct ufmt8_float_output *fmt, uwrite_uc8_t write, void *write_arg);
 
-bool uffmt_valid(const struct uffmt *fmt);
+// Valid
+
+UEXPORT bool ufmt32_float_output_valid(const struct ufmt32_float_output *fmt);
+UEXPORT bool ufmt16_float_output_valid(const struct ufmt16_float_output *fmt);
+UEXPORT bool ufmt8_float_output_valid(const struct ufmt8_float_output *fmt);
 
 #endif

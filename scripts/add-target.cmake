@@ -1,19 +1,26 @@
 add_library(ustr
             src/ustr/fmt/all.h
-            src/ustr/fmt/case.h       src/ustr/fmt/case.c
-            src/ustr/fmt/float.h      src/ustr/fmt/float.c
-            src/ustr/fmt/fmt.h        src/ustr/fmt/fmt.c
-            src/ustr/fmt/int.h        src/ustr/fmt/int.c
-            src/ustr/fmt/radix.h      src/ustr/fmt/radix.c
-            src/ustr/fmt/type.h       src/ustr/fmt/type.c
+            src/ustr/fmt/bool.h         src/ustr/fmt/bool.c
+            src/ustr/fmt/case.h         src/ustr/fmt/case.c
+            src/ustr/fmt/char.h         src/ustr/fmt/char.c
+            src/ustr/fmt/float.h        src/ustr/fmt/float.c
+            src/ustr/fmt/fmt.h          src/ustr/fmt/fmt.c
+            src/ustr/fmt/int.h          src/ustr/fmt/int.c
+            src/ustr/fmt/plus.h         src/ustr/fmt/plus.c 
+            src/ustr/fmt/radix.h        src/ustr/fmt/radix.c
+            src/ustr/fmt/str.h          src/ustr/fmt/str.c
+            src/ustr/fmt/type.h         src/ustr/fmt/type.c
             src/ustr/type/fmt/all.h
             src/ustr/type/fmt/case.h
             src/ustr/type/fmt/float.h
             src/ustr/type/fmt/fmt.h
             src/ustr/type/fmt/int.h
+            src/ustr/type/fmt/plus.h
             src/ustr/type/fmt/radix.h
             src/ustr/type/fmt/type.h
-            src/ustr/type/util/endian.h
+            src/ustr/type/util/endian.h 
+            src/ustr/type/util/mem.h
+            src/ustr/type/util/write.h 
             src/ustr/type/all.h
             src/ustr/type/attr.h
             src/ustr/type/char.h
@@ -22,18 +29,19 @@ add_library(ustr
             src/ustr/type/str.h
             src/ustr/type/view.h
             src/ustr/util/all.h
-            src/ustr/util/endian.h    src/ustr/util/endian.c
-            src/ustr/util/math.h
-            src/ustr/util/mem.h       src/ustr/util/mem.c
+            src/ustr/util/endian.h      src/ustr/util/endian.c
+            src/ustr/util/export.h
+            src/ustr/util/mem.h         src/ustr/util/mem.c
+            src/ustr/util/name.h
             src/ustr/config.h.in
             src/ustr/all.h
-            src/ustr/char.h           src/ustr/char.c
-            src/ustr/cstr.h           src/ustr/cstr.c
-            src/ustr/cview.h          src/ustr/cview.c
-            src/ustr/encoding.h       src/ustr/encoding.c
-            src/ustr/io.h             src/ustr/io.c
-            src/ustr/str.h            src/ustr/str.c
-            src/ustr/view.h           src/ustr/view.c)
+            src/ustr/char.h             src/ustr/char.c
+            src/ustr/cstr.h             src/ustr/cstr.c
+            src/ustr/cview.h            src/ustr/cview.c
+            src/ustr/encoding.h         src/ustr/encoding.c
+            src/ustr/io.h               src/ustr/io.c
+            src/ustr/str.h              src/ustr/str.c
+            src/ustr/view.h             src/ustr/view.c)
 
 set_target_properties(ustr PROPERTIES
                       C_STANDARD 17

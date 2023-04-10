@@ -3,21 +3,21 @@
 
 #include <stdbool.h>
 
-#include <ustr/fmt/case.h>
+#include <ustr/type/fmt/case.h>
 #include <ustr/type/fmt/radix.h>
-#include <ustr/cview.h>
+#include <ustr/type/cview.h>
+#include <ustr/util/export.h>
 
-static const ucv32_t UBIN_PREFIX_UPPER = ucv32("0B");
-static const ucv32_t UBIN_PREFIX_LOWER = ucv32("0b");
+// Prefix
 
-static const ucv32_t UOCT_PREFIX_UPPER = ucv32("0O");
-static const ucv32_t UOCT_PREFIX_LOWER = ucv32("0o");
+UEXPORT ucv32_t uradix_prefix_32(uradix_t radix, ucase_t ca);
+UEXPORT ucv16_t uradix_prefix_16(uradix_t radix, ucase_t ca);
+UEXPORT ucv8_t uradix_prefix_8(uradix_t radix, ucase_t ca);
 
-static const ucv32_t UHEX_PREFIX_UPPER = ucv32("0X");
-static const ucv32_t UHEX_PREFIX_LOWER = ucv32("0x");
+UEXPORT bool uradix_has_prefix(uradix_t radix);
 
-ucv32_t uradix_prefix(uradix_t radix, ucase_t ca);
-bool uradix_has_prefix(uradix_t radix);
-bool uradix_valid(uradix_t radix);
+// Valid
+
+UEXPORT bool uradix_valid(uradix_t radix);
 
 #endif
