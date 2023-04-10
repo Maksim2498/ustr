@@ -4,7 +4,7 @@
 
 ## Table Of Contents
 
-- [Index](#index);
+- [Table Of Contents](#table-of-contents);
 - [About](#about);
 - [Building](#building);
 - [Installation](#installtion);
