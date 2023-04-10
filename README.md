@@ -2,7 +2,7 @@
 
 ![Logo](/images/logo.png)
 
-## Index
+## Table Of Contents
 
 - [Index](#index);
 - [About](#about);
